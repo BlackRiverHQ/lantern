@@ -143,7 +143,7 @@ contract Lantern is IWindfall, ILanternErrors {
     function heldTotal() external view returns (uint256) { return _heldTotal; }
 
     function exposureFloor(bytes32 feedId) external view returns (uint256) {
-        return BondMath.exposureFloor(_feeds[feedId].exposure);
+        return BondMath.exposureFloor(_feeds[feedId].exposure, minBond());
     }
 
     function isPriceable(bytes32 feedId) public view returns (bool) {
