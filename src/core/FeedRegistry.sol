@@ -113,25 +113,22 @@ contract FeedRegistry is IFeedRegistry, ILanternErrors {
         }
         }
 
-        // Snapshot the band, and the depth, as they stood *before* this value was folded in.
-        (uint256 lo, uint256 hi) = _history.bandOf(feedId);
-        uint64 depth = uint64(_history.samplesOf(feedId));
+        // Snapshot the band and the depth as they stood *before* this value was folded in, straight
+        // into the record: the band is what the print is judged against, and the depth is how much
+        // history it had behind it. Reading them through locals ran this function out of stack.
+        Report storage rec = _byRound[feedId][round];
+        (rec.prevBandLo, rec.prevBandHi) = _history.bandOf(feedId);
+        rec.prevSamples = uint64(_history.samplesOf(feedId));
 
         _history.checkDrift(feedId, value, block.timestamp);
         _history.observe(feedId, value, round, timestamp);
 
-        // Written field by field into storage rather than through a memory literal: the literal ran
-        // the function out of stack once the depth was added, and this is the cheaper shape anyway.
-        Report storage rec = _byRound[feedId][round];
         rec.value = value;
         rec.prevValue = last.exists ? last.value : 0;
-        rec.prevBandLo = lo;
-        rec.prevBandHi = hi;
         rec.round = round;
         rec.timestamp = timestamp;
         rec.payloadHash = payloadHash;
         rec.signer = signer;
-        rec.prevSamples = depth;
         rec.exists = true;
         _last[feedId] = rec;
     }
