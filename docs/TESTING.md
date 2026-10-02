@@ -12,7 +12,7 @@
 
 Forged print, replayed payload across assets, same-slot conflict, stale round, band walk, challenge
 after the window, double challenge, insufficient stake, verdict on a moved round, bond drained
-mid-window, shortfall ordering, honest loss classified honest.
+mid-window, an honest loss classified honest, and a conflict that must leave evidence on-chain.
 
 ## Running
 
