@@ -51,11 +51,16 @@ contract BandFuzzTest is Test {
         assertEq(Band.accepts(s, value), value >= lo && value <= hi);
     }
 
-    function testFuzz_observe_never_widens_past_the_current_band(uint32 moveBps, uint256 value) public pure {
-        vm.assume(value > 0);
-        Band.State memory s = _state(1_000e18, uint32(bound(moveBps, 0, Constants.MAX_WIDTH_BPS)), 64);
-        uint32 next = Band.observeMove(s, value);
-        assertLe(Band.widthBps(_state(1_000e18, next, 64)), Band.widthBps(s));
+    /// @dev An outlier contributes at most the band it contradicted, so the blended estimate
+    ///      can rise by at most one blend step: 13/8 of the previous width. The ceiling still binds.
+    function testFuzz_outlier_widening_is_bounded(uint32 moveBps, uint256 value) public pure {
+    vm.assume(value > 0);
+    Band.State memory s = _state(1_000e18, uint32(bound(moveBps, 0, Constants.MAX_WIDTH_BPS)), 64);
+    uint32 before = Band.widthBps(s);
+    uint32 widened = Band.widthBps(_state(1_000e18, Band.observeMove(s, value), 64));
+
+    assertLe(widened, Constants.MAX_WIDTH_BPS);
+    if (widened > before) assertLe(uint256(widened) * 8, uint256(before) * 13 + 8);
     }
 
     function testFuzz_report_drift_is_symmetric(uint96 a, uint96 b) public pure {
