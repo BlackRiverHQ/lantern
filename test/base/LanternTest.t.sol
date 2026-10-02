@@ -85,6 +85,32 @@ contract LanternTest is Test {
         vm.stopPrank();
     }
 
+    /// @notice Warm a feed so its band tightens onto its own realized moves.
+    function _warm(bytes32 feedId, uint256 samples) internal {
+        for (uint256 i = 0; i < samples; i++) {
+            vm.warp(block.timestamp + 60);
+            _push(feedId, 100e18 + i * 1e17);
+        }
+    }
+
+    /// @notice A print inside the per-report drift cap but far outside the warmed band.
+    function _suspiciousPrint(bytes32 feedId) internal returns (uint64 round) {
+        vm.warp(block.timestamp + 60);
+        round = _push(feedId, 115e18);
+    }
+
+    /// @notice Push with a payload the caller chooses, for provenance tests.
+    function _pushWithPayload(bytes32 feedId, uint256 value, bytes32 payload) internal returns (uint64 round) {
+        round = ++roundCounter;
+        vm.prank(OPERATOR);
+        lantern.recordReport(feedId, value, round, uint64(block.timestamp), payload, OPERATOR);
+    }
+
+    function _liquidateOn(bytes32 feedId, uint256 liquidationId, uint64 round, uint256 bonus) internal {
+        vm.prank(LIQUIDATOR);
+        market.liquidate(liquidationId, feedId, round, bonus, BORROWER);
+    }
+
     // --- smoke ---------------------------------------------------------
 
     function test_harness_wired() public view {
