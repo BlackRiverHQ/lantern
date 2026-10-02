@@ -13,6 +13,7 @@ interface IWindfall is IWindfallMarket {
         bytes32 feedId,
         uint64  round,
         uint256 bonus,
+        uint256 notional,
         address liquidator,
         address borrower
     ) external;
