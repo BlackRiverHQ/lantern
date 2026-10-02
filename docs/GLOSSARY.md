@@ -8,5 +8,5 @@
 - **Exposure** — the sum of held bonuses on liquidations that consumed a given feed.
 - **Exposure floor** — the minimum bond a feed must post for its current exposure.
 - **Waterfall** — payout order on an upheld challenge: borrower, prover, bond.
-- **Shortfall queue** — FIFO remainder parked against a feed when a payout exceeds the bond.
+- **At-fault pool** — the bonus a challenge is measured against; the borrower is restored from it and the prover's bounty is charged against the signer's bond.
 
