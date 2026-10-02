@@ -92,6 +92,15 @@ contract Lantern is IWindfall, ILanternErrors {
         _;
     }
 
+    /// @dev Cheap insurance on top of the effects-before-interactions ordering: a hostile token
+    ///      cannot re-enter any state-changing entry point.
+    modifier nonReentrant() {
+    if (_locked) revert Reentrancy();
+    _locked = true;
+    _;
+    _locked = false;
+    }
+
     modifier knownFeed(bytes32 feedId) {
         if (!_feeds[feedId].registered) revert UnknownFeed(feedId);
         _;
