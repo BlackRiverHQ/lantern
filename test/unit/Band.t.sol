@@ -75,8 +75,8 @@ contract BandTest is Test {
     // widen the estimate past that narrow band.
     Band.State memory s = Band.State({anchor: 100e18, moveBps: 1, samples: 64});
     uint32 before = Band.widthBps(s);
-    uint32 after = Band.widthBps(Band.State({anchor: 100e18, moveBps: Band.observeMove(s, 200e18), samples: 64}));
-    assertLe(after, before + 2);
+    uint32 widened = Band.widthBps(Band.State({anchor: 100e18, moveBps: Band.observeMove(s, 200e18), samples: 64}));
+    assertLe(widened, before + 2);
     }
 
     function test_observe_move_keeps_a_warm_band_warm() public pure {
@@ -89,8 +89,8 @@ contract BandTest is Test {
     moveBps = uint32(bound(moveBps, 0, Constants.MAX_WIDTH_BPS));
     Band.State memory s = Band.State({anchor: 1_000e18, moveBps: moveBps, samples: 64});
     uint32 before = Band.widthBps(s);
-    uint32 after = Band.observeMove(s, value);
-    assertLe(after, before);
+    uint32 widened = Band.observeMove(s, value);
+    assertLe(widened, before);
     }
 
     function test_observe_move_caps_at_ceiling() public pure {
