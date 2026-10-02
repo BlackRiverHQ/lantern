@@ -15,6 +15,7 @@ import {Provenance} from "../libraries/Provenance.sol";
 ///      and left contestable.
 contract FeedRegistry is IFeedRegistry, ILanternErrors {
     event SlotConflictRecorded(bytes32 indexed feedId, uint64 round, uint256 firstValue, uint256 secondValue);
+    event PayloadReuseRecorded(bytes32 indexed feedId, bytes32 payloadHash, bytes32 priorOwner);
 
     address public immutable controller;
     History private immutable _history;
