@@ -29,11 +29,12 @@ that consumed that feed. A feed may only have a report recorded while
 underwritten more must bond more. A feed that cannot cover its own exposure cannot price — it fails
 closed rather than silently taking more risk.
 
-## Shortfall queue
+## Why there is no deferral queue
 
-A payout exceeding both the held bonus and the bond does not silently truncate. `EscrowBook` parks
-the remainder in a FIFO queue against the feed, paid as the bond is topped up. Nothing is forgotten,
-only deferred.
+An earlier draft parked a payout that exceeded the bond in a FIFO queue. That path is unreachable:
+exposure can never exceed the bond (a liquidation that would break the 1:1 rule reverts), and the
+bounty is a fraction of the bonus already inside that exposure. So the bond can always pay, and the
+queue was deleted rather than kept as decoration. Payments here are immediate or they do not exist.
 
 ## Why no owner
 
