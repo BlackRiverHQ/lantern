@@ -87,9 +87,14 @@ contract FixedPointTest is Test {
         assertLe(FixedPoint.bpsOf(amount, bps), uint256(amount));
     }
 
-    function testFuzz_absDiffBps_symmetry(uint128 a, uint128 b) public pure {
-    // A zero base returns the sentinel max by design, so symmetry is claimed only off zero.
-    vm.assume(a != 0 && b != 0);
-    assertEq(FixedPoint.absDiffBps(a, b), FixedPoint.absDiffBps(b, a));
+    /// @dev absDiffBps is relative to its second argument, so it is deliberately not symmetric.
+    function testFuzz_absDiffBps_is_bps_of_its_base(uint128 a, uint128 b) public pure {
+    vm.assume(b != 0);
+    assertEq(FixedPoint.absDiffBps(a, b), FixedPoint.mulDiv(FixedPoint.absDiff(a, b), 10_000, b));
+    }
+
+    function testFuzz_absDiffBps_bounded_when_base_larger(uint64 small, uint64 large) public pure {
+    vm.assume(large > 0 && small <= large);
+    assertLe(FixedPoint.absDiffBps(small, large), 10_000);
     }
 }
