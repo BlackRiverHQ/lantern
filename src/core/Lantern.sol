@@ -160,7 +160,10 @@ contract Lantern is IWindfall, ILanternErrors {
     // --- feeds and bonds ---------------------------------------------------
 
     function registerFeed(bytes32 feedId, bytes32 signerSet, uint8 decimals) external nonReentrant {
-        if (_feeds[feedId].registered) revert FeedAlreadyRegistered(feedId);
+    if (_feeds[feedId].registered) revert FeedAlreadyRegistered(feedId);
+    // The floors are derived from the asset, so a feed declaring different decimals would be
+    // priced against the wrong unit.
+    if (decimals != assetDecimals) revert DecimalsMismatch(decimals, assetDecimals);
         _feeds[feedId] = FeedState({operator: msg.sender, bond: 0, exposure: 0, errors: 0, registered: true});
         reg.registerFeed(feedId, msg.sender, signerSet, decimals);
         emit FeedRegistered(feedId, msg.sender);
