@@ -1,5 +1,5 @@
 # Everything a reviewer needs, in the order they would need it.
-.PHONY: build test fast invariants gas sizes fmt clean deploy demo report challenge redeploy coverage
+.PHONY: build test fast invariants gas sizes fmt clean deploy demo report challenge redeploy redeploy-account rehearse coverage
 
 build:
 	forge build
@@ -48,3 +48,14 @@ challenge:
 # rewritten from the broadcast. Refuses to run the demo against a deploy that did not land.
 redeploy:
 	./script/redeploy.sh
+
+# The same sequence with the key read from the account file, so it never has to be exported by hand
+# and never appears in a shell history, a transcript, or this file. The file is created once, outside
+# the repository, by: cast wallet new --json > ~/.lantern-deployer.json && chmod 600 it.
+ACCOUNT_FILE ?= $(HOME)/.lantern-deployer.json
+redeploy-account:
+	ACCOUNT_FILE="$(ACCOUNT_FILE)" ./script/with-account.sh ./script/redeploy.sh
+
+# Prove the whole sequence on a fork of the live chain, for free, before paying for it.
+rehearse:
+	./script/rehearse-fork.sh
