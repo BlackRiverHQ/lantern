@@ -77,6 +77,12 @@ contract History is IHistory, ILanternErrors {
         return Band.accepts(Band.State({anchor: s.anchor, moveBps: s.moveBps, samples: s.samples}), value);
     }
 
+    /// @notice How many prints this feed has accepted. It is the only thing standing between a
+    ///         freshly registered feed and a liquidation priced on it with no basis for a claim.
+    function samplesOf(bytes32 feedId) external view returns (uint256) {
+    return _snapshot[feedId].samples;
+    }
+
     function widthBps(bytes32 feedId) external view returns (uint32) {
         Snapshot memory s = _snapshot[feedId];
         return Band.widthBps(Band.State({anchor: s.anchor, moveBps: s.moveBps, samples: s.samples}));
