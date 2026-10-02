@@ -260,7 +260,7 @@ contract Lantern is IWindfall, ILanternErrors {
         if (evidence.length == 0) revert EmptyEvidence();
         if (uint8(rule) > uint8(IChallenge.Rule.PAYLOAD_PROVENANCE)) revert BadRuleKind(uint8(rule));
 
-        uint256 floor = WaterfallMath.stakeFloor(e.bonus);
+        uint256 floor = WaterfallMath.stakeFloor(e.bonus, minStake());
         if (stake < floor) revert StakeBelowMinimum(stake, floor);
         // Effects before interactions: a hostile token must not be able to re-enter and open a
         // second challenge against the same escrow.
