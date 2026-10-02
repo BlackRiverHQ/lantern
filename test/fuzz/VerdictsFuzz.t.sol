@@ -11,7 +11,7 @@ import {IFeedRegistry} from "../../src/interfaces/IFeedRegistry.sol";
 ///         verdict, never a revert. A mechanism that can be made to revert by choosing the wrong
 ///         rule is a denial-of-service surface.
 contract VerdictsFuzzTest is Test {
-    function _inputs(uint256 value, uint256 timestamp, uint256 lo, uint256 hi, uint256 liqTime)
+    function _inputs(uint256 value, uint64 timestamp, uint256 lo, uint256 hi, uint64 liqTime)
         internal pure returns (Verdicts.Inputs memory in_)
     {
         in_.report.value = value;
@@ -22,7 +22,7 @@ contract VerdictsFuzzTest is Test {
     }
 
     function testFuzz_every_rule_returns_without_reverting(
-        uint256 value, uint256 timestamp, uint256 lo, uint256 hi, uint256 liqTime,
+        uint256 value, uint64 timestamp, uint256 lo, uint256 hi, uint64 liqTime,
         uint256 otherValue, bool conflicted, bytes32 payloadFeed, bytes32 thisFeed
     ) public pure {
         Verdicts.Inputs memory in_ = _inputs(value, timestamp, lo, hi, liqTime);
@@ -55,10 +55,13 @@ contract VerdictsFuzzTest is Test {
     }
 
     function testFuzz_a_future_report_has_zero_age(uint64 timestamp, uint64 before) public pure {
+        // The report is dated at or after the liquidation: there is no positive age to compute,
+        // and the library must clamp rather than wrap into a huge number that upholds a claim.
         uint64 liqTime = uint64(bound(uint256(before), 0, uint256(timestamp)));
         Verdicts.Inputs memory in_ = _inputs(100, timestamp, 0, 0, liqTime);
-        (, uint256 observed, ) = Verdicts.evaluate(Provenance.Rule.ROUND_ORDERING, in_);
-        assertEq(observed, uint256(timestamp) - liqTime, "age clamps at zero, never wraps");
+        (bool upheld, uint256 observed, ) = Verdicts.evaluate(Provenance.Rule.ROUND_ORDERING, in_);
+        assertEq(observed, 0, "a report newer than its liquidation has zero age");
+        assertFalse(upheld, "a fresh report is not stale");
     }
 
     function testFuzz_self_history_agrees_with_the_band(
