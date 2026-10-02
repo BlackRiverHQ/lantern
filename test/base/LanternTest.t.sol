@@ -46,7 +46,21 @@ contract LanternTest is Test {
 
     // --- setup helpers -------------------------------------------------
 
+    /// @notice A feed that has been running for a while, which is the ordinary case. A liquidation may
+    ///         not be priced on a feed with no history behind the print, so the harness gives it some.
     function _openFeed(bytes32 feedId) internal {
+        _registerFeed(feedId);
+        for (uint256 i = 0; i < Constants.MIN_SAMPLES_FOR_PRICING; i++) {
+            _push(feedId, valueCounter);
+        }
+    }
+
+    /// @notice A feed with nothing behind it, for the tests that are about what a fresh feed does.
+    function _openFeedCold(bytes32 feedId) internal {
+        _registerFeed(feedId);
+    }
+
+    function _registerFeed(bytes32 feedId) internal {
         token.mint(OPERATOR, BOND);
         vm.startPrank(OPERATOR);
         lantern.registerFeed(feedId, keccak256("SIGNERS"), 18);
