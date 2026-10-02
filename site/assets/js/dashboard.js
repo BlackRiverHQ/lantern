@@ -5,10 +5,10 @@
   var CFG = {
     rpcs: ['https://sepolia-rollup.arbitrum.io/rpc', 'https://arbitrum-sepolia-rpc.publicnode.com'],
     chainId: 421614,
-    lantern: '0x9420b6B3e5Cc8FC028b34206F9C0388230a6B772',
+    lantern: '0x83b4E869a471638c374De4Bcf4Ab6Ba2396f9040',
     subject: '0xf7ed0c5000d57be8bb1723e1298ee49e6a076692f4ef68d27dd00db178f57210',
     peer: '0x0bf35ab8318649a0b126cdc6fb6c89b2ebbb1659b37fbd0b3aca12e6eefa71a2',
-    fromBlock: 314930000,
+    fromBlock: 315044920,
     explorer: 'https://sepolia.arbiscan.io'
   };
   // the same override the console honours, so one page can be pointed at a local chain or a redeploy
@@ -112,7 +112,11 @@
 
   function renderReads() {
     var s = S;
-    var mult = s.exposure > 0n ? Number(s.required * 1000n / s.exposure) / 1000 : 0;
+    // The requirement is the floor times a penalty, and the floor is the larger of the exposure and
+    // the deployment's minimum bond. Dividing by exposure alone reads 0.00x whenever nothing is
+    // exposed, which is the state a feed sits in once its bonus has been redirected or released.
+    var floor = s.exposure > s.minBond ? s.exposure : s.minBond;
+    var mult = floor > 0n ? Number(s.required * 1000n / floor) / 1000 : 1;
     setRead('held', units(s.held, 2) + '<small>HOLD</small>');
     setRead('windowShort', dur(s.window));
     setRead('bountyShort', (Number(s.bounty) / 100) + '%');
@@ -122,7 +126,7 @@
     setRead('exposureShort', units(s.exposure, 2) + '<small>HOLD</small>');
     setRead('bondShort', units(s.bond, 2) + '<small>HOLD</small>');
     setRead('mult', mult.toFixed(2) + '\u00d7');
-    setRead('multS', mult.toFixed(2) + '\u00d7 exposure');
+    setRead('multS', mult.toFixed(2) + '\u00d7 the floor');
     setRead('coverS', s.bond >= s.required ? 'covers the requirement' : 'short of the requirement');
     setRead('peer', s.peer === CFG.peer ? 'ETH/USD' : /^0x0+$/.test(s.peer) ? 'none' : short(s.peer));
     // bars inside bond rows use the plain unit text
@@ -139,8 +143,8 @@
     $('#mExp').style.setProperty('--w', w(exp));
     $('#mReq').style.setProperty('--w', w(req));
     $('#mBond').style.setProperty('--w', bond > top ? '100%' : w(bond));
-    $('#bondNote').innerHTML = (s.errors === 0n ? 'No caught prints, so the requirement equals exposure.' :
-      s.errors + ' caught print' + (s.errors === 1n ? '' : 's') + ' took the requirement from <b>' + units(s.exposure) + '</b> to <b>' + units(s.required) + ' HOLD</b>.') + ' ' +
+    $('#bondNote').innerHTML = (s.errors === 0n ? 'No caught prints, so the requirement is the floor: ' + units(floor) + ' HOLD.' :
+      s.errors + ' caught print' + (s.errors === 1n ? '' : 's') + ' took the requirement from <b>' + units(floor) + '</b> to <b>' + units(s.required) + ' HOLD</b>.') + ' ' +
       (s.bond >= s.required ? 'The posted bond' + (bond > top ? ' (' + units(s.bond, 1) + ' HOLD, bar clipped)' : '') + ' still covers it.' : 'The posted bond no longer covers it, so the feed cannot price until it tops up.');
 
     // escalation ladder: 1.0x + 0.2x per caught print, stopping at 3.0x after ten

@@ -9,9 +9,9 @@
   var CHAIN = 421614;
   var CFG = {
     chainId: CHAIN,
-    lantern: '0x9420b6B3e5Cc8FC028b34206F9C0388230a6B772',
-    market: '0x53fFF340f1e6796F905985E43e7a784b0e687066',
-    asset: '0xfF062343892989373F422F7543F0587581594249',
+    lantern: '0x83b4E869a471638c374De4Bcf4Ab6Ba2396f9040',
+    market: '0x4b41D14D0aD565E1135676af0aD270227Bf879dF',
+    asset: '0xf00Ffe2F1e3f49F225124107b7f8218255F722eE',
     decimals: 18,
     explorer: 'https://sepolia.arbiscan.io',
     rpc: 'https://sepolia-rollup.arbitrum.io/rpc'

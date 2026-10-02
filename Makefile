@@ -1,5 +1,5 @@
 # Everything a reviewer needs, in the order they would need it.
-.PHONY: build test fast invariants gas sizes fmt clean deploy demo report challenge redeploy redeploy-account rehearse coverage
+.PHONY: build test fast invariants gas sizes fmt clean deploy demo report challenge redeploy redeploy-account verify-source rehearse coverage
 
 build:
 	forge build
@@ -55,6 +55,9 @@ redeploy:
 ACCOUNT_FILE ?= $(HOME)/.lantern-deployer.json
 redeploy-account:
 	ACCOUNT_FILE="$(ACCOUNT_FILE)" ./script/with-account.sh ./script/redeploy.sh
+
+verify-source:
+	./script/verify-source.sh all
 
 # Prove the whole sequence on a fork of the live chain, for free, before paying for it.
 rehearse:

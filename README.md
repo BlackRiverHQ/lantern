@@ -66,10 +66,10 @@ declaration, and after it is set it cannot be changed.
 
 | Contract | Address |
 |---|---|
-| Lantern | `0x9420b6B3e5Cc8FC028b34206F9C0388230a6B772` |
-| Market | `0x53fFF340f1e6796F905985E43e7a784b0e687066` |
-| Asset | `0xfF062343892989373F422F7543F0587581594249` |
-| Second source | `0x3Fba7aBB9f393446917c9cAA5BD99b40FC85DF98` |
+| Lantern | `0x83b4E869a471638c374De4Bcf4Ab6Ba2396f9040` |
+| Market | `0x4b41D14D0aD565E1135676af0aD270227Bf879dF` |
+| Asset | `0xf00Ffe2F1e3f49F225124107b7f8218255F722eE` |
+| Second source | `0xf7Bb2294b01D5ADb2470cad3F856A4C4C49Cf4d9` |
 
 Lantern's constructor builds the feed registry and, under it, the history store and the report book; all
 three addresses are in [docs/DEPLOYMENTS.md](docs/DEPLOYMENTS.md) with the block they landed at.
@@ -79,10 +79,19 @@ command in [docs/DEPLOYMENTS.md](docs/DEPLOYMENTS.md).
 
 The chain currently says two caught prints (`feedErrors` 2). The second was decided by comparing the
 feed's own print against a live price aggregator on the same round, with the verdict recomputed in the
-contract. The feed's required bond has escalated to 1.4x its exposure as a result.
+contract. The feed's required bond has escalated to 1.4x its floor as a result.
 
-That deployment predates the pricing floor and the notional requirement. Both are in the source and in
-the tests; the current revision is built and waiting on gas for this wallet.
+This deployment is the current source. `script/verify-source.sh` checks it the way it has to be checked:
+deployed runtime code cannot be byte-identical to the artifact, because the constructor substitutes the
+immutables into it, so the check is that the two are the same length, that the metadata trailer is
+identical - which pins compiler, sources and settings - and that every differing byte is a slot the
+artifact leaves zero. Lantern passes with 30 such slots, the registry with 22. And
+`FeedRegistry.samplesOf`, the depth accessor the pricing floor reads through, absent from the previous
+deployment, answers with 6. The floor and the notional requirement are live, not merely in the tests.
+
+All six contracts verify on Sourcify with an exact match on creation and runtime bytecode
+(`make verify-source` for the bytecode check), and the source is readable on the public explorer with
+no key at `arbitrum-sepolia.blockscout.com/address/<address>`.
 
 ## Run it
 

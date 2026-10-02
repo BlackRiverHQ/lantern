@@ -28,13 +28,13 @@ export RPC_URL=https://sepolia-rollup.arbitrum.io/rpc
 
 forge script script/Deploy.s.sol                  --rpc-url $RPC_URL --broadcast -vv
 
-export LANTERN=0x9420b6B3e5Cc8FC028b34206F9C0388230a6B772
-export MARKET=0x53fFF340f1e6796F905985E43e7a784b0e687066
+export LANTERN=0x83b4E869a471638c374De4Bcf4Ab6Ba2396f9040
+export MARKET=0x4b41D14D0aD565E1135676af0aD270227Bf879dF
 
 forge script script/DemoRun.s.sol                 --rpc-url $RPC_URL --broadcast -vv
-export ROUND=8
+export ROUND=7
 forge script script/ReportFromChainlink.s.sol     --rpc-url $RPC_URL --broadcast -vv
-export LIQUIDATION_ID=10
+export LIQUIDATION_ID=9
 forge script script/ChallengeWithChainlink.s.sol  --rpc-url $RPC_URL --broadcast -vv
 forge script script/DemoSettle.s.sol              --rpc-url $RPC_URL --broadcast -vv
 ```

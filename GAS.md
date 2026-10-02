@@ -1,21 +1,28 @@
 # Cost
 
-Measured on Arbitrum Sepolia, at the gas price the transactions actually paid: 0.0401 gwei. The figures
+Measured on Arbitrum Sepolia, at the gas price the transactions actually paid: 0.0420 gwei. The figures
 below are read back from the receipts of the current deployment - every transaction hash is in
 `broadcast/`, so each row can be recomputed rather than taken on trust.
 
 | Action | Transactions | Gas | What it buys |
 |---|---|---|---|
-| Deploy | 3 | 5,881,630 | the asset, Lantern, and the market |
-| The caught case, end to end | 11 | 1,585,676 | register, bond, two prints, a liquidation, a challenge, an adjudication |
-| A live Chainlink report | 5 | 1,193,823 | deploy the source, bond the peer feed, publish one aggregator answer |
-| A live Chainlink challenge | 8 | 1,096,172 | a second liquidation, a challenge against it, and the adjudication |
+| Deploy | 3 | 5,936,603 | the asset, Lantern, and the market |
+| The caught case, end to end | 15 | 3,315,025 | register, bond, five prints, a liquidation, a challenge, an adjudication |
+| A live Chainlink report | 7 | 1,370,654 | deploy the source, bond the peer feed, publish one aggregator answer |
+| A live Chainlink challenge | 8 | 1,142,069 | a second liquidation, a challenge against it, and the adjudication |
 
-The deploy breaks down as the asset at 421,717 gas, Lantern at 5,215,582, and the market at 244,331 -
+Thirty-three transactions, 11,764,351 gas, 0.0004947 ETH as measured by the balance before and after.
+
+The deploy breaks down as the asset at 406,564 gas, Lantern at 5,246,522, and the market at 283,517 -
 Lantern is the whole cost, and almost all of it is the contract itself rather than the constructor.
 
-In ETH: the deployment cost 0.000237, the caught case 0.000064, the Chainlink report 0.000048, and the
-Chainlink challenge 0.000045. All four together are under 0.0004 ETH. Nothing here is expensive: the
+The caught case is four transactions heavier than it was before the pricing floor existed: the demo now
+warms four rounds at one value and prints the conflict on the fifth, because a round cannot be priced
+with fewer than four prints behind it. Those four prints are the difference, and they are the reason the
+sequence is coherent rather than the reason it is expensive.
+
+In ETH: the deployment cost 0.000249, the caught case 0.000139, the Chainlink report 0.000058, and the
+Chainlink challenge 0.000048. All four together are under 0.0005 ETH. Nothing here is expensive: the
 design adds one escrow write and one adjudication read per liquidation, and a challenge is a single
 transaction against state that is already on-chain.
 
