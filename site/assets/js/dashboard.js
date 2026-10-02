@@ -11,6 +11,8 @@
     fromBlock: 314930000,
     explorer: 'https://sepolia.arbiscan.io'
   };
+  // the same override the console honours, so one page can be pointed at a local chain or a redeploy
+  if (window.__LANTERN__) for (var k in window.__LANTERN__) CFG[k] = window.__LANTERN__[k];
 
   var SEL = {
     heldTotal: '0xb3097a08', holdWindow: '0x3f9006f6', bountyBps: '0x415307cc', minBond: '0x831518b7',
@@ -39,7 +41,7 @@
   ];
   var EV_COLOR = { LiquidationRecorded: '#7084ff', ChallengeOpened: '#ff9d29', ChallengeUpheld: '#ff6b5b', ChallengeRefused: '#939598', ChallengeVoided: '#ff9d29', BonusReleased: '#add300', ReportRecorded: '#bcbec0', BondDeposited: '#405bff', FeedRegistered: '#191919', PeerDeclared: '#191919' };
   var VERDICT_COLOR = { upheld: '#ff6b5b', refused: '#939598', voided: '#ff9d29', released: '#add300', held: '#7084ff' };
-  var VIEWS = { overview: 'Overview', liquidations: 'Liquidations', bonds: 'Feeds & bonds', rules: 'Rules', events: 'Event log' };
+  var VIEWS = { overview: 'Overview', liquidations: 'Liquidations', bonds: 'Feeds & bonds', rules: 'Rules', events: 'Event log', operate: 'Operate' };
 
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };

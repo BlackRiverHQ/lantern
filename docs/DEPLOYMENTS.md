@@ -22,16 +22,25 @@ are the current record.
 
 ## Revision
 
-This deployment predates the current source: it was broadcast before the depth and notional work
-landed, and the registry shows it. `band(feed)` on the deployed registry returns a single word where
-the current `FeedRegistry.band` returns `(lo, hi)`, and `samplesOf(feed)` reverts on it entirely - so
-the pricing floor, which reads depth through `_history.samplesOf` while recording a report, cannot be
-enforced by this revision.
+This deployment predates the current source. It was broadcast at 09:15 UTC (block `314,935,709`). The
+depth work that added
+`FeedRegistry.samplesOf` landed at 09:47 UTC, and the deployed registry shows it: `samplesOf(feed)`
+opens with no return data at all, which is what a call to a selector the contract does not implement
+produces, while `band(feed)` - two-word in this revision already - answers normally. The pricing floor
+reads depth through `_history.samplesOf` while recording a report, so this revision cannot be
+enforcing it, and the notional-sized bond (`BondMath.notionalFloor`) landed with it, nineteen minutes
+after the deploy, for the same reason.
 
-A redeploy of the current source was attempted at block `314,943,478` (09:48 UTC) and ran out of gas:
-only the asset landed, which is why `broadcast/Deploy.s.sol/421614/run-latest.json` names a Lantern and
-a market that have no code. Running the sequence below against the current source replaces this section
-with a fresh record.
+An earlier deploy at 09:07 UTC (Lantern `0xf3e59109...`) is superseded and not listed above.
+
+A redeploy of the current source was attempted at 09:48 UTC (block `314,943,478`) and ran out of gas: only the asset landed
+(`0x556488fc...`), which is why `broadcast/Deploy.s.sol/421614/run-latest.json` names a Lantern
+(`0x00c9382e...`) and a market (`0xdae213fd...`) that have no code. That broadcast is kept as the
+record of the failure. `make redeploy` refuses to continue when a reported address has no code, so the
+same failure cannot be mistaken for a deployment a second time.
+
+The history store and the report book above are the live Lantern's own children, built by its
+constructor in the successful run: `registry.history()` returns `0x53d9D6f2...`.
 
 ## What the chain says now
 

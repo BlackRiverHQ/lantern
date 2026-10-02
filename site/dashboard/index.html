@@ -21,6 +21,7 @@
       <a href="#bonds" data-view="bonds"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2 3 5v5c0 4 3 7 7 8 4-1 7-4 7-8V5z"/></svg>Feeds &amp; bonds</a>
       <a href="#rules" data-view="rules"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4h12M4 8h12M4 12h8M4 16h6"/></svg>Rules</a>
       <a href="#events" data-view="events"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 10h3l2-6 4 12 2-6h5"/></svg>Event log</a>
+      <a href="#operate" data-view="operate"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M10 4v12"/></svg>Operate</a>
     </nav>
 
     <div class="side-foot">
@@ -130,9 +131,133 @@
       <div class="card flush"><div class="table" id="evTable"><div class="empty">Reading events…</div></div></div>
     </section>
 
+    <!-- OPERATE -->
+    <section class="view" id="view-operate">
+      <div class="head">
+        <h1>Operate.</h1>
+        <p>Every button here sends a real transaction on Arbitrum Sepolia, signed by your own wallet. The console encodes the call, shows you the calldata before you sign, then reads the receipt back — including the contract's own revert reason when a call is refused.</p>
+      </div>
+
+      <div class="wallet" id="walletBar">
+        <div class="w-left">
+          <span class="dot" id="wDot"></span>
+          <div>
+            <div class="w-acct" id="wAccount">No wallet connected</div>
+            <div class="w-sub" id="wSub">Connect a wallet on Arbitrum Sepolia to send transactions.</div>
+          </div>
+        </div>
+        <div class="w-right">
+          <span class="chip" id="wChain">—</span>
+          <span class="chip" id="wToken">—</span>
+          <span class="chip" id="wEth">—</span>
+          <button class="btn-lime" id="wConnect"><span>Connect wallet</span><span class="arrow"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h11M11 5l5 5-5 5"/></svg></span></button>
+        </div>
+      </div>
+      <div class="err" id="wErr" role="alert"></div>
+
+      <div class="acts">
+
+        <div class="act" data-role="operator">
+          <div class="act-h"><h3>Register a feed</h3><span class="tag">operator</span></div>
+          <label>feed id <input data-f="feedId" value="FEED:ARB-SEPOLIA-DEMO" spellcheck="false"></label>
+          <label>signer set <input data-f="signerSet" value="SIGNERS:OPS" spellcheck="false"></label>
+          <label>decimals <input data-f="decimals" value="18" inputmode="numeric"></label>
+          <div class="cta"><button class="go" data-act="registerFeed">Send transaction</button><button class="ghost" data-preview>Preview calldata</button></div>
+          <div class="preview"></div>
+        </div>
+
+        <div class="act" data-role="operator">
+          <div class="act-h"><h3>Declare the peer</h3><span class="tag">one shot</span></div>
+          <label>feed id <input data-f="feedId" value="FEED:ARB-SEPOLIA-DEMO" spellcheck="false"></label>
+          <label>peer feed id <input data-f="peer" value="FEED:ETH-USD-PEER" spellcheck="false"></label>
+          <div class="cta"><button class="go" data-act="setPeerFeed">Send transaction</button><button class="ghost" data-preview>Preview calldata</button></div>
+          <div class="preview"></div>
+        </div>
+
+        <div class="act" data-role="operator">
+          <div class="act-h"><h3>Post a bond</h3><span class="tag">approve + deposit</span></div>
+          <label>feed id <input data-f="feedId" value="FEED:ARB-SEPOLIA-DEMO" spellcheck="false"></label>
+          <label>amount <input data-f="amount" value="0.1" inputmode="decimal"></label>
+          <div class="cta"><button class="go" data-act="depositBond">Send transaction</button><button class="ghost" data-preview>Preview calldata</button></div>
+          <div class="preview"></div>
+        </div>
+
+        <div class="act" data-role="operator">
+          <div class="act-h"><h3>Publish a print</h3><span class="tag">operator</span></div>
+          <label>feed id <input data-f="feedId" value="FEED:ARB-SEPOLIA-DEMO" spellcheck="false"></label>
+          <label>value <input data-f="value" value="100" inputmode="decimal"></label>
+          <label>round <input data-f="round" value="7" inputmode="numeric"></label>
+          <label>observed at <input data-f="timestamp" value="" placeholder="unix seconds" inputmode="numeric"></label>
+          <label>payload hash <input data-f="payloadHash" value="PAYLOAD:ROUND-7" spellcheck="false"></label>
+          <label>signer <input data-f="signer" placeholder="0x…  (or leave blank for my wallet)" spellcheck="false"></label>
+          <div class="cta"><button class="go" data-act="recordReport">Send transaction</button><button class="ghost" data-preview>Preview calldata</button></div>
+          <div class="preview"></div>
+        </div>
+
+        <div class="act" data-role="liquidator">
+          <div class="act-h"><h3>Liquidate</h3><span class="tag">liquidator</span></div>
+          <label>liquidation id <input data-f="liquidationId" value="11" inputmode="numeric"></label>
+          <label>feed id <input data-f="feedId" value="FEED:ARB-SEPOLIA-DEMO" spellcheck="false"></label>
+          <label>round <input data-f="round" value="7" inputmode="numeric"></label>
+          <label>bonus <input data-f="bonus" value="1" inputmode="decimal"></label>
+          <label>notional <input data-f="notional" value="100" inputmode="decimal"></label>
+          <label>borrower <input data-f="borrower" placeholder="0x…  (or leave blank for my wallet)" spellcheck="false"></label>
+          <div class="cta"><button class="go" data-act="liquidate">Send transaction</button><button class="ghost" data-preview>Preview calldata</button></div>
+          <div class="preview"></div>
+        </div>
+
+        <div class="act" data-role="prover">
+          <div class="act-h"><h3>Open a challenge</h3><span class="tag">prover</span></div>
+          <label>liquidation id <input data-f="liquidationId" value="10" inputmode="numeric"></label>
+          <label>rule <select data-f="rule"><option value="4">CROSS_SOURCE</option><option value="0">SLOT_UNIQUENESS</option><option value="1">ROUND_ORDERING</option><option value="2">SELF_HISTORY</option><option value="3">PAYLOAD_PROVENANCE</option></select></label>
+          <label>evidence <input data-f="evidence" value="peer disagreed on the same round" spellcheck="false"></label>
+          <label>stake <input data-f="stake" value="0.01" inputmode="decimal"></label>
+          <div class="cta"><button class="go" data-act="openChallenge">Send transaction</button><button class="ghost" data-preview>Preview calldata</button></div>
+          <div class="preview"></div>
+        </div>
+
+        <div class="act" data-role="prover">
+          <div class="act-h"><h3>Adjudicate</h3><span class="tag">anyone</span></div>
+          <label>liquidation id <input data-f="liquidationId" value="10" inputmode="numeric"></label>
+          <div class="cta"><button class="go" data-act="adjudicate">Send transaction</button><button class="ghost" data-preview>Preview calldata</button></div>
+          <div class="preview"></div>
+        </div>
+
+        <div class="act" data-role="anyone">
+          <div class="act-h"><h3>Release a bonus</h3><span class="tag">after the window</span></div>
+          <label>liquidation id <input data-f="liquidationId" value="9" inputmode="numeric"></label>
+          <div class="cta"><button class="go" data-act="release">Send transaction</button><button class="ghost" data-preview>Preview calldata</button></div>
+          <div class="preview"></div>
+        </div>
+
+        <div class="act" data-role="anyone">
+          <div class="act-h"><h3>Void a stale challenge</h3><span class="tag">after grace</span></div>
+          <label>liquidation id <input data-f="liquidationId" value="9" inputmode="numeric"></label>
+          <div class="cta"><button class="go" data-act="voidStaleChallenge">Send transaction</button><button class="ghost" data-preview>Preview calldata</button></div>
+          <div class="preview"></div>
+        </div>
+
+        <div class="act" data-role="operator">
+          <div class="act-h"><h3>Withdraw a bond</h3><span class="tag">operator</span></div>
+          <label>feed id <input data-f="feedId" value="FEED:ARB-SEPOLIA-DEMO" spellcheck="false"></label>
+          <label>amount <input data-f="amount" value="0.05" inputmode="decimal"></label>
+          <div class="cta"><button class="go" data-act="withdrawBond">Send transaction</button><button class="ghost" data-preview>Preview calldata</button></div>
+          <div class="preview"></div>
+        </div>
+
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h3>Transactions</h3><span class="tag" id="txCount">none yet</span></div>
+        <div class="txlog" id="txLog"><div class="empty">Nothing sent from this page yet.</div></div>
+      </div>
+    </section>
+
     <footer class="foot"><span>©2026 Lantern</span><span>Testnet only</span></footer>
   </div>
 </div>
 <script src="/assets/js/dashboard.js"></script>
+<script src="/assets/js/console.js"></script>
+<script src="/assets/js/console-ui.js"></script>
 </body>
 </html>
