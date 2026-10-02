@@ -26,7 +26,8 @@ contract PricingGateTest is LanternTest {
     function test_one_sample_short_of_the_floor_is_still_refused() public {
         _openFeedCold(FEED);
         uint64 round = 0;
-        for (uint256 i = 0; i < Constants.MIN_SAMPLES_FOR_PRICING - 2; i++) {
+        // Three prints, then a fourth: the fourth is one sample short of the floor.
+        for (uint256 i = 0; i < Constants.MIN_SAMPLES_FOR_PRICING - 1; i++) {
             round = _push(FEED, valueCounter);
         }
         round = _push(FEED, valueCounter);
