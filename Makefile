@@ -23,7 +23,7 @@ sizes:
 # here for a reason that has nothing to do with the code changing.
 coverage:
 	forge coverage --report lcov --no-match-contract "GasTest|LanternInvariantsTest"
-	@echo "lcov.info written
+	@echo "lcov.info written"
 
 fmt:
 	forge fmt
