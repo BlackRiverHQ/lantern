@@ -291,23 +291,26 @@
     });
   });
 
-  /* ---------- video: poster → Wistia player (id from the page data) ------- */
+  /* ---------- video: poster -> our own file, played in place ------------- */
+  // Drop the recording at assets/video/demo.mp4. Until it exists the poster stays and nothing
+  // third-party is loaded.
+  var VIDEO = 'assets/video/demo.mp4';
   $$('button[aria-label^="Play "]').forEach(function (btn) {
     btn.addEventListener('click', function () {
-      var card = btn.parentElement, f = document.createElement('iframe');
-      f.src = 'https://fast.wistia.net/embed/iframe/gadywi8nbh?autoPlay=true';
-      f.allow = 'autoplay; fullscreen'; f.allowFullscreen = true;
-      f.title = btn.getAttribute('aria-label').replace(/^Play /, '');
-      f.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:inherit';
+      var card = btn.parentElement, v = document.createElement('video');
+      v.src = VIDEO; v.controls = true; v.autoplay = true; v.playsInline = true;
+      v.title = btn.getAttribute('aria-label').replace(/^Play /, '');
+      v.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:inherit;background:#000;object-fit:cover';
+      v.addEventListener('error', function () { v.remove(); btn.style.visibility = ''; });
       if (getComputedStyle(card).position === 'static') card.style.position = 'relative';
-      btn.style.visibility = 'hidden'; card.appendChild(f);
+      btn.style.visibility = 'hidden'; card.appendChild(v);
     });
   });
 
   /* ---------- forms: validate, hand off, never post ---------------------- */
   $$('form').forEach(function (form) {
     form.addEventListener('submit', function (e) { e.preventDefault(); });
-    var btn = form.querySelector('button, .mktoButton');
+    var btn = form.querySelector('button, .fButton');
     var input = form.querySelector('input[type="email"]');
     if (!btn || !input) return;
     btn.addEventListener('click', function (e) {

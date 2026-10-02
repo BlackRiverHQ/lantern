@@ -4,16 +4,16 @@ html{scroll-behavior:smooth}
    pulling everything up 8px. Keep that offset without the banner. */
 body > a#home { display: block; margin-top: -8px; }
 /* form styles */
-.mktoForm { width: 100% !important; }
+.fForm { width: 100% !important; }
 #LblcompanyWebsite, #companyWebsite { position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
 #maplesyrup, label[for=maplesyrup] { display: none !important; }
 
 /* case-study photos removed: fill the cover with the page's own card artwork */
-.styles-module__Ef3Avq__imageWrap { background: #191919 url("../img/agYYcqYofJOwHQXh_img-home-card-bg--orange.png") center / cover no-repeat; }
-article[aria-label="Poka"] .styles-module__Ef3Avq__imageWrap,
-article[aria-label="Paramount"] .styles-module__Ef3Avq__imageWrap { background-image: url("../img/agYYc6YofJOwHQXi_img-home-card-bg--pink.png"); }
-article[aria-label="Dior"] .styles-module__Ef3Avq__imageWrap,
-article[aria-label="Hireology"] .styles-module__Ef3Avq__imageWrap { background-image: url("../img/agYYqaYofJOwHQXk_img-home-card-bg--green.png"); }
+.c-module__063x__imageWrap { background: #191919 url("../img/img-067.png") center / cover no-repeat; }
+article[aria-label="Poka"] .c-module__063x__imageWrap,
+article[aria-label="Paramount"] .c-module__063x__imageWrap { background-image: url("../img/img-112.png"); }
+article[aria-label="Dior"] .c-module__063x__imageWrap,
+article[aria-label="Hireology"] .c-module__063x__imageWrap { background-image: url("../img/img-068.png"); }
 
 /* Lantern wordmark collapses to a single "L" tile once the header is scrolled */
 .lantern-mark { opacity: 0; transition: opacity .3s linear; }
