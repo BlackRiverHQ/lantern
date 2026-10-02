@@ -1,54 +1,64 @@
 # Lantern
 
-**The liquidator's bonus is paid on the next block. Lantern pays it on the next window.**
+Held, bonded, provable: the liquidator's bonus becomes provisional.
 
-Lantern makes a liquidation's profit provisional. The debt still clears, the position still
-closes, the lender still gets paid — only the liquidator's profit above principal and fees is
-credited to an escrow with a hold window. During that window anyone may prove, using on-chain
-evidence alone, that the price report the liquidation consumed could not be true. Prove it and
-the held bonus is redirected: the borrower is restored first, the prover is paid a bounty, and
-the remainder is charged to the bond of the signer who carried the report.
+A liquidation repays debt and closes a position immediately. Only the liquidator's **profit above
+principal and fees** is credited to an escrow for a short window. Inside that window, anyone may prove
+- from state that is already on-chain, with no reference price and no committee - that the value which
+priced the liquidation cannot be reconciled with what the feed itself published. If the claim holds,
+the held bonus goes to the borrower, the prover is paid out of the report signer's bond, and the
+feed's error count moves. If nobody contests it, the bonus is paid in full.
 
-## Why hold the profit and not the debt
+The debt is never delayed. Only the profit becomes provisional, so integrating this costs patience and
+not solvency.
 
-Delaying solvency breaks a market. Delaying profit does not. The design keeps the part that
-cannot wait immediate and makes the part that can wait provable.
+## Live on Arbitrum Sepolia
 
-## The evidence standard
+| Contract | Address |
+|---|---|
+| Lantern | `0xF3e59109d72D052888B1Df97D82d8E920067b1C9` |
+| Market | `0x504945EC11AD3CA5Bf4920496b3C613eb83a7A17` |
+| Asset | `0x25939dB67A1bA238001444fad8D879f787A374e4` |
 
-No reference price. No committee. No owner. Four checks, all derivable from the feed's own
-on-chain history:
+After the demo run, the chain says: one caught print (`feedErrors` 1), the bonus redirected rather than
+paid (`bonusOutcome(1)` 2), 2e18 charged to the signer's bond, exposure back to zero, and the feed still
+priceable. See [docs/DEPLOYMENTS.md](docs/DEPLOYMENTS.md) for the reads and the exact commands.
 
-1. **Slot uniqueness** — one value per feed per block; two different values in one block is proof.
-2. **Round ordering** — strictly newer than the feed's last accepted round, inside its staleness
-   bound.
-3. **Self-history bound** — the value must sit inside a band derived from the feed's own realized
-   moves, with both a per-report cap and a cumulative drift cap.
-4. **Payload provenance** — a payload hash may never be reused across assets or rounds.
+## The four rules a challenger can prove
 
-## What this does not do
+1. `SLOT_UNIQUENESS` - two different values for one feed in one round. Conflicts are recorded, never
+   hidden behind a revert.
+2. `ROUND_ORDERING` - the print was already stale when the liquidation consumed it.
+3. `SELF_HISTORY` - the value is outside the band implied by the feed's own realized moves. The band
+   is never set by hand and has no external reference.
+4. `PAYLOAD_PROVENANCE` - the payload was signed for another asset.
 
-Lantern is a falsification detector, not a correctness oracle. A price that is wrong but
-plausible — every source agreeing, configuration self-consistent — passes every check above.
-See `docs/LIMITS.md`; the limits are written down before they are found.
+The verdict is recomputed from state at adjudication; a prover supplies a rule, not arithmetic.
 
-## Layout
+## No owner
 
-```
-src/core/       registry, history, bonds, escrow, challenges, adjudication, waterfall
-src/libraries/  band math, provenance checks, escrow accounting, hashing
-src/mocks/      driverable feed, market, token — for adversarial fixtures
-fixtures/       scenario data
-test/           unit, fuzz, invariant and integration suites
-docs/           design, invariants, limits, architecture, testing, demo
-```
+No pause, no parameter setter, no upgrade, no admin key. The hold window and the bounty share are
+constructor arguments; `Lantern` builds its own registry, so nothing is trusted after deployment.
 
-## Build
+## Run it
 
 ```
 forge build
-forge test
-forge test --match-path "test/invariants/*"
+forge test                                  # 510 tests: unit, fuzz, integration, invariants
+forge test --match-path "test/invariants/*"  # stateful invariants over random action sequences
+forge script script/Deploy.s.sol --rpc-url arbitrum_sepolia --broadcast -vv
+forge script script/DemoRun.s.sol --rpc-url arbitrum_sepolia --broadcast -vv
 ```
 
-Deployment target: Arbitrum Sepolia (chain id 421614).
+## Documentation
+
+| Document | Contents |
+|---|---|
+| [docs/DESIGN.md](docs/DESIGN.md) | the mechanism, and why the bonus is the disputed object |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | the modules, who may do what, and the flow of one liquidation |
+| [docs/INVARIANTS.md](docs/INVARIANTS.md) | what must always hold, each with a test that attacks it |
+| [docs/LIMITS.md](docs/LIMITS.md) | what this is not, and the sharp edges, stated plainly |
+| [docs/DEPLOYMENTS.md](docs/DEPLOYMENTS.md) | the Sepolia deployment and its on-chain reads |
+| [docs/TESTING.md](docs/TESTING.md) | the shape of the suite and what it covers |
+| [docs/DEMO.md](docs/DEMO.md) | the six acts, and the commands that reproduce them |
+| [GAS.md](GAS.md) | measured cost |
