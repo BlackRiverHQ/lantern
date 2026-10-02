@@ -27,4 +27,8 @@ library Constants {
     uint16 internal constant BOUNTY_BPS = 2_000;          // 20% of the at-fault pool to the prover
     uint16 internal constant MIN_STAKE_BPS = 100;         // 1% of the held bonus
     uint256 internal constant MIN_STAKE_ABSOLUTE = 1e15;  // 0.001 unit floor
+
+        // Bonds
+        uint256 internal constant MIN_BOND = 1e17;         // 0.1 unit to list a feed
+        uint16 internal constant COVERAGE_BPS = 10_000;    // bond >= exposure, 1:1
 }
