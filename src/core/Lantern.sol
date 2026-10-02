@@ -205,7 +205,7 @@ contract Lantern is IWindfall, ILanternErrors {
         uint256 bonus,
         address liquidator,
         address borrower
-    ) external onlyMarket {
+    ) external onlyMarket nonReentrant {
         if (_escrows[liquidationId].exists) revert LiquidationAlreadySettled(liquidationId);
         if (bonus == 0) revert ZeroAmount();
 
