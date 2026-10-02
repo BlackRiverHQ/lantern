@@ -205,6 +205,7 @@ contract Lantern is IWindfall, ILanternErrors {
             exists: true
         });
         recorded += 1;
+        SafeTransfer.pull(asset, market, bonus);
         emit LiquidationRecorded(liquidationId, feedId, bonus, _escrows[liquidationId].deadline);
     }
 
