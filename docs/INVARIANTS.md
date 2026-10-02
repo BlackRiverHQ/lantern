@@ -9,7 +9,7 @@ Each invariant has at least one test that tries to break it.
   burns value.
 - `invariant_noDoubleSettle` — a liquidation can never both release and redirect; the terminal state
   is written once.
-- `invariant_escrowSolvency` — held balances always equal un-settled escrows plus queued remainders.
+- `invariant_escrowSolvency` — held balances always equal the sum of un-settled escrows.
 
 ## Access and authority
 
