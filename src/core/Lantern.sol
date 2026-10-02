@@ -159,5 +159,61 @@ contract Lantern is IWindfall, ILanternErrors {
         SafeTransfer.push(asset, msg.sender, allowed);
     }
 
+    // --- reports and liquidations ------------------------------------------
+
+    function recordReport(
+        bytes32 feedId,
+        uint256 value,
+        uint64  round,
+        uint64  timestamp,
+        bytes32 payloadHash,
+        address signer
+    ) external onlyOperator(feedId) knownFeed(feedId) {
+        if (!isPriceable(feedId)) {
+            revert UnderBonded(feedId, _feeds[feedId].bond, BondMath.exposureFloor(_feeds[feedId].exposure));
+        }
+        reg.recordReport(feedId, value, round, timestamp, payloadHash, signer);
+        emit ReportRecorded(feedId, round, value);
+    }
+
+    function recordLiquidation(
+        uint256 liquidationId,
+        bytes32 feedId,
+        uint64  round,
+        uint256 bonus,
+        address liquidator,
+        address borrower
+    ) external onlyMarket {
+        if (_escrows[liquidationId].exists) revert LiquidationAlreadySettled(liquidationId);
+        if (bonus == 0) revert ZeroAmount();
+
+        FeedState storage f = _feeds[feedId];
+        if (!f.registered) revert UnknownFeed(feedId);
+        IFeedRegistry.Report memory r = reg.reportAt(feedId, round);
+        if (!r.exists) revert UnknownFeed(feedId);
+
+        uint256 nextExposure = f.exposure + bonus;
+        uint256 required = BondMath.exposureFloor(nextExposure);
+        if (f.bond < required) revert UnderBonded(feedId, f.bond, required);
+
+        SafeTransfer.pull(asset, market, bonus);
+        f.exposure = nextExposure;
+        _heldTotal += bonus;
+
+        _escrows[liquidationId] = Escrow({
+            feedId: feedId,
+            round: round,
+            recordedAt: uint64(block.timestamp),
+            deadline: TimeLib.deadline(block.timestamp, holdWindow),
+            bonus: bonus,
+            liquidator: liquidator,
+            borrower: borrower,
+            outcome: 0,
+            exists: true
+        });
+        recorded += 1;
+        emit LiquidationRecorded(liquidationId, feedId, bonus, _escrows[liquidationId].deadline);
+    }
+
     // (continued)
 }
