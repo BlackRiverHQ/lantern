@@ -32,8 +32,10 @@ contract VerdictsTest is Test {
             otherValueForRound: 0,
             payloadFeed: FEED,
             thisFeed: FEED,
-            liquidationTime: r.timestamp
-        });
+            liquidationTime: r.timestamp,
+            peerValue: 0,
+            peerExists: false
+            });
     }
 
     function test_slotUniqueness_upheld_when_conflicted() public pure {
