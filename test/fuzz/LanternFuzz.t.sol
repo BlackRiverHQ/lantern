@@ -49,7 +49,7 @@ contract LanternFuzzTest is LanternTest {
         _warm(FEED, 40);
         uint64 round = _suspiciousPrint(FEED);
         _liquidate(1, round, bonus);
-        _challenge(1, IChallenge.Rule.SELF_HISTORY, WaterfallMath.stakeFloor(bonus));
+        _challenge(1, IChallenge.Rule.SELF_HISTORY, WaterfallMath.stakeFloor(bonus, Constants.MIN_STAKE_ABSOLUTE_18));
         uint256 before = token.balanceOf(BORROWER);
         lantern.adjudicate(1);
         assertEq(token.balanceOf(BORROWER), before + bonus);
@@ -60,7 +60,7 @@ contract LanternFuzzTest is LanternTest {
         _warm(FEED, 40);
         uint64 round = _suspiciousPrint(FEED);
         _liquidate(1, round, bonus);
-        uint256 stake = WaterfallMath.stakeFloor(bonus);
+        uint256 stake = WaterfallMath.stakeFloor(bonus, Constants.MIN_STAKE_ABSOLUTE_18);
         _challenge(1, IChallenge.Rule.SELF_HISTORY, stake);
         uint256 proverBefore = token.balanceOf(PROVER);
         uint256 bondBefore = lantern.bondOf(FEED);
@@ -99,7 +99,7 @@ contract LanternFuzzTest is LanternTest {
     function testFuzz_refused_forfeits_exactly_the_stake(uint96 stakeSeed) public {
         uint64 round = _push(FEED, 100e18);
         _liquidate(1, round, 10e18);
-        uint256 stake = bound(uint256(stakeSeed), WaterfallMath.stakeFloor(10e18), 5e18);
+        uint256 stake = bound(uint256(stakeSeed), WaterfallMath.stakeFloor(10e18, Constants.MIN_STAKE_ABSOLUTE_18), 5e18);
         _challenge(1, IChallenge.Rule.SELF_HISTORY, stake);
         uint256 before = token.balanceOf(LIQUIDATOR);
         assertFalse(lantern.adjudicate(1));

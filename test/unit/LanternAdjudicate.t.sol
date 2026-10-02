@@ -15,7 +15,7 @@ contract LanternAdjudicateTest is LanternTest {
     function setUp() public override {
         super.setUp();
         _openFeed(FEED);
-        stake = WaterfallMath.stakeFloor(BONUS);
+        stake = WaterfallMath.stakeFloor(BONUS, Constants.MIN_STAKE_ABSOLUTE_18);
     }
 
     function _bounty() internal pure returns (uint256) {

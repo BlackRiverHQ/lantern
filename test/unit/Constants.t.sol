@@ -52,7 +52,7 @@ contract ConstantsTest is Test {
     }
 
     function test_the_absolute_stake_floor_fits_the_minimum_bond() public pure {
-        assertLe(Constants.MIN_STAKE_ABSOLUTE, Constants.MIN_BOND);
+        assertLe(Constants.MIN_STAKE_ABSOLUTE_18, Constants.MIN_BOND);
     }
 
     function test_coverage_is_one_for_one() public pure {

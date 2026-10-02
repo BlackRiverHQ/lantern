@@ -73,10 +73,10 @@ contract LanternReleaseTest is LanternTest {
     }
 
     function test_unresolved_challenge_blocks_release() public {
-        token.mint(PROVER, WaterfallMath.stakeFloor(BONUS));
+        token.mint(PROVER, WaterfallMath.stakeFloor(BONUS, Constants.MIN_STAKE_ABSOLUTE_18));
         vm.startPrank(PROVER);
         token.approve(address(lantern), type(uint256).max);
-        lantern.openChallenge(1, IChallenge.Rule.SELF_HISTORY, abi.encode(uint256(1)), WaterfallMath.stakeFloor(BONUS));
+        lantern.openChallenge(1, IChallenge.Rule.SELF_HISTORY, abi.encode(uint256(1)), WaterfallMath.stakeFloor(BONUS, Constants.MIN_STAKE_ABSOLUTE_18));
         vm.stopPrank();
         _afterWindow();
         vm.expectRevert(abi.encodeWithSelector(ILanternErrors.ChallengeAlreadyOpen.selector, 1));
@@ -84,10 +84,10 @@ contract LanternReleaseTest is LanternTest {
     }
 
     function test_release_after_a_refused_challenge_works() public {
-        token.mint(PROVER, WaterfallMath.stakeFloor(BONUS));
+        token.mint(PROVER, WaterfallMath.stakeFloor(BONUS, Constants.MIN_STAKE_ABSOLUTE_18));
         vm.startPrank(PROVER);
         token.approve(address(lantern), type(uint256).max);
-        lantern.openChallenge(1, IChallenge.Rule.SELF_HISTORY, abi.encode(uint256(1)), WaterfallMath.stakeFloor(BONUS));
+        lantern.openChallenge(1, IChallenge.Rule.SELF_HISTORY, abi.encode(uint256(1)), WaterfallMath.stakeFloor(BONUS, Constants.MIN_STAKE_ABSOLUTE_18));
         vm.stopPrank();
         lantern.adjudicate(1); // refused
         _afterWindow();
@@ -100,7 +100,7 @@ contract LanternReleaseTest is LanternTest {
         _warm(FEED, 40);
         uint64 bad = _suspiciousPrint(FEED);
         _liquidate(2, bad, BONUS);
-        _challenge(2, IChallenge.Rule.SELF_HISTORY, WaterfallMath.stakeFloor(BONUS));
+        _challenge(2, IChallenge.Rule.SELF_HISTORY, WaterfallMath.stakeFloor(BONUS, Constants.MIN_STAKE_ABSOLUTE_18));
         lantern.adjudicate(2);
         _afterWindow();
         vm.expectRevert(abi.encodeWithSelector(ILanternErrors.LiquidationAlreadySettled.selector, 2));

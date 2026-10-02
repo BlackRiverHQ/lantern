@@ -77,7 +77,7 @@ contract DeploymentTest is Test {
         vm.prank(LIQUIDATOR);
         market.liquidate(1, FEED, 1, 10e18, BORROWER);
 
-        uint256 stake = WaterfallMath.stakeFloor(10e18);
+        uint256 stake = WaterfallMath.stakeFloor(10e18, Constants.MIN_STAKE_ABSOLUTE_18);
         token.mint(PROVER, stake);
         vm.startPrank(PROVER);
         token.approve(address(lantern), stake);

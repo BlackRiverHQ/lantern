@@ -7,28 +7,28 @@ import {Constants} from "../../src/libraries/Constants.sol";
 
 contract BondMathTest is Test {
     function test_floor_at_least_minimum() public pure {
-        assertEq(BondMath.exposureFloor(0), Constants.MIN_BOND);
+        assertEq(BondMath.exposureFloor(0, Constants.MIN_BOND), Constants.MIN_BOND);
     }
 
     function test_floor_tracks_exposure_one_to_one() public pure {
-        assertEq(BondMath.exposureFloor(5e18), 5e18);
+        assertEq(BondMath.exposureFloor(5e18, Constants.MIN_BOND), 5e18);
     }
 
     function test_floor_above_minimum_scales() public pure {
-        assertEq(BondMath.exposureFloor(100e18), 100e18);
+        assertEq(BondMath.exposureFloor(100e18, Constants.MIN_BOND), 100e18);
     }
 
     function test_priceable_exact_floor() public pure {
-        assertTrue(BondMath.isPriceable(1e18, 1e18));
+        assertTrue(BondMath.isPriceable(1e18, 1e18, Constants.MIN_BOND));
     }
 
     function test_not_priceable_below_floor() public pure {
-        assertFalse(BondMath.isPriceable(0.5e18, 1e18));
+        assertFalse(BondMath.isPriceable(0.5e18, 1e18, Constants.MIN_BOND));
     }
 
     function test_priceable_zero_exposure_needs_minimum() public pure {
-        assertTrue(BondMath.isPriceable(Constants.MIN_BOND, 0));
-        assertFalse(BondMath.isPriceable(Constants.MIN_BOND - 1, 0));
+        assertTrue(BondMath.isPriceable(Constants.MIN_BOND, 0, Constants.MIN_BOND));
+        assertFalse(BondMath.isPriceable(Constants.MIN_BOND - 1, 0, Constants.MIN_BOND));
     }
 
     function test_charge_partial() public pure {
@@ -56,26 +56,26 @@ contract BondMathTest is Test {
     }
 
     function test_withdraw_blocked_at_floor() public pure {
-        assertEq(BondMath.withdrawable(1e18, 1e18, 1e18), 0);
+        assertEq(BondMath.withdrawable(1e18, 1e18, 1e18, Constants.MIN_BOND), 0);
     }
 
     function test_withdraw_only_spare() public pure {
-        assertEq(BondMath.withdrawable(5e18, 1e18, 10e18), 4e18);
+        assertEq(BondMath.withdrawable(5e18, 1e18, 10e18, Constants.MIN_BOND), 4e18);
     }
 
     function test_withdraw_request_below_spare() public pure {
-        assertEq(BondMath.withdrawable(5e18, 1e18, 2e18), 2e18);
+        assertEq(BondMath.withdrawable(5e18, 1e18, 2e18, Constants.MIN_BOND), 2e18);
     }
 
     function test_withdraw_below_minimum_exposure() public pure {
-        assertEq(BondMath.withdrawable(Constants.MIN_BOND, 0, 1e18), 0);
+        assertEq(BondMath.withdrawable(Constants.MIN_BOND, 0, 1e18, Constants.MIN_BOND), 0);
     }
 
     function testFuzz_floor_monotone(uint96 exposureA, uint96 exposureB) public pure {
         uint256 a = uint256(exposureA);
         uint256 b = uint256(exposureB);
-        if (a <= b) assertLe(BondMath.exposureFloor(a), BondMath.exposureFloor(b));
-        else assertGe(BondMath.exposureFloor(a), BondMath.exposureFloor(b));
+        if (a <= b) assertLe(BondMath.exposureFloor(a, Constants.MIN_BOND), BondMath.exposureFloor(b, Constants.MIN_BOND));
+        else assertGe(BondMath.exposureFloor(a, Constants.MIN_BOND), BondMath.exposureFloor(b, Constants.MIN_BOND));
     }
 
     function testFuzz_charge_conserves(uint96 bond, uint96 amount) public pure {
@@ -94,6 +94,6 @@ contract BondMathTest is Test {
         uint256 e = uint256(exposure);
         uint256 allowed = BondMath.withdrawable(b, e, uint256(req));
         assertLe(allowed, b);
-        assertTrue(b - allowed >= BondMath.exposureFloor(e) || allowed == 0);
+        assertTrue(b - allowed >= BondMath.exposureFloor(e, Constants.MIN_BOND) || allowed == 0);
     }
 }

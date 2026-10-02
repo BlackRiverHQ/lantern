@@ -46,7 +46,7 @@ contract GasTest is LanternTest {
     function test_challenge_is_bounded() public {
         uint64 round = _push(FEED, 100e18);
         _liquidate(1, round, BONUS);
-        uint256 stake = WaterfallMath.stakeFloor(BONUS);
+        uint256 stake = WaterfallMath.stakeFloor(BONUS, Constants.MIN_STAKE_ABSOLUTE_18);
         token.mint(PROVER, stake);
 
         vm.startPrank(PROVER);
@@ -61,7 +61,7 @@ contract GasTest is LanternTest {
         _warm(FEED, 40);
         uint64 round = _suspiciousPrint(FEED);
         _liquidate(1, round, BONUS);
-        _challenge(1, IChallenge.Rule.SELF_HISTORY, WaterfallMath.stakeFloor(BONUS));
+        _challenge(1, IChallenge.Rule.SELF_HISTORY, WaterfallMath.stakeFloor(BONUS, Constants.MIN_STAKE_ABSOLUTE_18));
 
         uint256 g0 = gasleft();
         lantern.adjudicate(1);
@@ -75,7 +75,7 @@ contract GasTest is LanternTest {
     uint64 round = _suspiciousPrint(FEED);
     uint256 g0 = gasleft();
     _liquidate(1, round, BONUS);
-    _challenge(1, IChallenge.Rule.SELF_HISTORY, WaterfallMath.stakeFloor(BONUS));
+    _challenge(1, IChallenge.Rule.SELF_HISTORY, WaterfallMath.stakeFloor(BONUS, Constants.MIN_STAKE_ABSOLUTE_18));
     lantern.adjudicate(1);
     assertLt(g0 - gasleft(), 620_000, "liquidation plus challenge plus verdict, under 620k gas");
     }

@@ -40,7 +40,7 @@ contract ConformanceTest is LanternTest {
         IWindfall w = IWindfall(address(lantern));
         _liquidate(1, round, BONUS);
 
-        uint256 stake = WaterfallMath.stakeFloor(BONUS);
+        uint256 stake = WaterfallMath.stakeFloor(BONUS, Constants.MIN_STAKE_ABSOLUTE_18);
         token.mint(PROVER, stake);
         vm.startPrank(PROVER);
         token.approve(address(lantern), stake);
@@ -83,7 +83,7 @@ contract ConformanceTest is LanternTest {
         _warm(FEED, 40);
         uint64 bad = _suspiciousPrint(FEED);
         _liquidate(1, bad, BONUS);
-        uint256 stake = WaterfallMath.stakeFloor(BONUS);
+        uint256 stake = WaterfallMath.stakeFloor(BONUS, Constants.MIN_STAKE_ABSOLUTE_18);
         _challenge(1, IChallenge.Rule.SELF_HISTORY, stake);
         uint256 before = lantern.bondOf(FEED);
         lantern.adjudicate(1);
@@ -100,7 +100,7 @@ contract ConformanceTest is LanternTest {
         _warm(FEED, 40);
         uint64 bad = _suspiciousPrint(FEED);
         _liquidate(2, bad, BONUS);
-        _challenge(2, IChallenge.Rule.SELF_HISTORY, WaterfallMath.stakeFloor(BONUS));
+        _challenge(2, IChallenge.Rule.SELF_HISTORY, WaterfallMath.stakeFloor(BONUS, Constants.MIN_STAKE_ABSOLUTE_18));
         lantern.adjudicate(2);
         assertEq(lantern.bonusOutcome(2), 2); // redirected
     }

@@ -42,12 +42,12 @@ contract WaterfallFuzzTest is Test {
     }
 
     function testFuzz_stake_floor_has_an_absolute_minimum(uint96 bonus) public pure {
-        assertGe(WaterfallMath.stakeFloor(bonus), Constants.MIN_STAKE_ABSOLUTE);
+        assertGe(WaterfallMath.stakeFloor(bonus, Constants.MIN_STAKE_ABSOLUTE_18), Constants.MIN_STAKE_ABSOLUTE_18);
     }
 
     function testFuzz_stake_floor_is_one_percent_above_the_absolute(uint96 bonus) public pure {
-        vm.assume(bonus > Constants.MIN_STAKE_ABSOLUTE * 100);
-        assertEq(WaterfallMath.stakeFloor(bonus), (uint256(bonus) * Constants.MIN_STAKE_BPS) / Constants.BPS);
+        vm.assume(bonus > Constants.MIN_STAKE_ABSOLUTE_18 * 100);
+        assertEq(WaterfallMath.stakeFloor(bonus, Constants.MIN_STAKE_ABSOLUTE_18), (uint256(bonus) * Constants.MIN_STAKE_BPS) / Constants.BPS);
     }
 
     function testFuzz_shortfall_is_the_uncovered_part(uint96 available, uint96 owed) public pure {

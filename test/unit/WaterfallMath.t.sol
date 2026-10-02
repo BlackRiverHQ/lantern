@@ -55,11 +55,11 @@ contract WaterfallMathTest is Test {
     }
 
     function test_stake_floor_uses_proportional() public pure {
-        assertEq(WaterfallMath.stakeFloor(1_000e18), 10e18);
+        assertEq(WaterfallMath.stakeFloor(1_000e18, Constants.MIN_STAKE_ABSOLUTE_18), 10e18);
     }
 
     function test_stake_floor_uses_absolute_for_tiny_bonus() public pure {
-        assertEq(WaterfallMath.stakeFloor(1), Constants.MIN_STAKE_ABSOLUTE);
+        assertEq(WaterfallMath.stakeFloor(1, Constants.MIN_STAKE_ABSOLUTE_18), Constants.MIN_STAKE_ABSOLUTE_18);
     }
 
     function testFuzz_split_conserves(uint96 available, uint96 claim, uint16 bountyBps) public pure {
@@ -74,6 +74,6 @@ contract WaterfallMathTest is Test {
     }
 
     function testFuzz_stake_floor_minimum(uint96 bonus) public pure {
-        assertGe(WaterfallMath.stakeFloor(uint256(bonus)), Constants.MIN_STAKE_ABSOLUTE);
+        assertGe(WaterfallMath.stakeFloor(uint256(bonus)), Constants.MIN_STAKE_ABSOLUTE_18);
     }
 }

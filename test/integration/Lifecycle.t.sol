@@ -16,7 +16,7 @@ contract LifecycleTest is LanternTest {
     }
 
     function _stake() internal pure returns (uint256) {
-        return WaterfallMath.stakeFloor(BONUS);
+        return WaterfallMath.stakeFloor(BONUS, Constants.MIN_STAKE_ABSOLUTE_18);
     }
 
     /// @dev The solvency identity that must hold whenever no challenge is live.

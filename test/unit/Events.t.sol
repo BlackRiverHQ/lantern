@@ -58,7 +58,7 @@ contract EventsTest is LanternTest {
     function test_challenge_is_announced() public {
         uint64 round = _push(FEED, 100e18);
         _liquidate(1, round, BONUS);
-        uint256 stake = WaterfallMath.stakeFloor(BONUS);
+        uint256 stake = WaterfallMath.stakeFloor(BONUS, Constants.MIN_STAKE_ABSOLUTE_18);
 
         token.mint(PROVER, stake);
         vm.startPrank(PROVER);
@@ -73,7 +73,7 @@ contract EventsTest is LanternTest {
         _warm(FEED, 40);
         uint64 round = _suspiciousPrint(FEED);
         _liquidate(1, round, BONUS);
-        _challenge(1, IChallenge.Rule.SELF_HISTORY, WaterfallMath.stakeFloor(BONUS));
+        _challenge(1, IChallenge.Rule.SELF_HISTORY, WaterfallMath.stakeFloor(BONUS, Constants.MIN_STAKE_ABSOLUTE_18));
 
         vm.expectEmit(true, false, false, false, address(lantern));
         emit ChallengeUpheld(1, uint8(IChallenge.Rule.SELF_HISTORY), 0, 0);
@@ -83,7 +83,7 @@ contract EventsTest is LanternTest {
     function test_refused_verdict_is_announced_with_the_forfeited_stake() public {
         uint64 round = _push(FEED, 100e18);
         _liquidate(1, round, BONUS);
-        uint256 stake = WaterfallMath.stakeFloor(BONUS);
+        uint256 stake = WaterfallMath.stakeFloor(BONUS, Constants.MIN_STAKE_ABSOLUTE_18);
         _challenge(1, IChallenge.Rule.SELF_HISTORY, stake);
 
         vm.expectEmit(true, false, false, true, address(lantern));

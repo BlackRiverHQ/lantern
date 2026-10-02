@@ -94,11 +94,11 @@ contract LanternViewsTest is LanternTest {
     }
 
     function test_challenge_view_after_opening() public {
-        _challenge(1, IChallenge.Rule.SELF_HISTORY, WaterfallMath.stakeFloor(BONUS));
+        _challenge(1, IChallenge.Rule.SELF_HISTORY, WaterfallMath.stakeFloor(BONUS, Constants.MIN_STAKE_ABSOLUTE_18));
         Lantern.ChallengeRec memory c = lantern.challengeOf(1);
         assertEq(c.prover, PROVER);
         assertEq(c.rule, uint8(IChallenge.Rule.SELF_HISTORY));
-        assertEq(c.stake, WaterfallMath.stakeFloor(BONUS));
+        assertEq(c.stake, WaterfallMath.stakeFloor(BONUS, Constants.MIN_STAKE_ABSOLUTE_18));
     }
 
     function test_bonus_settled_is_false_while_held() public view {

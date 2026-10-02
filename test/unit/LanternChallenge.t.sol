@@ -19,7 +19,7 @@ contract LanternChallengeTest is LanternTest {
     }
 
     function _floor() internal pure returns (uint256) {
-        return WaterfallMath.stakeFloor(BONUS);
+        return WaterfallMath.stakeFloor(BONUS, Constants.MIN_STAKE_ABSOLUTE_18);
     }
 
     function test_challenge_accepted_inside_window() public {
@@ -142,11 +142,11 @@ contract LanternChallengeTest is LanternTest {
     }
 
     function test_floor_is_one_percent_of_the_bonus() public pure {
-        assertEq(WaterfallMath.stakeFloor(1_000e18), 10e18);
+        assertEq(WaterfallMath.stakeFloor(1_000e18, Constants.MIN_STAKE_ABSOLUTE_18), 10e18);
     }
 
     function test_floor_has_an_absolute_minimum() public pure {
-        assertEq(WaterfallMath.stakeFloor(1), Constants.MIN_STAKE_ABSOLUTE);
+        assertEq(WaterfallMath.stakeFloor(1, Constants.MIN_STAKE_ABSOLUTE_18), Constants.MIN_STAKE_ABSOLUTE_18);
     }
 
     function test_anyone_may_challenge() public {

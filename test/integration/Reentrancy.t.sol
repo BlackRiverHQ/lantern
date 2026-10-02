@@ -57,7 +57,7 @@ contract ReentrancyTest is Test {
     }
 
     function test_reentrancy_cannot_open_a_second_challenge() public {
-        uint256 stake = WaterfallMath.stakeFloor(BONUS);
+        uint256 stake = WaterfallMath.stakeFloor(BONUS, Constants.MIN_STAKE_ABSOLUTE_18);
         token.mint(PROVER, stake);
         _armReentryIntoOpenChallenge(stake);
 
@@ -70,7 +70,7 @@ contract ReentrancyTest is Test {
     }
 
     function test_reentrancy_cannot_double_take_the_stake() public {
-        uint256 stake = WaterfallMath.stakeFloor(BONUS);
+        uint256 stake = WaterfallMath.stakeFloor(BONUS, Constants.MIN_STAKE_ABSOLUTE_18);
         token.mint(PROVER, stake * 2);
         _armReentryIntoOpenChallenge(stake);
 
@@ -93,7 +93,7 @@ contract ReentrancyTest is Test {
     }
 
     function test_reentrancy_leaves_the_books_balanced() public {
-        uint256 stake = WaterfallMath.stakeFloor(BONUS);
+        uint256 stake = WaterfallMath.stakeFloor(BONUS, Constants.MIN_STAKE_ABSOLUTE_18);
         token.mint(PROVER, stake);
         _armReentryIntoOpenChallenge(stake);
 
