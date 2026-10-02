@@ -104,6 +104,7 @@ contract Lantern is IWindfall, ILanternErrors {
         market = market_;
         holdWindow = TimeLib.validateWindow(holdWindow_);
         bountyBps = bountyBps_;
+        assetDecimals = _readDecimals(address(asset_));
         reg = new FeedRegistry(address(this));
     }
 
