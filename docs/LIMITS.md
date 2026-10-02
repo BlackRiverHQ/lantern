@@ -14,13 +14,23 @@ can, the bonus is paid.
 - **Not a correctness oracle.** A value can be false and still consistent with the feed's own history
   and with its declared peer, in which case no rule fires. Lantern catches contradictions, not lies
   that agree with themselves.
-- **Not exposure-sized.** Recovery is bounded by the held bonus plus what the bond can pay. Sizing a
-  bond to the notional at risk would need the market to pass the notional, which it does not do today.
+- **Sized to the notional, but only to a share of it.** The market declares what the liquidation put at
+  risk and the bond has to cover a fixed share of that, so recovery is no longer capped at the held
+  bonus. The share is one per cent, which is a policy choice and not a derivation: a bond that covers a
+  hundredth of a position is not a bond that makes the position whole.
 - **Not a way to pause a feed by decree.** A feed that cannot cover its exposure cannot price, and that
   is arithmetic, not authority. Nobody can silence a well-bonded feed.
 - **Not a mechanism for every token.** Fee-on-transfer and rebasing tokens are refused rather than
   accounted for, and an asset above 18 decimals is refused rather than rounded. Both refusals are
   explicit errors, not silent behaviour.
+
+## One structural condition, before any rule is asked
+
+A liquidation may only be priced on a print that had at least four prints behind it. Below that a band
+is computed from almost nothing and is wide enough to excuse anything, so every rule above is
+vacuously true. A feed may still print as freely as it likes below the floor — that is how it *builds*
+the history — but it cannot price until it has one. This is the condition a fabricated first print
+would otherwise walk through.
 
 ## The five rules, and what each one can miss
 
