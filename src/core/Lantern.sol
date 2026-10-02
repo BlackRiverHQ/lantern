@@ -15,6 +15,7 @@ import {WaterfallMath} from "../libraries/WaterfallMath.sol";
 import {SafeTransfer} from "../libraries/SafeTransfer.sol";
 import {TimeLib} from "../libraries/TimeLib.sol";
 import {Constants} from "../libraries/Constants.sol";
+import {EscrowLedger} from "../libraries/EscrowLedger.sol";
 import {FixedPoint} from "../libraries/FixedPoint.sol";
 
 /// @title Lantern
