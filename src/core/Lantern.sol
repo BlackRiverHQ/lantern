@@ -241,6 +241,12 @@ contract Lantern is IWindfall, ILanternErrors {
         IFeedRegistry.Report memory r = reg.reportAt(feedId, round);
         if (!r.exists) revert UnknownFeed(feedId);
 
+        // A feed may print as freely as it likes, but a liquidation may only be priced on a print
+        // that had something to be judged against. Below that, every rule is vacuously true.
+        if (r.prevSamples < Constants.MIN_SAMPLES_FOR_PRICING) {
+        revert ReportTooThin(feedId, r.prevSamples, Constants.MIN_SAMPLES_FOR_PRICING);
+        }
+
         uint256 nextExposure = f.exposure + bonus;
         uint256 required = BondMath.penalisedFloor(
         BondMath.exposureFloor(nextExposure, minBond()), f.errors, Constants.ERROR_BOND_PENALTY_BPS
