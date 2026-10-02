@@ -195,7 +195,7 @@ contract Lantern is IWindfall, ILanternErrors {
         address signer
     ) external knownFeed(feedId) onlyOperator(feedId) nonReentrant {
         if (!isPriceable(feedId)) {
-            revert UnderBonded(feedId, _feeds[feedId].bond, BondMath.exposureFloor(_feeds[feedId].exposure));
+            revert UnderBonded(feedId, _feeds[feedId].bond, BondMath.exposureFloor(_feeds[feedId].exposure, minBond()));
         }
         reg.recordReport(feedId, value, round, timestamp, payloadHash, signer);
         emit ReportRecorded(feedId, round, value);
