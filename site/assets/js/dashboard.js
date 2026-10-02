@@ -43,7 +43,7 @@
   ];
   var EV_COLOR = { LiquidationRecorded: '#7084ff', ChallengeOpened: '#ff9d29', ChallengeUpheld: '#ff6b5b', ChallengeRefused: '#939598', ChallengeVoided: '#ff9d29', BonusReleased: '#add300', ReportRecorded: '#bcbec0', BondDeposited: '#405bff', FeedRegistered: '#191919', PeerDeclared: '#191919' };
   var VERDICT_COLOR = { upheld: '#ff6b5b', refused: '#939598', voided: '#ff9d29', released: '#add300', held: '#7084ff' };
-  var VIEWS = { overview: 'Overview', liquidations: 'Liquidations', bonds: 'Feeds & bonds', rules: 'Rules', events: 'Event log', operate: 'Operate' };
+  var VIEWS = { run: 'Run a case', operate: 'Manual calls', overview: 'Overview', liquidations: 'Liquidations', bonds: 'Feeds & bonds', events: 'Event log' };
 
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
@@ -207,7 +207,7 @@
         c.op = c.events.filter(function (e) { return e.name === 'ChallengeOpened'; })[0];
         c.up = c.events.filter(function (e) { return e.name === 'ChallengeUpheld'; })[0];
       });
-      renderVerdicts(); renderRecent(); renderCaseList(); renderRules(); renderEvents();
+      renderVerdicts(); renderRecent(); renderCaseList(); renderEvents();
     });
   }
 
@@ -297,7 +297,8 @@
     cases.forEach(function (c) {
       if (c.op) { var r = c.op.args.rule.v; opened[r] = (opened[r] || 0) + 1; if (c.verdict === 'upheld') upheld[r] = (upheld[r] || 0) + 1; }
     });
-    $('#rulesList').innerHTML = RULES.map(function (r, i) {
+    var box = $('#rulesList'); if (!box) return;
+    box.innerHTML = RULES.map(function (r, i) {
       return '<div class="rule"><span class="no">' + (i + 1) + '</span><h3>' + r.name + '</h3><code>' + r.id + '</code><p>' + esc(r.text) + '</p>' +
         '<div class="stats"><span class="tag">challenged ' + (opened[i] || 0) + '</span><span class="tag">upheld ' + (upheld[i] || 0) + '</span></div></div>';
     }).join('');
@@ -322,8 +323,8 @@
 
   /* ---------- routing (sidebar) ---------- */
   function route() {
-    var v = (location.hash || '#overview').slice(1);
-    if (!VIEWS[v]) v = 'overview';
+    var v = (location.hash || '#run').slice(1);
+    if (!VIEWS[v]) v = 'run';
     $$('.view').forEach(function (s) { s.classList.toggle('active', s.id === 'view-' + v); });
     $$('.side-nav a[data-view]').forEach(function (a) { a.classList.toggle('active', a.dataset.view === v); });
     $('#crumb').textContent = VIEWS[v];
@@ -353,6 +354,7 @@
   }, 1000);
   setInterval(function () { if (!document.hidden) loadReads().catch(function () {}); }, 30000);
 
+  window.LanternDash = { reload: load };
   route();
   load();
 })();

@@ -13,6 +13,10 @@
     market: '0x290714d09f6d1ab50f7c31698eda92993ab01f95',
     asset: '0x185690fb4d3c765bac544423a34953b2b8b03a22',
     collateral: '0x980B62Da83eFf3D4576C647993b0c1D7faf17c73',
+    // the market's second source, read directly: Chainlink ETH/USD on this chain, eight decimals
+    aggregator: '0xd30e2101a97dcbAeBCBC04F14C3f624E67A35165',
+    subject: '0xf7ed0c5000d57be8bb1723e1298ee49e6a076692f4ef68d27dd00db178f57210',
+    peer: '0x0bf35ab8318649a0b126cdc6fb6c89b2ebbb1659b37fbd0b3aca12e6eefa71a2',
     decimals: 6,
     explorer: 'https://sepolia.arbiscan.io',
     rpc: 'https://sepolia-rollup.arbitrum.io/rpc'
@@ -37,6 +41,9 @@
     withdrawCollateral: '0x6112fe2e',  // withdrawCollateral(uint256)
     borrow: '0xc5ebeaec',              // borrow(uint256)
     repay: '0x371fd8e6',               // repay(uint256)
+    withdraw: '0x2e1a7d4d',            // withdraw(uint256)
+    faucetClaim: '0x4e71d92d',         // claim() on the asset: rate-limited, no open mint
+    wrap: '0xd0e30db0',                // deposit() on wrapped ether, payable
     claim: '0x379607f5',               // claim(uint256)
     liquidate: '0x36eb326d',           // liquidate(address,uint256,uint64,uint256)
     accountOf: '0x8086b8ba',           // accountOf(address)
@@ -81,7 +88,26 @@
     // the asset's own refusals, which a bond or a stake can also run into
     '0x7939f424': 'TransferFromFailed()',
     '0xf4d678b8': 'InsufficientBalance()',
-    '0x13be252b': 'InsufficientAllowance()'
+    '0x13be252b': 'InsufficientAllowance()',
+    '0x90b8ec18': 'TransferFailed()',
+    '0x2e847cbc': 'TransferShort(uint256,uint256)',
+    '0x329766e9': 'TransferFromShort(uint256,uint256)',
+    '0xdad10ce9': 'ClaimTooSoon(address,uint64)',
+    // the market's own refusals
+    '0xb07e3bc4': 'InsufficientCollateral(uint256,uint256)',
+    '0x4eb7b713': 'InsufficientSupplied(uint256,uint256)',
+    '0xa17e11d5': 'InsufficientLiquidity(uint256,uint256)',
+    '0xcf479181': 'InsufficientBalance(uint256,uint256)',
+    '0xe52acc06': 'WouldBeUnhealthy(uint256,uint256)',
+    '0x2ff435d3': 'PositionIsHealthy(address,uint256,uint256)',
+    '0x09d6d0bf': 'NothingToLiquidate(address)',
+    '0x74f938ce': 'RepayOutOfRange(uint256,uint256)',
+    '0x93782367': 'SeizeExceedsCollateral(uint256,uint256)',
+    '0xc5b68975': 'FeedCannotPrice(bytes32)',
+    '0x4b52109d': 'UnknownRound(uint64)',
+    '0xb3167bfa': 'AlreadyClaimed(uint256)',
+    '0x38aa087c': 'NotSettled(uint256)',
+    '0x4bf8e32a': 'BadOutcome(uint8)'
   };
 
   var RULES = ['SLOT_UNIQUENESS', 'ROUND_ORDERING', 'SELF_HISTORY', 'PAYLOAD_PROVENANCE', 'CROSS_SOURCE'];
@@ -277,9 +303,14 @@
   var log = [];
 
   // ask the chain what a call would do before anything is signed: a refusal costs no gas
-  async function simulate(to, calldata) {
+  function txFields(to, calldata, value) {
+    var t = { from: W.account, to: to, data: calldata };
+    if (value) t.value = '0x' + BigInt(value).toString(16);
+    return t;
+  }
+  async function simulate(to, calldata, value) {
     try {
-      await request('eth_call', [{ from: W.account, to: to, data: calldata }, 'latest']);
+      await request('eth_call', [txFields(to, calldata, value), 'latest']);
       return { ok: true };
     } catch (e) {
       var d = e && (e.data || (e.info && e.info.error && e.info.error.data));
@@ -289,8 +320,8 @@
       return { ok: false, reason: reason || (e && e.message) || 'the chain refused it' };
     }
   }
-  async function send(label, to, calldata) {
-    var hash = await request('eth_sendTransaction', [{ from: W.account, to: to, data: calldata }]);
+  async function send(label, to, calldata, value) {
+    var hash = await request('eth_sendTransaction', [txFields(to, calldata, value)]);
     var entry = { label: label, hash: hash, status: 'pending', to: to };
     log.unshift(entry);
     notify();
@@ -334,11 +365,25 @@
   }
   function notify() { listeners.forEach(function (f) { f(); }); }
 
+  // The allowance this spender holds on this token, read at the moment it matters. A market supply
+  // spends an allowance to the market, a bond spends one to Lantern, collateral spends one on the
+  // wrapped ether: one cached number cannot stand for all three.
+  async function allowanceOf(token, spender) {
+    return BigInt(await request('eth_call', [{ to: token, data: SIGS.allowance + encAddress(W.account) + encAddress(spender) }, 'latest']));
+  }
+  async function ensureAllowance(label, token, spender, need) {
+    if (!need || (await allowanceOf(token, spender)) >= need) return null;
+    var e = await send(label + ' (approve)', token, encode('approve', ['address', 'uint256'], [spender, need]));
+    if (e.status !== 'ok') throw new Error('approval ' + e.status + (e.reason ? ': ' + e.reason : ''));
+    return e;
+  }
+
   window.LanternConsole = {
     CFG: CFG, SIGS: SIGS, RULES: RULES, W: W,
     connect: connect, switchChain: switchChain, refreshBalances: refreshBalances,
     encode: encode, decodeError: decodeError, keccak256: keccak256,
     parseUnits: parseUnits, formatUnits: formatUnits, stringToBytes: stringToBytes, bytesToHex: bytesToHex,
-    send: send, simulate: simulate, log: log, onChange: function (f) { listeners.push(f); }
+    send: send, simulate: simulate, log: log, onChange: function (f) { listeners.push(f); },
+    request: request, allowanceOf: allowanceOf, ensureAllowance: ensureAllowance, encAddress: encAddress
   };
 })();
