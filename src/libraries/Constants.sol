@@ -33,4 +33,11 @@ library Constants {
         // Bonds
         uint256 internal constant MIN_BOND = 1e17;         // 0.1 unit to list a feed
         uint16 internal constant COVERAGE_BPS = 10_000;    // bond >= exposure, 1:1
+        uint16 internal constant ERROR_BOND_PENALTY_BPS = 2_000; // each caught print raises the floor 20%
+
+        // Reconciliation across independent sources
+        uint16 internal constant CROSS_SOURCE_TOLERANCE_BPS = 500; // two sources may differ by 5%
+
+        // Liveness
+        uint64 internal constant CHALLENGE_GRACE = 6 hours; // after this, an unresolved challenge is void
 }
