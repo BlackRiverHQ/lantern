@@ -43,6 +43,14 @@ forge test --match-path "test/invariants/*"     # the stateful campaign
 forge test --match-path "test/gas/*" --gas-report
 ```
 
+## A note on coverage
+
+Coverage counters are injected into every branch, so a run under `forge coverage` executes different
+bytecode and burns more gas. The ceilings in `test/gas/` are calibrated for a normal run and will
+report failures under instrumentation that have nothing to do with a regression. `make coverage`
+therefore excludes the gas suite and the invariant campaign; the gas suite is checked by `make gas` on
+an uninstrumented build, and the invariants by `make invariants`.
+
 ## Why the invariants matter more than the unit tests
 
 Unit tests show that the paths the author thought of behave. The handler in `test/invariants/handlers/`
