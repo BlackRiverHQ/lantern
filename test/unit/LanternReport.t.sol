@@ -52,11 +52,39 @@ contract LanternReportTest is LanternTest {
     }
 
     function test_round_going_backwards_reverts() public {
-        _openFeed(FEED);
-        _push(FEED, 100e18);
-        vm.prank(OPERATOR);
-        vm.expectRevert(abi.encodeWithSelector(ILanternErrors.RoundNotMonotone.selector, FEED, roundCounter, roundCounter));
-        lantern.recordReport(FEED, 100e18, roundCounter, uint64(block.timestamp), keccak256("fresh"), OPERATOR);
+    _openFeed(FEED);
+    _push(FEED, 100e18);
+    uint64 stale = roundCounter - 1;
+    vm.prank(OPERATOR);
+    vm.expectRevert(abi.encodeWithSelector(ILanternErrors.RoundNotMonotone.selector, FEED, stale, roundCounter));
+    lantern.recordReport(FEED, 101e18, stale, uint64(block.timestamp), keccak256("fresh"), OPERATOR);
+    }
+
+    /// @dev A duplicate print of an already-used round is refused outright: there is nothing new
+    ///      to learn from it, unlike a *different* value for the same round, which is recorded.
+    function test_duplicate_round_same_value_is_refused() public {
+    _openFeed(FEED);
+    uint64 round = _push(FEED, 100e18);
+    vm.prank(OPERATOR);
+    vm.expectRevert(abi.encodeWithSelector(ILanternErrors.SlotConflict.selector, FEED, round));
+    lantern.recordReport(FEED, 100e18, round, uint64(block.timestamp), keccak256("dup"), OPERATOR);
+    }
+
+    /// @dev The rule that proves a conflict needs the conflict to survive on-chain.
+    function test_conflicting_value_for_a_used_round_is_recorded() public {
+    _openFeed(FEED);
+    uint64 round = _push(FEED, 100e18);
+    vm.prank(OPERATOR);
+    lantern.recordReport(FEED, 105e18, round, uint64(block.timestamp), keccak256("revised"), OPERATOR);
+    assertTrue(lantern.reg().book().slotOf(FEED, round).conflicted);
+    }
+
+    function test_recorded_conflict_keeps_the_first_print() public {
+    _openFeed(FEED);
+    uint64 round = _push(FEED, 100e18);
+    vm.prank(OPERATOR);
+    lantern.recordReport(FEED, 105e18, round, uint64(block.timestamp), keccak256("revised"), OPERATOR);
+    assertEq(lantern.reg().reportAt(FEED, round).value, 100e18);
     }
 
     function test_fresh_payload_accepted() public {
