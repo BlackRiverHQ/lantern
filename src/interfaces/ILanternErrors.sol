@@ -31,4 +31,6 @@ interface ILanternErrors {
     error BadDecimals(uint256 decimals);
     error DecimalsMismatch(uint8 declared, uint8 asset);
 
+    error Reentrancy();
+
 }
