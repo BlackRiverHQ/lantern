@@ -56,7 +56,8 @@ contract TimeLibTest is Test {
     }
 
     function testFuzz_deadline_monotone(uint64 nowTs, uint64 window) public pure {
-        window = uint64(bound(window, Constants.MIN_HOLD_WINDOW, Constants.MAX_HOLD_WINDOW));
-        assertGe(TimeLib.deadline(uint256(nowTs), window), uint256(nowTs));
+    vm.assume(nowTs < type(uint64).max - 1_000); // keep the bound inside uint64 timestamps
+    window = uint64(bound(window, Constants.MIN_HOLD_WINDOW, Constants.MAX_HOLD_WINDOW));
+    assertGe(TimeLib.deadline(uint256(nowTs), window), uint256(nowTs));
     }
 }
