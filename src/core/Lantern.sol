@@ -179,7 +179,7 @@ contract Lantern is IWindfall, ILanternErrors {
     function withdrawBond(bytes32 feedId, uint256 amount) external knownFeed(feedId) onlyOperator(feedId) nonReentrant {
         FeedState storage f = _feeds[feedId];
         uint256 allowed = BondMath.withdrawable(f.bond, f.exposure, amount, minBond());
-        if (allowed == 0) revert UnderBonded(feedId, f.bond, BondMath.exposureFloor(f.exposure));
+        if (allowed == 0) revert UnderBonded(feedId, f.bond, BondMath.exposureFloor(f.exposure, minBond()));
         f.bond -= allowed;
         SafeTransfer.push(asset, msg.sender, allowed);
     }
