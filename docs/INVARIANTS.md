@@ -32,7 +32,7 @@ Each invariant has at least one test that tries to break it.
 
 ## Failure behaviour
 
-- `invariant_failClosed` — under-bonded, stale, conflicting or replayed reports revert the recording
-  path rather than being accepted with reduced guarantees.
-- `invariant_queueMonotone` — the shortfall queue only decreases by payment, never by trimming.
+- `invariant_failClosed` — under-bonded, stale, replayed or duplicate prints revert the recording
+  path rather than being accepted with reduced guarantees. A slot conflict is the one deliberate
+  exception: it is recorded, because a rule that cannot leave evidence can never be proven.
 
