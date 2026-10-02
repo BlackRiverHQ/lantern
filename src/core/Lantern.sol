@@ -166,7 +166,7 @@ contract Lantern is IWindfall, ILanternErrors {
         emit FeedRegistered(feedId, msg.sender);
     }
 
-    function depositBond(bytes32 feedId, uint256 amount) external knownFeed(feedId) onlyOperator(feedId) {
+    function depositBond(bytes32 feedId, uint256 amount) external knownFeed(feedId) onlyOperator(feedId) nonReentrant {
         if (amount == 0) revert ZeroAmount();
         SafeTransfer.pull(asset, msg.sender, amount);
         _feeds[feedId].bond += amount;
