@@ -44,7 +44,7 @@ contract MockToken is IERC20 {
         }
     }
 
-    function _move(address from, address to, uint256 amount) internal {
+    function _move(address from, address to, uint256 amount) internal virtual {
         if (balanceOf[from] < amount) revert InsufficientBalance();
         balanceOf[from] -= amount;
         balanceOf[to] += amount;
