@@ -56,7 +56,7 @@ contract WaterfallFuzzTest is Test {
     }
 
     function testFuzz_full_bounty_leaves_nothing_for_the_bond(uint96 pot) public pure {
-        WaterfallMath.Split memory s = WaterfallMath.split(pot, 0, Constants.BPS);
+        WaterfallMath.Split memory s = WaterfallMath.split(pot, 0, uint16(Constants.BPS));
         assertEq(s.toBond, 0);
     }
 }
