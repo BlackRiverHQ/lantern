@@ -17,6 +17,7 @@ interface IFeedRegistry {
         uint64  timestamp;
         bytes32 payloadHash;
         address signer;
+        uint64  prevSamples;
         bool    exists;
     }
 
