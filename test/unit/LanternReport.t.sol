@@ -55,7 +55,7 @@ contract LanternReportTest is LanternTest {
         _openFeed(FEED);
         _push(FEED, 100e18);
         vm.prank(OPERATOR);
-        vm.expectRevert(abi.encodeWithSelector(ILanternErrors.NonMonotoneRound.selector, roundCounter, roundCounter));
+        vm.expectRevert(abi.encodeWithSelector(ILanternErrors.RoundNotMonotone.selector, FEED, roundCounter, roundCounter));
         lantern.recordReport(FEED, 100e18, roundCounter, uint64(block.timestamp), keccak256("fresh"), OPERATOR);
     }
 

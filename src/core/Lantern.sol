@@ -144,7 +144,7 @@ using EscrowLedger for EscrowLedger.Queue;
         emit FeedRegistered(feedId, msg.sender);
     }
 
-    function depositBond(bytes32 feedId, uint256 amount) external onlyOperator(feedId) knownFeed(feedId) {
+    function depositBond(bytes32 feedId, uint256 amount) external knownFeed(feedId) onlyOperator(feedId) {
         if (amount == 0) revert ZeroAmount();
         SafeTransfer.pull(asset, msg.sender, amount);
         _feeds[feedId].bond += amount;
@@ -152,7 +152,7 @@ using EscrowLedger for EscrowLedger.Queue;
         _settleQueue(feedId);
     }
 
-    function withdrawBond(bytes32 feedId, uint256 amount) external onlyOperator(feedId) knownFeed(feedId) {
+    function withdrawBond(bytes32 feedId, uint256 amount) external knownFeed(feedId) onlyOperator(feedId) {
         FeedState storage f = _feeds[feedId];
         uint256 allowed = BondMath.withdrawable(f.bond, f.exposure, amount);
         if (allowed == 0) revert UnderBonded(feedId, f.bond, BondMath.exposureFloor(f.exposure));
@@ -169,7 +169,7 @@ using EscrowLedger for EscrowLedger.Queue;
         uint64  timestamp,
         bytes32 payloadHash,
         address signer
-    ) external onlyOperator(feedId) knownFeed(feedId) {
+    ) external knownFeed(feedId) onlyOperator(feedId) {
         if (!isPriceable(feedId)) {
             revert UnderBonded(feedId, _feeds[feedId].bond, BondMath.exposureFloor(_feeds[feedId].exposure));
         }
