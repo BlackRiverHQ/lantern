@@ -50,6 +50,7 @@ contract LanternFeedBondTest is LanternTest {
 
     function test_deposit_adds_up() public {
         _openFeed(FEED);
+        token.mint(OPERATOR, 5e18);
         vm.startPrank(OPERATOR);
         lantern.depositBond(FEED, 5e18);
         vm.stopPrank();
