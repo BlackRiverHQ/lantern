@@ -27,7 +27,8 @@ contract ChallengeWithChainlink is Script {
 
         // The feed prints through Lantern the way it always does.
         token.approve(address(lantern), type(uint256).max);
-        lantern.recordReport(subject, 100e18, round, uint64(block.timestamp), keccak256("subject-print"), deployer);
+        // A payload is single-use; the rule that catches a replay would catch this script too.
+        lantern.recordReport(subject, 100e18, round, uint64(block.timestamp), keccak256(abi.encode("subject-print", round)), deployer);
 
         // A liquidation consumes that round.
         token.mint(address(market), bonus);
