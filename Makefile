@@ -22,7 +22,7 @@ sizes:
 # Coverage counters inflate gas, so the gas suite is excluded rather than allowed to fail
 # here for a reason that has nothing to do with the code changing.
 coverage:
-	forge coverage --report lcov --no-match-path "test/invariants/*" --no-match-path "test/gas/*"
+	forge coverage --report lcov --no-match-contract "GasTest|LanternInvariantsTest"
 	@echo "lcov.info written
 
 fmt:
