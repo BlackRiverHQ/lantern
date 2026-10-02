@@ -63,9 +63,23 @@ contract BandFuzzTest is Test {
     if (widened > before) assertLe(uint256(widened) * 8, uint256(before) * 13 + 8);
     }
 
-    function testFuzz_report_drift_is_symmetric(uint96 a, uint96 b) public pure {
-        vm.assume(a > 0 && b > 0);
-        assertEq(Band.withinReportDrift(a, b), Band.withinReportDrift(b, a));
+    /// @dev Drift is a fraction of the previous value, so it is deliberately not symmetric.
+    function testFuzz_report_drift_is_a_fraction_of_the_previous(uint96 previous, uint96 next) public pure {
+    vm.assume(previous > 0);
+    assertEq(Band.withinReportDrift(previous, next), FixedPoint.absDiffBps(next, previous) <= Constants.MAX_REPORT_DRIFT_BPS);
+    }
+
+    function testFuzz_report_drift_bounds_the_move(uint96 previous, uint96 next) public pure {
+    vm.assume(previous > 1e18 && next > 0);
+    if (Band.withinReportDrift(previous, next)) {
+    assertLe(uint256(next) * 100, uint256(previous) * 120);
+    assertGe(uint256(next) * 100, uint256(previous) * 80);
+    }
+    }
+
+    function testFuzz_report_drift_accepts_an_unchanged_value(uint96 previous) public pure {
+    vm.assume(previous > 0);
+    assertTrue(Band.withinReportDrift(previous, previous));
     }
 
     function testFuzz_report_drift_rejects_large_jumps(uint96 base) public pure {
