@@ -280,7 +280,7 @@ contract Lantern is IWindfall, ILanternErrors {
 
     /// @notice Recompute the claim from state. The prover supplies nothing but the rule; every
     ///         number used is read here.
-    function adjudicate(uint256 liquidationId) external returns (bool upheld) {
+    function adjudicate(uint256 liquidationId) external nonReentrant returns (bool upheld) {
         Escrow storage e = _escrows[liquidationId];
         if (!e.exists) revert UnknownLiquidation(liquidationId);
         if (e.outcome != 0) revert LiquidationAlreadySettled(liquidationId);
