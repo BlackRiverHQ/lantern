@@ -97,7 +97,7 @@ contract LanternAdjudicateTest is LanternTest {
     function test_selfHistory_refused_on_an_honest_print() public {
         _warm(FEED, 40);
         vm.warp(block.timestamp + 60);
-        round = _push(FEED, 103e18); // inside the warmed band
+        round = _push(FEED, 103.9e18)   // the last warmed value: on the anchor, inside the band; // inside the warmed band
         _liquidate(1, round, BONUS);
         _challenge(1, IChallenge.Rule.SELF_HISTORY, stake);
         assertFalse(lantern.adjudicate(1));
@@ -106,7 +106,7 @@ contract LanternAdjudicateTest is LanternTest {
     function test_refused_keeps_the_bonus_held() public {
         _warm(FEED, 40);
         vm.warp(block.timestamp + 60);
-        round = _push(FEED, 103e18);
+        round = _push(FEED, 103.9e18)   // the last warmed value: on the anchor, inside the band;
         _liquidate(1, round, BONUS);
         _challenge(1, IChallenge.Rule.SELF_HISTORY, stake);
         lantern.adjudicate(1);
@@ -116,7 +116,7 @@ contract LanternAdjudicateTest is LanternTest {
     function test_refused_forfeits_the_stake_to_the_liquidator() public {
         _warm(FEED, 40);
         vm.warp(block.timestamp + 60);
-        round = _push(FEED, 103e18);
+        round = _push(FEED, 103.9e18)   // the last warmed value: on the anchor, inside the band;
         _liquidate(1, round, BONUS);
         _challenge(1, IChallenge.Rule.SELF_HISTORY, stake);
         uint256 before = token.balanceOf(LIQUIDATOR);
@@ -127,7 +127,7 @@ contract LanternAdjudicateTest is LanternTest {
     function test_refused_marks_resolved_but_not_upheld() public {
         _warm(FEED, 40);
         vm.warp(block.timestamp + 60);
-        round = _push(FEED, 103e18);
+        round = _push(FEED, 103.9e18)   // the last warmed value: on the anchor, inside the band;
         _liquidate(1, round, BONUS);
         _challenge(1, IChallenge.Rule.SELF_HISTORY, stake);
         lantern.adjudicate(1);
@@ -138,7 +138,7 @@ contract LanternAdjudicateTest is LanternTest {
     function test_refused_leaves_the_escrow_open() public {
         _warm(FEED, 40);
         vm.warp(block.timestamp + 60);
-        round = _push(FEED, 103e18);
+        round = _push(FEED, 103.9e18)   // the last warmed value: on the anchor, inside the band;
         _liquidate(1, round, BONUS);
         _challenge(1, IChallenge.Rule.SELF_HISTORY, stake);
         lantern.adjudicate(1);
@@ -148,7 +148,7 @@ contract LanternAdjudicateTest is LanternTest {
     function test_refused_does_not_touch_the_bond() public {
         _warm(FEED, 40);
         vm.warp(block.timestamp + 60);
-        round = _push(FEED, 103e18);
+        round = _push(FEED, 103.9e18)   // the last warmed value: on the anchor, inside the band;
         _liquidate(1, round, BONUS);
         _challenge(1, IChallenge.Rule.SELF_HISTORY, stake);
         uint256 before = lantern.bondOf(FEED);
@@ -287,7 +287,7 @@ contract LanternAdjudicateTest is LanternTest {
 
     function test_two_liquidations_are_adjudicated_independently() public {
         _warm(FEED, 40);
-        uint64 good = _push(FEED, 103e18);
+        uint64 good = _push(FEED, 103.9e18)   // the last warmed value: on the anchor, inside the band;
         _liquidate(1, good, BONUS);
         uint64 bad = _suspiciousPrint(FEED);
         _liquidate(2, bad, BONUS);
