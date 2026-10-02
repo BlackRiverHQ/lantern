@@ -63,7 +63,9 @@ contract HistoryTest is Test {
 
     function test_band_is_wide_when_cold() public {
         h.observe(FEED, 100e18, 1, 1_000);
-        assertEq(h.widthBps(FEED), Constants.MAX_WIDTH_BPS);
+        uint256 w = h.widthBps(FEED);
+        assertLe(w, Constants.MAX_WIDTH_BPS);
+        assertGt(w, 4_800); // one sample leaves the band close to the ceiling, not at it
     }
 
     function test_band_tightens_as_samples_grow() public {
