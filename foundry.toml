@@ -27,3 +27,10 @@ line_length = 110
 tab_width = 4
 bracket_spacing = true
 int_types = "long"
+
+[rpc_endpoints]
+arbitrum_sepolia = "https://sepolia-rollup.arbitrum.io/rpc"
+arbitrum_sepolia_public = "https://arbitrum-sepolia-rpc.publicnode.com"
+
+[etherscan]
+arbitrum_sepolia = { key = "${ARBISCAN_API_KEY}", url = "https://api-sepolia.arbiscan.io/api" }
