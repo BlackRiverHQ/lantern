@@ -119,19 +119,19 @@ contract FeedRegistry is IFeedRegistry, ILanternErrors {
         _history.checkDrift(feedId, value, block.timestamp);
         _history.observe(feedId, value, round, timestamp);
 
-        Report memory rec = Report({
-            value: value,
-            prevValue: last.exists ? last.value : 0,
-            prevBandLo: lo,
-            prevBandHi: hi,
-            round: round,
-            timestamp: timestamp,
-            payloadHash: payloadHash,
-            signer: signer,
-            prevSamples: uint64(_history.samplesOf(feedId)),
-            exists: true
-            });
-        _byRound[feedId][round] = rec;
+        // Written field by field into storage rather than through a memory literal: the literal ran
+        // the function out of stack once the depth was added, and this is the cheaper shape anyway.
+        Report storage rec = _byRound[feedId][round];
+        rec.value = value;
+        rec.prevValue = last.exists ? last.value : 0;
+        rec.prevBandLo = lo;
+        rec.prevBandHi = hi;
+        rec.round = round;
+        rec.timestamp = timestamp;
+        rec.payloadHash = payloadHash;
+        rec.signer = signer;
+        rec.prevSamples = uint64(_history.samplesOf(feedId));
+        rec.exists = true;
         _last[feedId] = rec;
     }
 
