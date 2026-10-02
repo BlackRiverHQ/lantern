@@ -90,7 +90,7 @@ contract ReentrancyTest is Test {
     function test_reentrancy_cannot_duplicate_an_escrow() public {
         _armReentryIntoRecordLiquidation();
         vm.prank(LIQUIDATOR);
-        market.liquidate(2, FEED, 1, BONUS, BORROWER);
+        market.liquidate(2, FEED, 5, BONUS, BORROWER);
 
         assertEq(lantern.recorded(), 2, "only the outer liquidation may be recorded");
         assertEq(lantern.heldTotal(), 2 * BONUS);
