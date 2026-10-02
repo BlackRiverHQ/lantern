@@ -26,13 +26,21 @@ contract RegistryFuzzTest is Test {
         assertTrue(reg.reportAt(FEED, 2).exists);
     }
 
-    function testFuzz_monotone_rounds_only_advance(uint64 first, uint64 second) public {
-        first = uint64(bound(uint256(first), 1, type(uint64).max - 1));
-        second = uint64(bound(uint256(second), 1, type(uint64).max - 1));
-        vm.assume(second <= first);
-        reg.recordReport(FEED, 100e18, first, uint64(block.timestamp), keccak256("p1"), address(this));
-        vm.expectRevert(abi.encodeWithSelector(ILanternErrors.RoundNotMonotone.selector, FEED, second, first));
-        _record(second, 100e18, keccak256("p2"));
+    function testFuzz_a_new_lower_round_is_refused(uint64 first, uint64 second) public {
+    first = uint64(bound(uint256(first), 2, type(uint64).max - 1));
+    second = uint64(bound(uint256(second), 1, first - 1)); // strictly lower, so never claimed
+    reg.recordReport(FEED, 100e18, first, uint64(block.timestamp), keccak256("p1"), address(this));
+    vm.expectRevert(abi.encodeWithSelector(ILanternErrors.RoundNotMonotone.selector, FEED, second, first));
+    _record(second, 100e18, keccak256("p2"));
+    }
+
+    /// @dev A repeat of the exact round with the exact value is a duplicate claim, refused loudly.
+    function testFuzz_a_repeated_identical_claim_is_refused(uint64 round) public {
+    round = uint64(bound(uint256(round), 1, 1e12));
+    bytes32 payload = keccak256("p1");
+    reg.recordReport(FEED, 100e18, round, uint64(block.timestamp), payload, address(this));
+    vm.expectRevert(abi.encodeWithSelector(ILanternErrors.SlotConflict.selector, FEED, round));
+    _record(round, 100e18, keccak256("p2"));
     }
 
     function testFuzz_payloads_are_unique_across_rounds(uint64 a, uint64 b, bytes32 payload) public {
