@@ -12,7 +12,8 @@
 | `test/gas/` | cost ceilings, asserted rather than tabulated |
 | `test/fixtures/` | named scenarios, each a short story with a classification at the end |
 
-617 tests pass. The suite runs in about fifteen seconds locally, most of it the invariant campaign.
+631 tests pass across 45 suites. The suite runs in about fifteen seconds locally, most of it the
+invariant campaign.
 
 ## What the newer suites pin
 
