@@ -38,7 +38,7 @@ contract LanternReportTest is LanternTest {
     function test_report_count_moves() public {
         _openFeed(FEED);
         _push(FEED, 100e18);
-        assertEq(lantern.reg().pricedRounds(FEED), 1);
+        assertEq(lantern.reg().book().pricedRounds(FEED), 1);
     }
 
     function test_repeated_payload_reverts() public {
