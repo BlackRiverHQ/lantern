@@ -63,7 +63,11 @@ contract FeedRegistry is IFeedRegistry, ILanternErrors {
     }
 
     function decimalsOf(bytes32 feedId) external view returns (uint8) {
-        return _feeds[feedId].decimals;
+    return _feeds[feedId].decimals;
+    }
+
+    function registered(bytes32 feedId) external view returns (bool) {
+    return _feeds[feedId].registered;
     }
 
     function recordReport(
