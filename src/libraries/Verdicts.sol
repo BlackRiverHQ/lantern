@@ -40,6 +40,6 @@ library Verdicts {
         }
         // PAYLOAD_PROVENANCE
         bool crossFeed = in_.payloadFeed != bytes32(0) && in_.payloadFeed != in_.thisFeed;
-        return (crossFeed, uint256(uint160(address(0))) + (crossFeed ? 1 : 0), 1);
+        return (crossFeed, crossFeed ? 1 : 0, 1);
     }
 }
