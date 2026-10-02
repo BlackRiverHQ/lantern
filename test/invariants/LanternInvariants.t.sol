@@ -80,8 +80,10 @@ contract LanternInvariantsTest is StdInvariant, Test {
         uint256 seen = lantern.recorded();
         for (uint256 id = 1; id <= seen; id++) {
             Lantern.ChallengeRec memory c = lantern.challengeOf(id);
+            // Upheld is terminal: the bonus is redirected. Refused is not: the escrow stays
+            // open and may still be released once the window closes.
             if (c.resolved && c.upheld) assertEq(lantern.bonusOutcome(id), 2);
-            if (c.resolved && !c.upheld) assertEq(lantern.bonusOutcome(id), 0);
+            if (c.resolved && !c.upheld) assertLe(lantern.bonusOutcome(id), 1);
         }
     }
 
