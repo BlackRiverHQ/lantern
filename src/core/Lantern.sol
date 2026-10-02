@@ -227,8 +227,8 @@ contract Lantern is IWindfall, ILanternErrors {
 
         uint256 floor = WaterfallMath.stakeFloor(e.bonus);
         if (stake < floor) revert StakeBelowMinimum(stake, floor);
-        SafeTransfer.pull(asset, msg.sender, stake);
-
+        // Effects before interactions: a hostile token must not be able to re-enter and open a
+        // second challenge against the same escrow.
         _challenges[liquidationId] = ChallengeRec({
             prover: msg.sender,
             stake: stake,
