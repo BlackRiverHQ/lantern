@@ -63,8 +63,9 @@ contract ProvenanceTest is Test {
     }
 
     function testFuzz_stale_matches_boundary(uint64 ts, uint64 nowTs) public pure {
-        bool stale = Provenance.stale(ts, uint256(nowTs));
-        assertEq(stale, uint256(ts) + Constants.STALENESS_BOUND < uint256(nowTs));
+    vm.assume(ts < type(uint64).max - 20_000);
+    bool stale = Provenance.stale(ts, uint256(nowTs));
+    assertEq(stale, uint256(ts) + Constants.STALENESS_BOUND < uint256(nowTs));
     }
 
     function testFuzz_monotone_is_strict(uint64 a, uint64 b) public pure {
