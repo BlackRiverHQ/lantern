@@ -182,6 +182,16 @@ contract Lantern is IWindfall, ILanternErrors {
         emit FeedRegistered(feedId, msg.sender);
     }
 
+    /// @notice Declare the independent source this feed is reconciled against. Declared once and
+    ///         never changed: a peer that could be swapped after a liquidation would be a way to
+    ///         choose which comparison applies to a claim already made.
+    function setPeerFeed(bytes32 feedId, bytes32 peer) external knownFeed(feedId) onlyOperator(feedId) nonReentrant {
+    if (_peer[feedId] != bytes32(0)) revert PeerAlreadyDeclared(feedId);
+    if (peer == bytes32(0) || peer == feedId || !_feeds[peer].registered) revert BadPeer(feedId, peer);
+    _peer[feedId] = peer;
+    emit PeerDeclared(feedId, peer);
+    }
+
     function depositBond(bytes32 feedId, uint256 amount) external knownFeed(feedId) onlyOperator(feedId) nonReentrant {
         if (amount == 0) revert ZeroAmount();
         SafeTransfer.pull(asset, msg.sender, amount);
