@@ -2,6 +2,7 @@
 pragma solidity 0.8.28;
 
 import {LanternTest} from "../base/LanternTest.t.sol";
+import {Lantern} from "../../src/core/Lantern.sol";
 import {IWindfall} from "../../src/interfaces/IWindfall.sol";
 import {IChallenge} from "../../src/interfaces/IChallenge.sol";
 import {ILanternErrors} from "../../src/interfaces/ILanternErrors.sol";
