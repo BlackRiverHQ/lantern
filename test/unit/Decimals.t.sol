@@ -114,8 +114,10 @@ contract DecimalsTest is Test {
     function test_a_six_decimal_challenge_stake_is_affordable() public {
         MockToken6 token = new MockToken6();
         (Lantern lantern, MockMarket market) = _deploy(IERC20(address(token)));
+        // The bond must cover the held bonus one for one, whatever the decimals, so a 0.1 USDC
+        // bonus sits behind a 0.1 USDC bond.
         token.mint(OPERATOR, 1e5);
-        token.mint(address(market), 10e6);
+        token.mint(address(market), 1e5);
 
         vm.startPrank(OPERATOR);
         token.approve(address(lantern), type(uint256).max);
@@ -125,10 +127,11 @@ contract DecimalsTest is Test {
         vm.stopPrank();
 
         vm.prank(LIQUIDATOR);
-        market.liquidate(1, FEED, 1, 10e6, BORROWER);
+        market.liquidate(1, FEED, 1, 1e5, BORROWER);
 
-        // 1% of a 10 USDC bonus is 0.1 USDC; the floor must not be 1e15 units.
-        uint256 stake = 1e5;
+        // The proportional stake is 1% of 0.1 USDC = 0.001 USDC, which is exactly the floor; at
+        // an 18-decimal floor this would have been 1e15 units, or a billion USDC.
+        uint256 stake = 1e3;
         token.mint(PROVER, stake);
         vm.startPrank(PROVER);
         token.approve(address(lantern), stake);
