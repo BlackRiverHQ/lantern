@@ -31,17 +31,29 @@ contract CrossSourceTest is LanternTest {
         assertEq(lantern.peerOf(FEED), FEED_B);
     }
 
+    /// @dev FEED already declared its peer in setUp, so these use a feed that has not.
+    function _undeclaredFeed() internal returns (bytes32 third) {
+    third = keccak256("FEED:AMD");
+    token.mint(OPERATOR, BOND);
+    vm.startPrank(OPERATOR);
+    lantern.registerFeed(third, keccak256("SIGNERS"), 18);
+    lantern.depositBond(third, BOND);
+    vm.stopPrank();
+    }
+
     function test_a_feed_may_not_be_its_own_peer() public {
-        vm.prank(OPERATOR);
-        vm.expectRevert(abi.encodeWithSelector(ILanternErrors.BadPeer.selector, FEED, FEED));
-        lantern.setPeerFeed(FEED, FEED);
+    bytes32 third = _undeclaredFeed();
+    vm.prank(OPERATOR);
+    vm.expectRevert(abi.encodeWithSelector(ILanternErrors.BadPeer.selector, third, third));
+    lantern.setPeerFeed(third, third);
     }
 
     function test_a_peer_must_already_be_registered() public {
-        bytes32 stranger = keccak256("FEED:STRANGER");
-        vm.prank(OPERATOR);
-        vm.expectRevert(abi.encodeWithSelector(ILanternErrors.BadPeer.selector, FEED, stranger));
-        lantern.setPeerFeed(FEED, stranger);
+    bytes32 third = _undeclaredFeed();
+    bytes32 stranger = keccak256("FEED:STRANGER");
+    vm.prank(OPERATOR);
+    vm.expectRevert(abi.encodeWithSelector(ILanternErrors.BadPeer.selector, third, stranger));
+    lantern.setPeerFeed(third, stranger);
     }
 
     function test_a_peer_can_only_be_declared_once() public {
