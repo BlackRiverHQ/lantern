@@ -190,7 +190,7 @@ contract Lantern is IWindfall, ILanternErrors {
         uint64  timestamp,
         bytes32 payloadHash,
         address signer
-    ) external knownFeed(feedId) onlyOperator(feedId) {
+    ) external knownFeed(feedId) onlyOperator(feedId) nonReentrant {
         if (!isPriceable(feedId)) {
             revert UnderBonded(feedId, _feeds[feedId].bond, BondMath.exposureFloor(_feeds[feedId].exposure));
         }
