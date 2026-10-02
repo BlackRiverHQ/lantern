@@ -34,7 +34,6 @@ contract Lantern is IWindfall, ILanternErrors {
     event ChallengeUpheld(uint256 indexed liquidationId, uint8 rule, uint256 observed, uint256 bound);
     event ChallengeRefused(uint256 indexed liquidationId, uint256 stakeForfeited);
     event BonusReleased(uint256 indexed liquidationId, address indexed liquidator, uint256 amount);
-    event ShortfallQueued(uint256 indexed liquidationId, uint256 remainder);
     event ShortfallPaid(uint256 indexed liquidationId, uint256 amount);
 
     struct FeedState {
