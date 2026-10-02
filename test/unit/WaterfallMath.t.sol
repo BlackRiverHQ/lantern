@@ -34,7 +34,7 @@ contract WaterfallMathTest is Test {
     }
 
     function test_split_full_bounty() public pure {
-        WaterfallMath.Split memory s = WaterfallMath.split(50e18, 0, Constants.BPS);
+        WaterfallMath.Split memory s = WaterfallMath.split(50e18, 0, uint16(Constants.BPS));
         assertEq(s.toProver, 50e18);
         assertEq(s.toBond, 0);
     }
@@ -63,7 +63,7 @@ contract WaterfallMathTest is Test {
     }
 
     function testFuzz_split_conserves(uint96 available, uint96 claim, uint16 bountyBps) public pure {
-        bountyBps = uint16(bound(bountyBps, 0, Constants.BPS));
+        bountyBps = uint16(bound(bountyBps, 0, uint16(Constants.BPS)));
         WaterfallMath.Split memory s = WaterfallMath.split(uint256(available), uint256(claim), bountyBps);
         assertEq(s.toBorrower + s.toProver + s.toBond + s.remainder, uint256(available));
     }
