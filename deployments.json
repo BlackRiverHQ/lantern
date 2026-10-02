@@ -1,0 +1,13 @@
+{
+  "chainId": 421614,
+  "network": "arbitrum-sepolia",
+  "note": "This deployment supersedes every earlier address recorded in docs/.",
+  "lantern": "0x9420b6B3e5Cc8FC028b34206F9C0388230a6B772",
+  "market": "0x53fFF340f1e6796F905985E43e7a784b0e687066",
+  "asset": "0xfF062343892989373F422F7543F0587581594249",
+  "registry": "0x2Eb1fcd3c547a600D1b7e99e5D5bFc2132134997",
+  "chainlinkSource": "0x3Fba7aBB9f393446917c9cAA5BD99b40FC85DF98",
+  "chainlinkEthUsd": "0xd30e2101a97dcbAeBCBC04F14C3f624E67A35165",
+  "subjectFeed": "0xf7ed0c5000d57be8bb1723e1298ee49e6a076692f4ef68d27dd00db178f57210",
+  "peerFeed": "0x0bf35ab8318649a0b126cdc6fb6c89b2ebbb1659b37fbd0b3aca12e6eefa71a2"
+}
