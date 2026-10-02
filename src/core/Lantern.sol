@@ -188,7 +188,8 @@ contract Lantern is IWindfall, ILanternErrors {
         uint256 required = BondMath.exposureFloor(nextExposure);
         if (f.bond < required) revert UnderBonded(feedId, f.bond, required);
 
-        SafeTransfer.pull(asset, market, bonus);
+        // Effects before interactions, for the same reason: the escrow must exist before any
+        // token code runs.
         f.exposure = nextExposure;
         _heldTotal += bonus;
 
