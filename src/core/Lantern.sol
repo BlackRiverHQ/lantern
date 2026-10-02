@@ -239,6 +239,7 @@ contract Lantern is IWindfall, ILanternErrors {
             openedAt: uint64(block.timestamp)
         });
         challengesOpened += 1;
+        SafeTransfer.pull(asset, msg.sender, stake);
         emit ChallengeOpened(liquidationId, msg.sender, uint8(rule), stake);
         return liquidationId;
     }
