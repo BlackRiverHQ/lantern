@@ -143,14 +143,18 @@ contract LifecycleTest is LanternTest {
     // --- act six: a challenge that loses -----------------------------------------
 
     function test_refused_then_released() public {
-        uint64 round = _push(FEED, 100e18);
-        _liquidate(1, round, BONUS);
-        _challenge(1, IChallenge.Rule.SELF_HISTORY, _stake());
-        assertFalse(lantern.adjudicate(1));
-        vm.warp(block.timestamp + WINDOW + 1);
-        uint256 before = token.balanceOf(LIQUIDATOR);
-        lantern.release(1);
-        assertEq(token.balanceOf(LIQUIDATOR), before + BONUS + _stake());
+    uint64 round = _push(FEED, 100e18);
+    _liquidate(1, round, BONUS);
+    _challenge(1, IChallenge.Rule.SELF_HISTORY, _stake());
+
+    uint256 atOpen = token.balanceOf(LIQUIDATOR);
+    assertFalse(lantern.adjudicate(1));
+    assertEq(token.balanceOf(LIQUIDATOR), atOpen + _stake(), "the forfeited stake lands at adjudication");
+
+    vm.warp(block.timestamp + WINDOW + 1);
+    uint256 atRelease = token.balanceOf(LIQUIDATOR);
+    lantern.release(1);
+    assertEq(token.balanceOf(LIQUIDATOR), atRelease + BONUS, "then the bonus, when the window closes");
     }
 
     function test_refused_then_released_is_solvent() public {
