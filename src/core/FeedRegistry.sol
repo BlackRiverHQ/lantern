@@ -87,10 +87,10 @@ contract FeedRegistry is IFeedRegistry, ILanternErrors {
         if (!book.claimPayload(feedId, round, payloadHash)) revert PayloadReused(payloadHash);
 
         // Snapshot the band as it stood *before* this value was folded in.
-        (uint256 lo, uint256 hi) = history.bandOf(feedId);
+        (uint256 lo, uint256 hi) = _history.bandOf(feedId);
 
-        history.checkDrift(feedId, value, block.timestamp);
-        history.observe(feedId, value, round, timestamp);
+        _history.checkDrift(feedId, value, block.timestamp);
+        _history.observe(feedId, value, round, timestamp);
 
         Report memory rec = Report({
             value: value,
