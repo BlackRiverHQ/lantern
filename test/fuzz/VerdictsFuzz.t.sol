@@ -31,7 +31,7 @@ contract VerdictsFuzzTest is Test {
         in_.payloadFeed = payloadFeed;
         in_.thisFeed = thisFeed;
 
-        for (uint8 r = 0; r < 4; ++r) {
+        for (uint8 r = 0; r < 5; ++r) {
             (bool upheld, uint256 observed, uint256 bound) = Verdicts.evaluate(Provenance.Rule(r), in_);
             upheld; observed; bound;
         }
