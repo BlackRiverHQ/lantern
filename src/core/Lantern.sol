@@ -251,6 +251,10 @@ contract Lantern is IWindfall, ILanternErrors {
         uint256 required = BondMath.penalisedFloor(
         BondMath.exposureFloor(nextExposure, minBond()), f.errors, Constants.ERROR_BOND_PENALTY_BPS
         );
+        // Recovery is bounded by the collateral, not by the held profit, so the bond has to answer
+        // for a share of what the liquidation actually put at risk.
+        uint256 forNotional = BondMath.notionalFloor(notional, Constants.NOTIONAL_COVERAGE_BPS);
+        if (forNotional > required) required = forNotional;
         if (f.bond < required) revert UnderBonded(feedId, f.bond, required);
 
         // Effects before interactions, for the same reason: the escrow must exist before any
