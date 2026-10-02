@@ -335,7 +335,7 @@ contract Lantern is IWindfall, ILanternErrors {
 
     // --- release and the shortfall queue -----------------------------------
 
-    function release(uint256 liquidationId) external {
+    function release(uint256 liquidationId) external nonReentrant {
         Escrow storage e = _escrows[liquidationId];
         if (!e.exists) revert UnknownLiquidation(liquidationId);
         if (e.outcome != 0) revert LiquidationAlreadySettled(liquidationId);
