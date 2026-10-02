@@ -29,20 +29,27 @@ contract EscalationTest is LanternTest {
     }
 
     function test_a_feed_with_one_error_is_asked_for_a_fifth_more() public {
-        _openFeed(FEED);
-        uint64 round = _pushWithPayload(FEED, 100e18, keccak256("p"));
-        _liquidate(1, round, Constants.MIN_BOND);
-        _challenge(1, IChallenge.Rule.SELF_HISTORY, Constants.MIN_BOND);
-        // Refused is enough: the counter is what the requirement reads.
-        vm.prank(OPERATOR);
-        _report(THIN, 0, 0);
+    _openFeed(FEED);
+    uint64 round = _pushWithPayload(FEED, 100e18, keccak256("p"));
+    _liquidate(1, round, Constants.MIN_BOND);
+    // A second value for the same round is the conflict the rule reads.
+    vm.prank(OPERATOR);
+    lantern.recordReport(FEED, 105e18, round, uint64(block.timestamp), keccak256("q"), OPERATOR);
+    _challengeAs(1, IChallenge.Rule.SLOT_UNIQUENESS, Constants.MIN_BOND, PROVER);
+    assertTrue(lantern.adjudicate(1));
 
-        assertEq(lantern.feedErrors(FEED), 0, "a refused challenge leaves no mark");
+    assertEq(lantern.feedErrors(FEED), 1);
+    assertEq(lantern.requiredBond(FEED), Constants.MIN_BOND * 12 / 10, "20% more collateral");
     }
 
-    function _report(bytes32 feedId, uint256 value, uint64 round) internal {
-        vm.prank(OPERATOR);
-        lantern.recordReport(feedId, value, round, uint64(block.timestamp), keccak256(abi.encode("r", round)), OPERATOR);
+    function test_a_refused_challenge_leaves_no_mark() public {
+    _openFeed(FEED);
+    uint64 round = _pushWithPayload(FEED, 100e18, keccak256("p"));
+    _liquidate(1, round, Constants.MIN_BOND);
+    _challenge(1, IChallenge.Rule.SELF_HISTORY, Constants.MIN_BOND);
+    assertFalse(lantern.adjudicate(1));
+    assertEq(lantern.feedErrors(FEED), 0, "a refused challenge is not an error");
+    assertEq(lantern.requiredBond(FEED), Constants.MIN_BOND);
     }
 
     function test_the_escalator_stops_at_its_cap() public pure {
