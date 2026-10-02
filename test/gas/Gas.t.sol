@@ -32,7 +32,8 @@ contract GasTest is LanternTest {
         uint64 round = _push(FEED, 100e18);
         uint256 g0 = gasleft();
         _liquidate(1, round, BONUS);
-        assertLt(g0 - gasleft(), 250_000, "recording a liquidation should stay under 250k gas");
+        // Was ~230k before the delivery check and the mutex; measured at ~273k after.
+            assertLt(g0 - gasleft(), 300_000, "recording a liquidation should stay under 300k gas");
     }
 
     function test_release_is_cheap() public {
