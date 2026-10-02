@@ -85,7 +85,7 @@ the tests; the current revision is built and waiting on gas for this wallet.
 
 ```
 forge build
-forge test                                      # 631 tests: unit, fuzz, integration, invariants
+forge test                                      # 637 tests: unit, fuzz, integration, invariants
 forge test --match-path "test/invariants/*"      # stateful invariants over random action sequences
 forge test --match-path "test/gas/*" --gas-report
 forge script script/Deploy.s.sol --rpc-url arbitrum_sepolia --broadcast -vv
@@ -110,5 +110,6 @@ forge script script/ChallengeWithChainlink.s.sol --rpc-url arbitrum_sepolia --br
 | [docs/FAQ.md](docs/FAQ.md) | the objections, answered without hedging |
 | [docs/DEPLOYMENTS.md](docs/DEPLOYMENTS.md) | the Sepolia deployment and its on-chain reads |
 | [docs/TESTING.md](docs/TESTING.md) | the shape of the suite and what it covers |
+| [docs/COVERAGE.md](docs/COVERAGE.md) | line and branch coverage, and what it leaves out |
 | [docs/DEMO.md](docs/DEMO.md) | the acts, and the commands that reproduce them |
 | [GAS.md](GAS.md) | measured cost |
