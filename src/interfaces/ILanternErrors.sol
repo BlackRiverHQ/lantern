@@ -28,4 +28,7 @@ interface ILanternErrors {
     error ZeroAmount();
     error ZeroAddress();
     error ImmutableParameter();
+    error BadDecimals(uint256 decimals);
+    error DecimalsMismatch(uint8 declared, uint8 asset);
+
 }
