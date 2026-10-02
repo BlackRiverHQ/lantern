@@ -96,7 +96,17 @@ contract FeedRegistry is IFeedRegistry, ILanternErrors {
         if (last.exists && Provenance.nonMonotone(round, last.round)) {
         revert RoundNotMonotone(feedId, round, last.round);
         }
-        if (!book.claimPayload(feedId, round, payloadHash)) revert PayloadReused(payloadHash);
+        // A payload signed for one asset and presented for another is evidence, not a spelling
+        // mistake: it is recorded so a challenge can reach it. A true replay for the same feed is
+        // still refused outright.
+        bytes32 priorOwner = book.payloadFeed(payloadHash);
+        if (!book.claimPayload(feedId, round, payloadHash)) {
+        if (priorOwner != bytes32(0) && priorOwner != feedId) {
+        emit PayloadReuseRecorded(feedId, payloadHash, priorOwner);
+        } else {
+        revert PayloadReused(payloadHash);
+        }
+        }
 
         // Snapshot the band as it stood *before* this value was folded in.
         (uint256 lo, uint256 hi) = _history.bandOf(feedId);
