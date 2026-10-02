@@ -270,13 +270,14 @@ contract LanternAdjudicateTest is LanternTest {
     }
 
     function test_adjudicate_after_release_reverts() public {
-        round = _push(FEED, 100e18);
-        _liquidate(1, round, BONUS);
-        _challenge(1, IChallenge.Rule.SELF_HISTORY, stake);
-        vm.warp(block.timestamp + WINDOW + 1);
-        lantern.release(1);
-        vm.expectRevert(abi.encodeWithSelector(ILanternErrors.LiquidationAlreadySettled.selector, 1));
-        lantern.adjudicate(1);
+    round = _push(FEED, 100e18);
+    _liquidate(1, round, BONUS);
+    _challenge(1, IChallenge.Rule.SELF_HISTORY, stake);
+    lantern.adjudicate(1);           // refused, so the escrow stays open
+    vm.warp(block.timestamp + WINDOW + 1);
+    lantern.release(1);              // the bonus goes to the liquidator
+    vm.expectRevert(abi.encodeWithSelector(ILanternErrors.LiquidationAlreadySettled.selector, 1));
+    lantern.adjudicate(1);
     }
 
     function test_anyone_may_adjudicate() public {
