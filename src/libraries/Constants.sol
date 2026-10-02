@@ -26,7 +26,9 @@ library Constants {
     // Money
     uint16 internal constant BOUNTY_BPS = 2_000;          // 20% of the at-fault pool to the prover
     uint16 internal constant MIN_STAKE_BPS = 100;         // 1% of the held bonus
-    uint256 internal constant MIN_STAKE_ABSOLUTE = 1e15;  // 0.001 unit floor
+    /// @dev Reference values for an 18-decimal asset. A deployment with a different asset derives
+    ///      its own floors from the token's own decimals; see Lantern.minBond and Lantern.minStake.
+    uint256 internal constant MIN_STAKE_ABSOLUTE_18 = 1e15;   // 0.001 unit at 18 decimals
 
         // Bonds
         uint256 internal constant MIN_BOND = 1e17;         // 0.1 unit to list a feed
