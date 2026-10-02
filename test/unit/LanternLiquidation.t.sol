@@ -121,10 +121,14 @@ contract LanternLiquidationTest is LanternTest {
         market.liquidate(2, FEED, round, 1, BORROWER);
     }
 
-    function test_feed_stops_pricing_once_exposure_fills_the_bond() public {
-        uint64 round = _push(FEED, 100e18);
-        _liquidate(1, round, BOND);
-        assertFalse(lantern.isPriceable(FEED));
+    /// @dev The 1:1 rule is enforced when a liquidation is recorded, so exposure can never
+    ///      exceed the bond. What stops the next liquidation is that floor, not a silent pause.
+    function test_exposure_never_exceeds_the_bond() public {
+    uint64 round = _push(FEED, 100e18);
+    _liquidate(1, round, BOND);
+    assertEq(lantern.exposureOf(FEED), BOND);
+    assertEq(lantern.exposureOf(FEED), lantern.bondOf(FEED));
+    assertTrue(lantern.isPriceable(FEED));
     }
 
     function test_queue_starts_empty() public {
