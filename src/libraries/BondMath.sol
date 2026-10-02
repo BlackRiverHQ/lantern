@@ -22,7 +22,7 @@ library BondMath {
         shortfall = amount - paid;
     }
 
-    function withdrawable(uint256 bond, uint256 exposure, uint256 requested)
+    function withdrawable(uint256 bond, uint256 exposure, uint256 requested, uint256 minBond)
         internal pure returns (uint256 allowed)
     {
         uint256 floor = exposureFloor(exposure);
