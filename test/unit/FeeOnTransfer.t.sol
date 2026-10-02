@@ -78,10 +78,15 @@ contract FeeOnTransferTest is Test {
 
         vm.prank(OPERATOR);
         lantern.depositBond(FEED, 1_000e18);
-        vm.prank(OPERATOR);
-        lantern.recordReport(FEED, 100e18, 1, uint64(block.timestamp), keccak256("p"), OPERATOR);
+        vm.startPrank(OPERATOR);
+        // A feed with a past, because a liquidation may not be priced on a print without one.
+        for (uint64 r = 1; r <= 4; r++) {
+            lantern.recordReport(FEED, 100e18, r, uint64(block.timestamp), keccak256(abi.encode("p", r)), OPERATOR);
+        }
+        lantern.recordReport(FEED, 100e18, 5, uint64(block.timestamp), keccak256("p"), OPERATOR);
+        vm.stopPrank();
         vm.prank(LIQUIDATOR);
-        market.liquidate(1, FEED, 1, 10e18, BORROWER);
+        market.liquidate(1, FEED, 5, 10e18, BORROWER);
 
         vm.warp(block.timestamp + 61);
         vm.expectRevert(abi.encodeWithSelector(SafeTransfer.TransferShort.selector, 10e18, 99e17));
@@ -96,10 +101,15 @@ contract FeeOnTransferTest is Test {
 
         vm.prank(OPERATOR);
         lantern.depositBond(FEED, 1_000e18);
-        vm.prank(OPERATOR);
-        lantern.recordReport(FEED, 100e18, 1, uint64(block.timestamp), keccak256("p"), OPERATOR);
+        vm.startPrank(OPERATOR);
+        // A feed with a past, because a liquidation may not be priced on a print without one.
+        for (uint64 r = 1; r <= 4; r++) {
+            lantern.recordReport(FEED, 100e18, r, uint64(block.timestamp), keccak256(abi.encode("p", r)), OPERATOR);
+        }
+        lantern.recordReport(FEED, 100e18, 5, uint64(block.timestamp), keccak256("p"), OPERATOR);
+        vm.stopPrank();
         vm.prank(LIQUIDATOR);
-        market.liquidate(1, FEED, 1, 10e18, BORROWER);
+        market.liquidate(1, FEED, 5, 10e18, BORROWER);
         vm.warp(block.timestamp + 61);
         lantern.release(1);
 
