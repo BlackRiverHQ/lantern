@@ -16,7 +16,9 @@ library Verdicts {
         bytes32  payloadFeed;
         bytes32  thisFeed;
         uint256  liquidationTime;
-    }
+        uint256  peerValue;
+        bool     peerExists;
+        }
 
     /// @return upheld whether the claim holds, observed and bound the numbers it used
     function evaluate(Provenance.Rule rule, Inputs memory in_)
