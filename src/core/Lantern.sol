@@ -1,0 +1,138 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.28;
+
+import {IWindfall} from "../interfaces/IWindfall.sol";
+import {IChallenge} from "../interfaces/IChallenge.sol";
+import {IERC20} from "../interfaces/IERC20.sol";
+import {ILanternErrors} from "../interfaces/ILanternErrors.sol";
+import {IFeedRegistry} from "../interfaces/IFeedRegistry.sol";
+import {FeedRegistry} from "./FeedRegistry.sol";
+import {ReportBook} from "./ReportBook.sol";
+import {Provenance} from "../libraries/Provenance.sol";
+import {BondMath} from "../libraries/BondMath.sol";
+import {Verdicts} from "../libraries/Verdicts.sol";
+import {WaterfallMath} from "../libraries/WaterfallMath.sol";
+import {SafeTransfer} from "../libraries/SafeTransfer.sol";
+import {TimeLib} from "../libraries/TimeLib.sol";
+import {Constants} from "../libraries/Constants.sol";
+import {FixedPoint} from "../libraries/FixedPoint.sol";
+
+/// @title Lantern
+/// @notice Holds a liquidation's profit, not its debt. The bonus is escrowed for a window; inside
+///         that window anyone may prove, from on-chain evidence alone, that the price report the
+///         liquidation consumed could not be true. Upheld: the borrower is restored, the prover is
+///         paid from the signer's bond, and the feed's error count moves. Refused: the stake is
+///         forfeited. Nothing here can be paused, re-parameterised or upgraded.
+/// @dev Lantern builds its own registry, so no contract needs a setter and no address is trusted
+///      after construction.
+contract Lantern is IWindfall, ILanternErrors {
+    event FeedRegistered(bytes32 indexed feedId, address indexed operator);
+    event BondDeposited(bytes32 indexed feedId, uint256 amount, uint256 bond);
+    event ReportRecorded(bytes32 indexed feedId, uint64 round, uint256 value);
+    event LiquidationRecorded(uint256 indexed liquidationId, bytes32 indexed feedId, uint256 bonus, uint64 deadline);
+    event ChallengeOpened(uint256 indexed liquidationId, address indexed prover, uint8 rule, uint256 stake);
+    event ChallengeUpheld(uint256 indexed liquidationId, uint8 rule, uint256 observed, uint256 bound);
+    event ChallengeRefused(uint256 indexed liquidationId, uint256 stakeForfeited);
+    event BonusReleased(uint256 indexed liquidationId, address indexed liquidator, uint256 amount);
+    event ShortfallQueued(uint256 indexed liquidationId, uint256 remainder);
+    event ShortfallPaid(uint256 indexed liquidationId, uint256 amount);
+
+    struct FeedState {
+        address operator;
+        uint256 bond;
+        uint256 exposure;
+        uint256 errors;
+        bool    registered;
+    }
+
+    struct Escrow {
+        bytes32 feedId;
+        uint64  round;
+        uint64  recordedAt;
+        uint64  deadline;
+        uint256 bonus;
+        address liquidator;
+        address borrower;
+        uint8   outcome;
+        bool    exists;
+    }
+
+    struct ChallengeRec {
+        address prover;
+        uint256 stake;
+        uint8   rule;
+        bytes32 evidenceHash;
+        bool    resolved;
+        bool    upheld;
+        uint64  openedAt;
+    }
+
+    IERC20 public immutable asset;
+    FeedRegistry public immutable reg;
+    address public immutable market;
+    uint64 public immutable holdWindow;
+    uint16 public immutable bountyBps;
+
+    mapping(bytes32 => FeedState) private _feeds;
+    mapping(uint256 => Escrow) private _escrows;
+    mapping(uint256 => ChallengeRec) private _challenges;
+    mapping(bytes32 => uint256[]) private _queue;
+    mapping(bytes32 => uint256) private _queueHead;
+    mapping(uint256 => uint256) private _queued;
+    uint256 private _heldTotal;
+
+    uint256 public recorded;
+    uint256 public challengesOpened;
+
+    modifier onlyMarket() {
+        if (msg.sender != market) revert NotMarket(msg.sender);
+        _;
+    }
+
+    modifier onlyOperator(bytes32 feedId) {
+        if (_feeds[feedId].operator != msg.sender) revert NotMarket(msg.sender);
+        _;
+    }
+
+    modifier knownFeed(bytes32 feedId) {
+        if (!_feeds[feedId].registered) revert UnknownFeed(feedId);
+        _;
+    }
+
+    constructor(IERC20 asset_, address market_, uint64 holdWindow_, uint16 bountyBps_) {
+        if (address(asset_) == address(0) || market_ == address(0)) revert ZeroAddress();
+        require(bountyBps_ <= Constants.BPS, "BOUNTY");
+        asset = asset_;
+        market = market_;
+        holdWindow = TimeLib.validateWindow(holdWindow_);
+        bountyBps = bountyBps_;
+        reg = new FeedRegistry(address(this));
+    }
+
+    // --- views -------------------------------------------------------------
+
+    function operatorOf(bytes32 feedId) external view returns (address) { return _feeds[feedId].operator; }
+    function bondOf(bytes32 feedId) external view returns (uint256) { return _feeds[feedId].bond; }
+    function exposureOf(bytes32 feedId) external view returns (uint256) { return _feeds[feedId].exposure; }
+    function feedErrors(bytes32 feedId) external view returns (uint256) { return _feeds[feedId].errors; }
+    function heldTotal() external view returns (uint256) { return _heldTotal; }
+    function queuedOf(uint256 liquidationId) external view returns (uint256) { return _queued[liquidationId]; }
+
+    function exposureFloor(bytes32 feedId) external view returns (uint256) {
+        return BondMath.exposureFloor(_feeds[feedId].exposure);
+    }
+
+    function isPriceable(bytes32 feedId) public view returns (bool) {
+        FeedState storage f = _feeds[feedId];
+        return f.registered && BondMath.isPriceable(f.bond, f.exposure);
+    }
+
+    function priceable(bytes32 feedId) external view returns (bool) { return isPriceable(feedId); }
+    function escrowOf(uint256 liquidationId) external view returns (Escrow memory) { return _escrows[liquidationId]; }
+    function challengeOf(uint256 liquidationId) external view returns (ChallengeRec memory) { return _challenges[liquidationId]; }
+    function bonusSettled(uint256 liquidationId) external view returns (bool) { return _escrows[liquidationId].outcome != 0; }
+    function bonusOutcome(uint256 liquidationId) external view returns (uint8) { return _escrows[liquidationId].outcome; }
+    function queueRemaining(bytes32 feedId) external view returns (uint256) { return _queue[feedId].length - _queueHead[feedId]; }
+
+    // (continued)
+}
