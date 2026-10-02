@@ -7,6 +7,12 @@ import {FixedPoint} from "./FixedPoint.sol";
 /// @title BondMath
 /// @notice A feed's required bond is a function of what it has already underwritten.
 library BondMath {
+    /// @notice What the notional at risk demands of the bond: a share of it, not a share of the
+    ///         bonus. This is what stops recovery being capped at the size of the held profit.
+    function notionalFloor(uint256 notional, uint16 bps) internal pure returns (uint256) {
+    return FixedPoint.bpsOf(notional, bps);
+    }
+
     /// @notice A feed that has been caught pays for the next one in collateral, not in apologies.
     function penalisedFloor(uint256 floor, uint256 errors, uint16 penaltyBps) internal pure returns (uint256) {
     uint256 steps = errors > Constants.MAX_ERROR_STEPS ? Constants.MAX_ERROR_STEPS : errors;
