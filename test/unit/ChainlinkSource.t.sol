@@ -61,6 +61,13 @@ contract ChainlinkSourceTest is Test {
         source.latest();
     }
 
+    function test_a_round_id_too_large_to_carry_is_reported_as_absent() public {
+    agg.setAnswer(100e8);
+    agg.setRound(type(uint80).max);
+    (, uint64 round, ) = source.latest();
+    assertEq(round, 0, "a phase-encoded id must not be truncated into a different number");
+    }
+
     function test_a_higher_precision_aggregator_is_scaled_down() public {
         MockAggregator fine = new MockAggregator(20, "FINE / USD");
         fine.setAnswer(123e20);
