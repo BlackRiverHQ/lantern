@@ -26,8 +26,9 @@ Each invariant has at least one test that tries to break it.
 - `invariant_windowIsBinding` — no challenge opened after the window closes can be upheld.
 - `invariant_stakeConserved` — a prover's stake is either returned with the bounty or forfeited to
   the liquidator, never both.
-- `invariant_selfHistoryMonotone` — a feed's history only accepts values inside its own band, the
-  band only widens through realized moves, and drift caps hold across any call sequence.
+- `invariant_selfHistoryMonotone` — the pre-report band is snapshotted for every accepted report, the
+  band only widens through realized moves, and drift caps hold across any call sequence. The band is
+  not a gate: a value outside it is accepted and left contestable, which is the whole point.
 
 ## Failure behaviour
 
