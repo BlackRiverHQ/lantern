@@ -105,7 +105,7 @@ contract ReportBookTest is Test {
         new ReportBook(address(0));
     }
 
-    function testFuzz_conflict_detected_for_any_two_values(uint64 round, uint256 a, uint256 b) public {
+    function testFuzz_conflict_detected_for_any_two_values(uint64 round, uint256 v1, uint256 v2) public {
         vm.assume(a != b);
         b.claimSlot(FEED, round, a);
         b.claimSlot(FEED, round, b);
