@@ -55,37 +55,19 @@ contract FeeOnTransferTest is Test {
         lantern.depositBond(FEED, 100e18);
     }
 
-    function test_a_liquidation_that_delivers_less_is_refused() public {
-        FeeToken token = new FeeToken();
-        (Lantern lantern, MockMarket market) = _deploy(IERC20(address(token)));
-        _register(lantern, token);
-        token.mint(address(market), 1_000e18);
+    function test_a_fee_token_cannot_even_fund_an_escrow() public {
+    // The refusal happens at the first interaction, so the liquidation path is never reached
+    // with a token like this. That is the intended consequence: unusable is better than
+    // quietly wrong.
+    FeeToken token = new FeeToken();
+    (Lantern lantern, MockMarket market) = _deploy(IERC20(address(token)));
+    _register(lantern, token);
+    token.mint(address(market), 1_000e18);
 
-        vm.prank(OPERATOR);
-        lantern.depositBond(FEED, 1_000e18);
-        vm.prank(OPERATOR);
-        lantern.recordReport(FEED, 100e18, 1, uint64(block.timestamp), keccak256("p"), OPERATOR);
-
-        vm.prank(LIQUIDATOR);
-        vm.expectRevert(abi.encodeWithSelector(SafeTransfer.TransferFromShort.selector, 10e18, 99e17));
-        market.liquidate(1, FEED, 1, 10e18, BORROWER);
-    }
-
-    function test_a_stake_that_delivers_less_is_refused() public {
-        FeeToken token = new FeeToken();
-        (Lantern lantern, MockMarket market) = _deploy(IERC20(address(token)));
-        _register(lantern, token);
-        token.mint(address(market), 1_000e18);
-
-        vm.prank(OPERATOR);
-        lantern.depositBond(FEED, 1_000e18);
-        vm.prank(OPERATOR);
-        lantern.recordReport(FEED, 100e18, 1, uint64(block.timestamp), keccak256("p"), OPERATOR);
-        // A fee token cannot even fund the escrow, so the challenge path is reached against an
-        // escrow funded with a well-behaved token below. Here the deposit refusal is the point.
-        vm.prank(LIQUIDATOR);
-        vm.expectRevert();
-        market.liquidate(1, FEED, 1, 10e18, BORROWER);
+    vm.prank(OPERATOR);
+    vm.expectRevert(abi.encodeWithSelector(SafeTransfer.TransferFromShort.selector, 1_000e18, 990e18));
+    lantern.depositBond(FEED, 1_000e18);
+    assertEq(lantern.exposureOf(FEED), 0, "nothing was recorded");
     }
 
     function test_a_payout_that_delivers_less_is_refused() public {
