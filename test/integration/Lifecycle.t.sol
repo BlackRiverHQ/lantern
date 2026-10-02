@@ -201,7 +201,7 @@ contract LifecycleTest is LanternTest {
     function test_two_feeds_stay_independent() public {
         _openFeed(FEED_B);
         uint64 roundA = _push(FEED, 100e18);
-        uint64 roundB = _push(FEED_B, 50e18);
+        uint64 roundB = _push(FEED_B, 90e18); // a tenth below the other feed, inside every bound
         _liquidateOn(FEED, 1, roundA, BONUS);
         _liquidateOn(FEED_B, 2, roundB, BONUS);
         vm.warp(block.timestamp + WINDOW + 1);
