@@ -143,6 +143,16 @@ contract Lantern is IWindfall, ILanternErrors {
     function bondOf(bytes32 feedId) external view returns (uint256) { return _feeds[feedId].bond; }
     function exposureOf(bytes32 feedId) external view returns (uint256) { return _feeds[feedId].exposure; }
     function feedErrors(bytes32 feedId) external view returns (uint256) { return _feeds[feedId].errors; }
+    function peerOf(bytes32 feedId) external view returns (bytes32) { return _peer[feedId]; }
+
+    /// @notice What this feed's bond must currently be: its own exposure, escalated by how many
+    ///         times it has been caught.
+    function requiredBond(bytes32 feedId) public view returns (uint256) {
+    FeedState storage f = _feeds[feedId];
+    return BondMath.penalisedFloor(
+    BondMath.exposureFloor(f.exposure, minBond()), f.errors, Constants.ERROR_BOND_PENALTY_BPS
+    );
+    }
     function heldTotal() external view returns (uint256) { return _heldTotal; }
 
     function exposureFloor(bytes32 feedId) external view returns (uint256) {
