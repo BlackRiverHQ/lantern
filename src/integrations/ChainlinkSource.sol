@@ -38,10 +38,16 @@ contract ChainlinkSource {
     /// @notice The same read, refusing an answer older than `maxAge`. A stale aggregator is an
     ///         absence of evidence, not evidence.
     function latestFresh(uint256 maxAge) external view returns (uint256 value, uint64 round, uint64 updatedAt) {
-        (, int256 answer, , uint256 updated, ) = aggregator.latestRoundData();
-        if (answer <= 0) revert NoAnswer(answer);
-        if (maxAge != 0 && block.timestamp > updated + maxAge) revert Stale(answer, updated);
-        return (_scale(uint256(answer)), uint64(updated), uint64(updated));
+    (uint80 roundId, int256 answer, , uint256 updated, ) = aggregator.latestRoundData();
+    if (answer <= 0) revert NoAnswer(answer);
+    if (maxAge != 0 && block.timestamp > updated + maxAge) revert Stale(answer, updated);
+    return (_scale(uint256(answer)), _round(roundId), uint64(updated));
+    }
+
+    /// @dev Chainlink encodes its phase into a very large round id. One that does not fit in 64
+    ///      bits is reported as zero rather than silently truncated into a different number.
+    function _round(uint80 roundId) internal pure returns (uint64) {
+    return roundId <= type(uint64).max ? uint64(roundId) : 0;
     }
 
     function _scale(uint256 raw) internal view returns (uint256) {
