@@ -57,9 +57,14 @@ quoting only the flattering one would be the same as quoting neither.
 
 src/core/Lantern.sol lines [95, 102, 109, 302, 396]; src/integrations/ChainlinkSource.sol lines [42, 54]; src/libraries/FixedPoint.sol lines [19, 22]; src/mocks/MockToken6.sol lines [35, 43]; src/mocks/MockMarket.sol lines [27]; src/mocks/MockToken.sol lines [48]
 
-Most of the remainder are the second arm of a two-way comparison in a library, and one guard inside
-`ReentrantToken` that a hostile token would only reach by being called in a way the tests do not
-arrange. None of them is a path a user can walk. A coverage run named the guards that were genuinely
-untested when it was first written, and `test/unit/Guards.t.sol` now walks them: a zero asset, a zero
-market, a bounty share above the whole, a print against an unregistered feed, and a print by someone
-other than the feed's operator.
+Read that list with some care, because the instrument is not perfectly reliable about which arm of a
+guard it credits. Line 95 of `Lantern.sol` is the operator check in `onlyOperator`, and the run reports
+that line executed fourteen times while crediting its revert arm as never taken, even though
+`test_only_the_operator_of_a_feed_may_print_for_it` asserts exactly that revert and passes. The same
+holds for the unregistered-feed guard on line 109. So treat the count as a lower bound on what is
+uncovered and each line as a lead to check by hand rather than a verdict.
+
+A coverage run named the guards that were genuinely untested, and `test/unit/Guards.t.sol` now walks
+them: a zero asset, a zero market, a bounty share above the whole, a print against an unregistered feed,
+and a print by someone other than the feed's operator. Passing tests are the evidence for those; the
+branch counter is not.
