@@ -23,6 +23,9 @@ interface IFeedRegistry {
     function registerFeed(bytes32 feedId, address operator, bytes32 signerSet, uint8 decimals) external;
     function recordReport(bytes32 feedId, uint256 value, uint64 round, uint64 timestamp,
                           bytes32 payloadHash, address signer) external;
+    function operatorOf(bytes32 feedId) external view returns (address);
+    function decimalsOf(bytes32 feedId) external view returns (uint8);
+    function registered(bytes32 feedId) external view returns (bool);
     function reportAt(bytes32 feedId, uint64 round) external view returns (Report memory);
     function lastReport(bytes32 feedId) external view returns (Report memory);
     function band(bytes32 feedId) external view returns (uint256 lo, uint256 hi);
