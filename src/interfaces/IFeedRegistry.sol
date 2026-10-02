@@ -21,5 +21,4 @@ interface IFeedRegistry {
     function lastReport(bytes32 feedId) external view returns (Report memory);
     function band(bytes32 feedId) external view returns (uint256 lo, uint256 hi);
     function history() external view returns (IHistory);
-    function silenced(bytes32 feedId) external view returns (bool);
 }
