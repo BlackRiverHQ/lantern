@@ -11,13 +11,13 @@ contract EscrowLedgerTest is Test {
 
     function test_enqueue_then_head() public {
         q.enqueue(11);
-        (bool has, uint256 id) = q.head();
+        (bool has, uint256 id) = q.peek();
         assertTrue(has);
         assertEq(id, 11);
     }
 
     function test_head_empty() public {
-        (bool has, uint256 id) = q.head();
+        (bool has, uint256 id) = q.peek();
         assertFalse(has);
         assertEq(id, 0);
     }
@@ -32,7 +32,7 @@ contract EscrowLedgerTest is Test {
     function test_pop_advances_head() public {
         q.enqueue(7);
         q.pop();
-        (bool has, ) = q.head();
+        (bool has, ) = q.peek();
         assertFalse(has);
     }
 
@@ -83,7 +83,7 @@ contract EscrowLedgerTest is Test {
     function testFuzz_head_matches_first_enqueued(uint256 first, uint256 second) public {
         q.enqueue(first);
         q.enqueue(second);
-        (bool has, uint256 id) = q.head();
+        (bool has, uint256 id) = q.peek();
         assertTrue(has);
         assertEq(id, first);
     }
