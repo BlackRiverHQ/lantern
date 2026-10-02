@@ -321,6 +321,11 @@ contract Lantern is IWindfall, ILanternErrors {
         ReportBook.Slot memory slot = reg.book().slotOf(e.feedId, e.round);
         bytes32 payloadFeed = reg.book().payloadFeed(r.payloadHash);
 
+        bytes32 peer = _peer[e.feedId];
+        IFeedRegistry.Report memory pr = peer == bytes32(0)
+        ? IFeedRegistry.Report(0, 0, 0, 0, 0, 0, bytes32(0), address(0), false)
+        : reg.reportAt(peer, e.round);
+
         uint256 observed;
         uint256 bound;
         (upheld, observed, bound) = Verdicts.evaluate(
