@@ -251,5 +251,115 @@ contract Lantern is IWindfall, ILanternErrors {
         return liquidationId;
     }
 
-    // (continued)
+    // --- adjudication ------------------------------------------------------
+
+    /// @notice Recompute the claim from state. The prover supplies nothing but the rule; every
+    ///         number used is read here.
+    function adjudicate(uint256 liquidationId) external returns (bool upheld) {
+        Escrow storage e = _escrows[liquidationId];
+        if (!e.exists) revert UnknownLiquidation(liquidationId);
+        if (e.outcome != 0) revert LiquidationAlreadySettled(liquidationId);
+
+        ChallengeRec storage c = _challenges[liquidationId];
+        if (c.prover == address(0)) revert UnknownChallenge(liquidationId);
+        if (c.resolved) revert ChallengeAlreadyResolved(liquidationId);
+
+        IFeedRegistry.Report memory r = reg.reportAt(e.feedId, e.round);
+        ReportBook.Slot memory slot = reg.book().slotOf(e.feedId, e.round);
+        bytes32 payloadFeed = reg.book().payloadFeed(r.payloadHash);
+
+        uint256 observed;
+        uint256 bound;
+        (upheld, observed, bound) = Verdicts.evaluate(
+            Provenance.Rule(c.rule),
+            Verdicts.Inputs({
+                report: r,
+                slotConflicted: slot.conflicted,
+                otherValueForRound: slot.otherValue,
+                payloadFeed: payloadFeed,
+                thisFeed: e.feedId,
+                liquidationTime: e.recordedAt
+            })
+        );
+        c.resolved = true;
+        c.upheld = upheld;
+
+        if (!upheld) {
+            SafeTransfer.push(asset, e.liquidator, c.stake);
+            emit ChallengeRefused(liquidationId, c.stake);
+            return false;
+        }
+
+        FeedState storage f = _feeds[e.feedId];
+        _heldTotal -= e.bonus;
+        f.exposure = f.exposure > e.bonus ? f.exposure - e.bonus : 0;
+        f.errors += 1;
+        e.outcome = 2;
+
+        // Borrower first, then the prover out of the at-fault party's bond.
+        SafeTransfer.push(asset, e.borrower, e.bonus);
+        uint256 bounty = FixedPoint.bpsOf(e.bonus, bountyBps);
+        (uint256 paid, uint256 shortfall) = BondMath.chargeable(f.bond, bounty);
+        f.bond -= paid;
+        SafeTransfer.push(asset, c.prover, c.stake + paid);
+        if (shortfall > 0) {
+            _queued[liquidationId] = shortfall;
+            _queue[e.feedId].push(liquidationId);
+            emit ShortfallQueued(liquidationId, shortfall);
+        }
+        emit ChallengeUpheld(liquidationId, c.rule, observed, bound);
+        return true;
+    }
+
+    // --- release and the shortfall queue -----------------------------------
+
+    function release(uint256 liquidationId) external {
+        Escrow storage e = _escrows[liquidationId];
+        if (!e.exists) revert UnknownLiquidation(liquidationId);
+        if (e.outcome != 0) revert LiquidationAlreadySettled(liquidationId);
+        if (TimeLib.isOpen(block.timestamp, e.deadline)) revert WindowOpen(liquidationId, e.deadline);
+
+        ChallengeRec storage c = _challenges[liquidationId];
+        if (c.prover != address(0) && !c.resolved) revert ChallengeAlreadyOpen(liquidationId);
+
+        FeedState storage f = _feeds[e.feedId];
+        _heldTotal -= e.bonus;
+        f.exposure = f.exposure > e.bonus ? f.exposure - e.bonus : 0;
+        e.outcome = 1;
+        SafeTransfer.push(asset, e.liquidator, e.bonus);
+        emit BonusReleased(liquidationId, e.liquidator, e.bonus);
+    }
+
+    /// @notice Pay queued remainders as the bond is topped up. Never trims: only pays.
+    function settleQueue(bytes32 feedId) external {
+        _settleQueue(feedId);
+    }
+
+    function _settleQueue(bytes32 feedId) internal {
+        FeedState storage f = _feeds[feedId];
+        uint256 floor = BondMath.exposureFloor(f.exposure);
+        uint256 head = _queueHead[feedId];
+        uint256 len = _queue[feedId].length;
+
+        while (head < len) {
+            uint256 id = _queue[feedId][head];
+            uint256 owed = _queued[id];
+            if (owed == 0) {
+                head++;
+                continue;
+            }
+            uint256 spare = f.bond > floor ? f.bond - floor : 0;
+            if (spare == 0) break;
+
+            uint256 pay = spare < owed ? spare : owed;
+            f.bond -= pay;
+            _queued[id] -= pay;
+            SafeTransfer.push(asset, _challenges[id].prover, pay);
+            emit ShortfallPaid(id, pay);
+
+            if (_queued[id] == 0) head++;
+            else break;
+        }
+        _queueHead[feedId] = head;
+    }
 }
