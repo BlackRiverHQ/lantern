@@ -92,7 +92,7 @@ contract BondMathTest is Test {
     function testFuzz_withdrawable_never_breaks_floor(uint96 bond, uint96 exposure, uint96 req) public pure {
         uint256 b = uint256(bond);
         uint256 e = uint256(exposure);
-        uint256 allowed = BondMath.withdrawable(b, e, uint256(req));
+        uint256 allowed = BondMath.withdrawable(b, e, uint256(req), Constants.MIN_BOND);
         assertLe(allowed, b);
         assertTrue(b - allowed >= BondMath.exposureFloor(e, Constants.MIN_BOND) || allowed == 0);
     }
