@@ -49,7 +49,7 @@ contract DemoRun is Script {
         console2.log("liquidator paid out already", token.balanceOf(operator));
 
         // 4. anyone can contest it from the evidence alone
-        uint256 stake = WaterfallMath.stakeFloor(BONUS);
+        uint256 stake = WaterfallMath.stakeFloor(BONUS, lantern.minStake());
         token.mint(operator, stake);
         lantern.openChallenge(1, IChallenge.Rule.SLOT_UNIQUENESS, abi.encode(ROUND), stake);
         console2.log("stake posted", stake);
