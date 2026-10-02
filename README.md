@@ -44,7 +44,7 @@ constructor arguments; `Lantern` builds its own registry, so nothing is trusted 
 
 ```
 forge build
-forge test                                  # 533 tests: unit, fuzz, integration, invariants
+forge test                                  # 565 tests: unit, fuzz, integration, invariants
 forge test --match-path "test/invariants/*"  # stateful invariants over random action sequences
 forge script script/Deploy.s.sol --rpc-url arbitrum_sepolia --broadcast -vv
 forge script script/DemoRun.s.sol --rpc-url arbitrum_sepolia --broadcast -vv
@@ -54,7 +54,14 @@ forge script script/DemoRun.s.sol --rpc-url arbitrum_sepolia --broadcast -vv
 
 | Document | Contents |
 |---|---|
+| [docs/TOUR.md](docs/TOUR.md) | a reading order for someone with ten minutes |
 | [docs/DESIGN.md](docs/DESIGN.md) | the mechanism, and why the bonus is the disputed object |
+| [docs/RULES.md](docs/RULES.md) | each rule as a predicate, with the tests that pin it |
+| [docs/BAND.md](docs/BAND.md) | where the tolerance comes from, and its two guards |
+| [docs/ECONOMICS.md](docs/ECONOMICS.md) | the numbers, who pays whom, and why the bond binds |
+| [docs/INTEGRATION.md](docs/INTEGRATION.md) | how a market wires it in, and the failure modes |
+| [docs/SECURITY.md](docs/SECURITY.md) | every attack attempted, and the test that shows the outcome |
+| [docs/FAQ.md](docs/FAQ.md) | the objections, answered without hedging |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | the modules, who may do what, and the flow of one liquidation |
 | [docs/INVARIANTS.md](docs/INVARIANTS.md) | what must always hold, each with a test that attacks it |
 | [docs/LIMITS.md](docs/LIMITS.md) | what this is not, and the sharp edges, stated plainly |
