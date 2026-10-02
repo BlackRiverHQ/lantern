@@ -25,9 +25,14 @@ library EscrowLedger {
         q.ids.push(liquidationId);
     }
 
-    function head(Queue storage q) internal view returns (bool has, uint256 liquidationId) {
-        if (q.head >= q.ids.length) return (false, 0);
-        return (true, q.ids[q.head]);
+    function peek(Queue storage q) internal view returns (bool has, uint256 liquidationId) {
+    if (q.head >= q.ids.length) return (false, 0);
+    return (true, q.ids[q.head]);
+    }
+
+    /// @notice Entries still owed, including any already drained to zero.
+    function size(Queue storage q) internal view returns (uint256) {
+    return q.ids.length - q.head;
     }
 
     function pop(Queue storage q) internal returns (uint256 liquidationId) {
