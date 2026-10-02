@@ -159,7 +159,7 @@ contract Lantern is IWindfall, ILanternErrors {
 
     // --- feeds and bonds ---------------------------------------------------
 
-    function registerFeed(bytes32 feedId, bytes32 signerSet, uint8 decimals) external {
+    function registerFeed(bytes32 feedId, bytes32 signerSet, uint8 decimals) external nonReentrant {
         if (_feeds[feedId].registered) revert FeedAlreadyRegistered(feedId);
         _feeds[feedId] = FeedState({operator: msg.sender, bond: 0, exposure: 0, errors: 0, registered: true});
         reg.registerFeed(feedId, msg.sender, signerSet, decimals);
