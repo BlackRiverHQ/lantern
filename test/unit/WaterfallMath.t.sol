@@ -74,6 +74,6 @@ contract WaterfallMathTest is Test {
     }
 
     function testFuzz_stake_floor_minimum(uint96 bonus) public pure {
-        assertGe(WaterfallMath.stakeFloor(uint256(bonus)), Constants.MIN_STAKE_ABSOLUTE_18);
+        assertGe(WaterfallMath.stakeFloor(uint256(bonus), Constants.MIN_STAKE_ABSOLUTE_18), Constants.MIN_STAKE_ABSOLUTE_18);
     }
 }

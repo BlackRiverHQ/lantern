@@ -85,8 +85,8 @@ contract BondMathTest is Test {
     }
 
     function testFuzz_priceable_iff_bond_ge_floor(uint96 bond, uint96 exposure) public pure {
-        bool priceable = BondMath.isPriceable(uint256(bond), uint256(exposure));
-        assertEq(priceable, uint256(bond) >= BondMath.exposureFloor(uint256(exposure)));
+        bool priceable = BondMath.isPriceable(uint256(bond), uint256(exposure), Constants.MIN_BOND);
+        assertEq(priceable, uint256(bond) >= BondMath.exposureFloor(uint256(exposure), Constants.MIN_BOND));
     }
 
     function testFuzz_withdrawable_never_breaks_floor(uint96 bond, uint96 exposure, uint96 req) public pure {
