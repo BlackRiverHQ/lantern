@@ -31,16 +31,20 @@ contract MockToken is IERC20 {
     }
 
     function transferFrom(address from, address to, uint256 amount) external virtual returns (bool) {
+        _spendAllowance(from, amount);
+        _move(from, to, amount);
+        return true;
+    }
+
+    function _spendAllowance(address from, uint256 amount) internal {
         uint256 allowed = allowance[from][msg.sender];
         if (allowed != type(uint256).max) {
             if (allowed < amount) revert InsufficientAllowance();
             allowance[from][msg.sender] = allowed - amount;
         }
-        _move(from, to, amount);
-        return true;
     }
 
-    function _move(address from, address to, uint256 amount) private {
+    function _move(address from, address to, uint256 amount) internal {
         if (balanceOf[from] < amount) revert InsufficientBalance();
         balanceOf[from] -= amount;
         balanceOf[to] += amount;
