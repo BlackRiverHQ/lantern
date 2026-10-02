@@ -4,6 +4,7 @@ pragma solidity 0.8.28;
 import {IFeedRegistry} from "../interfaces/IFeedRegistry.sol";
 import {Provenance} from "./Provenance.sol";
 import {Constants} from "./Constants.sol";
+import {FixedPoint} from "./FixedPoint.sol";
 
 /// @title Verdicts
 /// @notice The recomputation. A challenge supplies a claim; these functions derive the answer
