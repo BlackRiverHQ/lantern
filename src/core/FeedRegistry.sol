@@ -128,8 +128,9 @@ contract FeedRegistry is IFeedRegistry, ILanternErrors {
             timestamp: timestamp,
             payloadHash: payloadHash,
             signer: signer,
+            prevSamples: uint64(_history.samplesOf(feedId)),
             exists: true
-        });
+            });
         _byRound[feedId][round] = rec;
         _last[feedId] = rec;
     }
