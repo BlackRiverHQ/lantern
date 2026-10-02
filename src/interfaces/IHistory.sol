@@ -13,4 +13,7 @@ interface IHistory {
     }
 
     function snapshot(bytes32 feedId) external view returns (Snapshot memory);
+    function bandOf(bytes32 feedId) external view returns (uint256 lo, uint256 hi);
+    function accepts(bytes32 feedId, uint256 value) external view returns (bool);
+    function widthBps(bytes32 feedId) external view returns (uint32);
 }
