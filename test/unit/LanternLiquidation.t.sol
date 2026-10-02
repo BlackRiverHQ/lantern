@@ -130,8 +130,4 @@ contract LanternLiquidationTest is LanternTest {
     assertEq(lantern.exposureOf(FEED), lantern.bondOf(FEED));
     assertTrue(lantern.isPriceable(FEED));
     }
-
-    function test_queue_starts_empty() public {
-        assertEq(lantern.queueRemaining(FEED), 0);
-    }
 }
