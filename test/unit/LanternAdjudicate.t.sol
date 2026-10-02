@@ -290,9 +290,9 @@ contract LanternAdjudicateTest is LanternTest {
         _warm(FEED, 40);
         uint64 good = _push(FEED, 103.9e18)   // the last warmed value: on the anchor, inside the band;
         _liquidate(1, good, BONUS);
+        _challenge(1, IChallenge.Rule.SELF_HISTORY, stake); // inside its own window
         uint64 bad = _suspiciousPrint(FEED);
         _liquidate(2, bad, BONUS);
-        _challenge(1, IChallenge.Rule.SELF_HISTORY, stake);
         _challenge(2, IChallenge.Rule.SELF_HISTORY, stake);
         assertFalse(lantern.adjudicate(1));
         assertTrue(lantern.adjudicate(2));
