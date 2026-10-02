@@ -3,7 +3,7 @@
 ## Shape
 
 - `test/unit/` — one file per module; behaviour and revert paths.
-- `test/fuzz/` — band math, exposure floors, waterfall splits, queue order.
+- `test/fuzz/` — band math, exposure floors, waterfall splits, window arithmetic.
 - `test/invariants/` — stateful suites driven by handlers over random sequences.
 - `test/integration/` — full lifecycle from print to waterfall.
 - `test/fixtures/` — named scenarios replayed from `fixtures/`.
