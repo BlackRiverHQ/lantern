@@ -14,7 +14,7 @@ library BondMath {
     }
 
     function isPriceable(uint256 bond, uint256 exposure, uint256 minBond) internal pure returns (bool) {
-        return bond >= exposureFloor(exposure);
+        return bond >= exposureFloor(exposure, minBond);
     }
 
     function chargeable(uint256 bond, uint256 amount) internal pure returns (uint256 paid, uint256 shortfall) {
@@ -25,7 +25,7 @@ library BondMath {
     function withdrawable(uint256 bond, uint256 exposure, uint256 requested, uint256 minBond)
         internal pure returns (uint256 allowed)
     {
-        uint256 floor = exposureFloor(exposure);
+        uint256 floor = exposureFloor(exposure, minBond);
         if (bond <= floor) return 0;
         uint256 spare = bond - floor;
         allowed = requested < spare ? requested : spare;
