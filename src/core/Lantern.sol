@@ -368,6 +368,25 @@ contract Lantern is IWindfall, ILanternErrors {
         return true;
     }
 
+    /// @notice A challenge nobody adjudicated must not hold the bonus forever. After the window and
+    ///         a grace period, anyone may void it: the stake goes to the liquidator, whose bonus was
+    ///         frozen, and the escrow becomes releasable. Adjudication is permissionless and always
+    ///         available, so a void means the claim was abandoned rather than defended.
+    function voidStaleChallenge(uint256 liquidationId) external nonReentrant {
+    Escrow storage e = _escrows[liquidationId];
+    if (!e.exists) revert UnknownLiquidation(liquidationId);
+    ChallengeRec storage c = _challenges[liquidationId];
+    if (c.prover == address(0)) revert UnknownChallenge(liquidationId);
+    if (c.resolved) revert ChallengeAlreadyResolved(liquidationId);
+    if (block.timestamp <= uint256(e.deadline) + Constants.CHALLENGE_GRACE) {
+    revert ChallengeStillFresh(liquidationId);
+    }
+    c.resolved = true;
+    c.upheld = false;
+    SafeTransfer.push(asset, e.liquidator, c.stake);
+    emit ChallengeVoided(liquidationId, c.stake);
+    }
+
     // --- release and the shortfall queue -----------------------------------
 
     function release(uint256 liquidationId) external nonReentrant {
