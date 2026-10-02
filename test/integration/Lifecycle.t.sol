@@ -239,7 +239,7 @@ contract LifecycleTest is LanternTest {
         _warm(FEED, 40);
         uint256 start = lantern.bondOf(FEED);
         for (uint256 i = 1; i <= 3; i++) {
-            uint64 round = _suspiciousPrint(FEED);
+        uint64 round = _escalatingPrint(FEED);
             _liquidate(i, round, BONUS);
             _challenge(i, IChallenge.Rule.SELF_HISTORY, _stake());
             lantern.adjudicate(i);
