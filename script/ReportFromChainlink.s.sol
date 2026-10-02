@@ -54,6 +54,6 @@ contract ReportFromChainlink is Script {
         console2.log("aggregator", aggregator);
         console2.log("value", value);
         console2.log("round", round);
-        console2.log("peerFeed", peerFeed);
+        console2.logBytes32(peerFeed);
     }
 }
