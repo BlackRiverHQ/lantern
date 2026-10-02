@@ -23,7 +23,7 @@ position open, and never touch a borrower's collateral.
 
 ## Bonds sized to exposure
 
-`BondVault` tracks per-feed outstanding exposure = the sum of bonuses currently held on liquidations
+`Lantern` tracks per-feed outstanding exposure = the sum of bonuses currently held on liquidations
 that consumed that feed. A feed may only have a report recorded while
 `bond >= exposureFloor(exposure)`. Exposure grows as liquidations happen, so a feed that has
 underwritten more must bond more. A feed that cannot cover its own exposure cannot price — it fails
