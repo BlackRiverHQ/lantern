@@ -302,9 +302,9 @@ contract Lantern is IWindfall, ILanternErrors {
         f.bond -= paid;
         SafeTransfer.push(asset, c.prover, c.stake + paid);
         if (shortfall > 0) {
-            _queued[liquidationId] = shortfall;
-            _queue[e.feedId].push(liquidationId);
-            emit ShortfallQueued(liquidationId, shortfall);
+        _queued[liquidationId] = shortfall;
+        _queues[e.feedId].enqueue(liquidationId);
+        emit ShortfallQueued(liquidationId, shortfall);
         }
         emit ChallengeUpheld(liquidationId, c.rule, observed, bound);
         return true;
