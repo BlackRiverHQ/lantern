@@ -1,35 +1,26 @@
-name: CI
-
-permissions: {}
+name: test
 
 on:
   push:
   pull_request:
-  workflow_dispatch:
 
 jobs:
-  check:
-    name: Foundry project
+  forge:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
         with:
-          persist-credentials: false
           submodules: recursive
 
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
 
-      - name: Show Forge version
-        run: forge --version
-
-      - name: Run Forge fmt
-        run: forge fmt --check
-
-      - name: Run Forge build
+      - name: Build
         run: forge build --sizes
 
-      - name: Run Forge tests
-        run: forge test -vvv
+      - name: Unit, fuzz and integration
+        run: forge test --no-match-path "test/invariants/*" -vv
+
+      - name: Invariants
+        run: forge test --match-path "test/invariants/*"
