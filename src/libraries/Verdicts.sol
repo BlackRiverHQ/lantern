@@ -28,7 +28,7 @@ library Verdicts {
             uint256 age = in_.liquidationTime > in_.report.timestamp
                 ? in_.liquidationTime - in_.report.timestamp
                 : 0;
-            return (age > 5 minutes, age, 5 minutes);
+            return (age > Constants.STALENESS_BOUND, age, Constants.STALENESS_BOUND);
         }
         if (rule == Provenance.Rule.SELF_HISTORY) {
             bool below = in_.report.prevBandLo != 0 && in_.report.value < in_.report.prevBandLo;
