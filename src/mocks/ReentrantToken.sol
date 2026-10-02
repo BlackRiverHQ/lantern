@@ -28,6 +28,8 @@ contract ReentrantToken is MockToken {
 
     function transferFrom(address from, address to, uint256 amount) external override returns (bool) {
         _maybeReenter();
-        return super.transferFrom(from, to, amount);
+        _spendAllowance(from, amount);
+        _move(from, to, amount);
+        return true;
     }
 }
