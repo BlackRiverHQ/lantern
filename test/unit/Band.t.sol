@@ -70,6 +70,29 @@ contract BandTest is Test {
         assertGt(next, 10);
     }
 
+    function test_observe_move_is_capped_by_the_current_width() public pure {
+    // moveBps small, so the band is narrow; a print an order of magnitude away cannot
+    // widen the estimate past that narrow band.
+    Band.State memory s = Band.State({anchor: 100e18, moveBps: 1, samples: 64});
+    uint32 before = Band.widthBps(s);
+    uint32 after = Band.widthBps(Band.State({anchor: 100e18, moveBps: Band.observeMove(s, 200e18), samples: 64}));
+    assertLe(after, before + 2);
+    }
+
+    function test_observe_move_keeps_a_warm_band_warm() public pure {
+    Band.State memory s = Band.State({anchor: 100e18, moveBps: 10, samples: 64});
+    uint32 next = Band.observeMove(s, 130e18);
+    assertLt(Band.widthBps(Band.State({anchor: 130e18, moveBps: next, samples: 64})), 200);
+    }
+
+    function testFuzz_observe_move_widening_is_bounded(uint32 moveBps, uint256 value) public pure {
+    moveBps = uint32(bound(moveBps, 0, Constants.MAX_WIDTH_BPS));
+    Band.State memory s = Band.State({anchor: 1_000e18, moveBps: moveBps, samples: 64});
+    uint32 before = Band.widthBps(s);
+    uint32 after = Band.observeMove(s, value);
+    assertLe(after, before);
+    }
+
     function test_observe_move_caps_at_ceiling() public pure {
         Band.State memory s = Band.State({anchor: 1e18, moveBps: 100, samples: 10});
         assertLe(Band.observeMove(s, 1_000e18), Constants.MAX_WIDTH_BPS);
