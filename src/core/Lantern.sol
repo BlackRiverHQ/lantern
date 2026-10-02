@@ -27,6 +27,7 @@ import {FixedPoint} from "../libraries/FixedPoint.sol";
 /// @dev Lantern builds its own registry, so no contract needs a setter and no address is trusted
 ///      after construction.
 contract Lantern is IWindfall, ILanternErrors {
+using EscrowLedger for EscrowLedger.Queue;
     event FeedRegistered(bytes32 indexed feedId, address indexed operator);
     event BondDeposited(bytes32 indexed feedId, uint256 amount, uint256 bond);
     event ReportRecorded(bytes32 indexed feedId, uint64 round, uint256 value);
