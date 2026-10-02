@@ -12,7 +12,7 @@ import {WaterfallMath} from "../src/libraries/WaterfallMath.sol";
 /// @notice Walks the lifecycle on a deployed instance. The caught case is driven by a round
 ///         printed twice with two different values, which needs no warming and no waiting.
 ///
-/// LANTERN=0x.. TOKEN=0x.. MARKET=0x.. forge script script/DemoRun.s.sol --rpc-url $RPC_URL --broadcast -vv
+/// LANTERN=0x.. MARKET=0x.. forge script script/DemoRun.s.sol --rpc-url $RPC_URL --broadcast -vv
 contract DemoRun is Script {
     uint256 internal constant BOND = 1_000e18;
     uint256 internal constant BONUS = 10e18;
@@ -23,7 +23,7 @@ contract DemoRun is Script {
         address operator = vm.addr(pk);
 
         Lantern lantern = Lantern(vm.envAddress("LANTERN"));
-        MockToken token = MockToken(vm.envAddress("TOKEN"));
+        MockToken token = MockToken(address(lantern.asset()));
         MockMarket market = MockMarket(vm.envAddress("MARKET"));
         bytes32 feedId = vm.envOr("FEED_ID", keccak256("FEED:DEMO"));
 

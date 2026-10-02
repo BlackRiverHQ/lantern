@@ -54,7 +54,6 @@ contract ReportFromChainlink is Script {
         vm.stopBroadcast();
 
         console2.log("source", address(source));
-        console2.log("subject feed now reconciles against", peerFeed);
-        vm.stopBroadcast();
+        console2.logBytes32(peerFeed);
     }
 }
