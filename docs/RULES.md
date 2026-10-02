@@ -49,6 +49,14 @@ which is evidence about both of them.
 `ChainlinkSource` turns a live aggregator into such a peer, scaling its answer to the asset's decimals
 and refusing an answer that is not positive, or - when freshness is asked for - one that is too old.
 
+## The condition that comes before the rules
+
+Pricing requires history. `recordLiquidation` refuses any print whose `prevSamples` is below
+`Constants.MIN_SAMPLES_FOR_PRICING` (four), with `ReportTooThin(feedId, samples, required)`. The count is
+snapshotted on the report itself, before the print is folded into the history, so it means "how many
+prints came before this one" and not "how many exist now". Printing is unaffected: a feed below the
+floor keeps building the history it needs.
+
 ## What happens on each verdict
 
 | Verdict | Held bonus | Prover | Bond | Exposure | Error count | Feed's requirement |
