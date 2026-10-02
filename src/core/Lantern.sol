@@ -215,5 +215,41 @@ contract Lantern is IWindfall, ILanternErrors {
         emit LiquidationRecorded(liquidationId, feedId, bonus, _escrows[liquidationId].deadline);
     }
 
+    // --- challenges --------------------------------------------------------
+
+    /// @notice One challenge per liquidation; the liquidation id is the challenge id. Stakes are
+    ///         denominated in the same asset as the held bonus.
+    function openChallenge(
+        uint256 liquidationId,
+        IChallenge.Rule rule,
+        bytes calldata evidence,
+        uint256 stake
+    ) external returns (uint256) {
+        Escrow storage e = _escrows[liquidationId];
+        if (!e.exists) revert UnknownLiquidation(liquidationId);
+        if (e.outcome != 0) revert LiquidationAlreadySettled(liquidationId);
+        if (TimeLib.isClosed(block.timestamp, e.deadline)) revert WindowClosed(liquidationId, e.deadline);
+        if (_challenges[liquidationId].prover != address(0)) revert ChallengeAlreadyOpen(liquidationId);
+        if (evidence.length == 0) revert EmptyEvidence();
+        if (uint8(rule) > uint8(IChallenge.Rule.PAYLOAD_PROVENANCE)) revert BadRuleKind(uint8(rule));
+
+        uint256 floor = WaterfallMath.stakeFloor(e.bonus);
+        if (stake < floor) revert StakeBelowMinimum(stake, floor);
+        SafeTransfer.pull(asset, msg.sender, stake);
+
+        _challenges[liquidationId] = ChallengeRec({
+            prover: msg.sender,
+            stake: stake,
+            rule: uint8(rule),
+            evidenceHash: keccak256(evidence),
+            resolved: false,
+            upheld: false,
+            openedAt: uint64(block.timestamp)
+        });
+        challengesOpened += 1;
+        emit ChallengeOpened(liquidationId, msg.sender, uint8(rule), stake);
+        return liquidationId;
+    }
+
     // (continued)
 }
