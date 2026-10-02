@@ -116,6 +116,10 @@ contract FeedRegistry is IFeedRegistry, ILanternErrors {
     }
 
     function band(bytes32 feedId) external view returns (uint256 lo, uint256 hi) {
-        return history.bandOf(feedId);
+    return _history.bandOf(feedId);
+    }
+
+    function history() external view returns (IHistory) {
+    return IHistory(address(_history));
     }
 }
