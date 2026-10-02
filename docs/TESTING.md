@@ -5,31 +5,43 @@
 | Directory | What it holds |
 |---|---|
 | `test/base/` | the shared harness: a real token, a real market, a predicted deploy order |
-| `test/unit/` | one file per module, plus the read surface, events and interface conformance |
-| `test/fuzz/` | band math, bond floors, waterfall splits, registry sequences, whole-mechanism properties |
+| `test/unit/` | one file per module, plus the read surface, events, decimals, fee tokens, cross-source, escalation, liveness and interface conformance |
+| `test/fuzz/` | band math, bond floors, waterfall splits, registry sequences, verdict totality, whole-mechanism properties |
 | `test/integration/` | the lifecycle, the deployment wiring, and a hostile-token reentrancy suite |
 | `test/invariants/` | a guarded handler driving random action sequences, with fifteen invariants over it |
 | `test/gas/` | cost ceilings, asserted rather than tabulated |
 | `test/fixtures/` | named scenarios, each a short story with a classification at the end |
 
-510 tests pass. The suite runs in about fifteen seconds locally, most of it the invariant campaign.
+617 tests pass. The suite runs in about fifteen seconds locally, most of it the invariant campaign.
+
+## What the newer suites pin
+
+- **`test/unit/Decimals.t.sol`** - the mechanism at six decimals: the floors scale to the asset, a feed
+  may not disagree with the asset about decimals, a token that will not answer is treated as 18, one
+  above 18 is refused, and a six-decimal prover can afford to accuse.
+- **`test/unit/FeeOnTransfer.t.sol`** - a token that keeps a cut is refused at the first interaction
+  rather than allowed to corrupt the books, in both directions.
+- **`test/unit/CrossSource.t.sol`** - the fifth rule: upheld on a real disagreement, refused when the
+  sources agree, refused exactly at tolerance, refused when the peer answered a different round, and
+  refused when no peer was declared.
+- **`test/unit/ChainlinkSource.t.sol`** - an eight-decimal answer scaled to eighteen, the round and
+  timestamp carried through, staleness refused when freshness is asked for, non-positive answers
+  refused, and a round id too large to carry reported as absent.
+- **`test/unit/Escalation.t.sol`** - a caught feed's requirement rises 20%, a refused challenge leaves
+  no mark, a thin feed that cannot meet the escalated requirement cannot price, and topping up restores
+  it.
+- **`test/unit/StaleChallenge.t.sol`** - an abandoned challenge cannot be voided early, can be voided
+  after the grace, pays the stake to the liquidator whose bonus was frozen, unblocks the release, and
+  cannot then be adjudicated.
 
 ## Run
 
 ```
-forge test                                    # everything
-forge test --no-match-path "test/invariants/*" # fast feedback
-forge test --match-path "test/invariants/*"    # the stateful campaign
+forge test                                     # everything
+forge test --no-match-path "test/invariants/*"  # fast feedback
+forge test --match-path "test/invariants/*"     # the stateful campaign
 forge test --match-path "test/gas/*" --gas-report
 ```
-
-## Adversarial cases the suite covers
-
-Forged print, replayed payload within a feed and across feeds, the same round printed twice with two
-values, a round moving backwards, a stale round, drift beyond the per-report cap, cumulative drift
-across a window, a challenge after the window, a second challenge on one escrow, a release blocked by
-a live challenge, a stake below the floor, a bond withdrawn to the floor, a liquidation beyond the
-bond, re-entry through a hostile token, and an honest loss that must be classified as honest.
 
 ## Why the invariants matter more than the unit tests
 
