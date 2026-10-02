@@ -113,8 +113,9 @@ contract FeedRegistry is IFeedRegistry, ILanternErrors {
         }
         }
 
-        // Snapshot the band as it stood *before* this value was folded in.
+        // Snapshot the band, and the depth, as they stood *before* this value was folded in.
         (uint256 lo, uint256 hi) = _history.bandOf(feedId);
+        uint64 depth = uint64(_history.samplesOf(feedId));
 
         _history.checkDrift(feedId, value, block.timestamp);
         _history.observe(feedId, value, round, timestamp);
@@ -130,7 +131,7 @@ contract FeedRegistry is IFeedRegistry, ILanternErrors {
         rec.timestamp = timestamp;
         rec.payloadHash = payloadHash;
         rec.signer = signer;
-        rec.prevSamples = uint64(_history.samplesOf(feedId));
+        rec.prevSamples = depth;
         rec.exists = true;
         _last[feedId] = rec;
     }
