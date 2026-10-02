@@ -32,10 +32,11 @@ library Band {
         if (base > Constants.MAX_WIDTH_BPS) base = Constants.MAX_WIDTH_BPS;
 
         if (s.samples < Constants.PRIOR_SAMPLES) {
-            uint256 deficit = Constants.PRIOR_SAMPLES - s.samples;
-            uint256 widening = uint256(base) * deficit / Constants.PRIOR_SAMPLES;
-            base += widening;
-            if (base > Constants.MAX_WIDTH_BPS) base = Constants.MAX_WIDTH_BPS;
+        // Thin history means wide band: interpolate toward the ceiling, so a feed with no
+        // samples accepts almost anything and a warm feed tightens onto its own realized moves.
+        uint256 deficit = Constants.PRIOR_SAMPLES - s.samples;
+        uint256 headroom = Constants.MAX_WIDTH_BPS - base;
+        base += (headroom * deficit) / Constants.PRIOR_SAMPLES;
         }
         return uint32(base);
     }
