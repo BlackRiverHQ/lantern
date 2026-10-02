@@ -120,9 +120,9 @@ contract LanternInvariantsTest is StdInvariant, Test {
         if (lantern.isPriceable(FEED)) assertGe(lantern.bondOf(FEED), lantern.exposureOf(FEED));
     }
 
-    /// @notice Fuzzed action counts are visible to the outside: the handler really did work.
-    function invariant_handlerActuallyExercised() public view {
-        assertGe(handler.challengesSeen(), 0);
+    /// @notice No challenge can exist that was not opened against a recorded liquidation.
+    function invariant_challengesBelongToLiquidations() public view {
+    assertLe(handler.challengesSeen(), lantern.recorded());
     }
 
     /// @notice No escrow can exist for a feed that was never registered.
