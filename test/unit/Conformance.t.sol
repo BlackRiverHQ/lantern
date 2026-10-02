@@ -22,8 +22,10 @@ contract ConformanceTest is LanternTest {
     function test_liquidation_is_reachable_through_the_interface() public {
         IWindfall w = IWindfall(address(lantern));
         token.mint(address(market), 1_000e18);
-        vm.prank(address(market));
+        vm.startPrank(address(market));
+        token.approve(address(lantern), type(uint256).max);
         w.recordLiquidation(1, FEED, round, BONUS, LIQUIDATOR, BORROWER);
+        vm.stopPrank();
         assertEq(w.bonusOutcome(1), 0);
     }
 
