@@ -16,4 +16,6 @@ interface IHistory {
     function bandOf(bytes32 feedId) external view returns (uint256 lo, uint256 hi);
     function accepts(bytes32 feedId, uint256 value) external view returns (bool);
     function widthBps(bytes32 feedId) external view returns (uint32);
+    function samplesOf(bytes32 feedId) external view returns (uint256);
+
 }
