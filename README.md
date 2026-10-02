@@ -9,6 +9,14 @@ it prints again. When nobody contests the window, the liquidator is paid in full
 The debt is not held back. Repayment and the closing of the position still happen at the moment of
 liquidation, exactly as they did before. What becomes provisional is the profit.
 
+**Try it: [friendly-fennec-31.convex.site/dashboard](https://friendly-fennec-31.convex.site/dashboard).**
+Connect any wallet on Arbitrum Sepolia and run a case from start to finish: take out a loan, watch the
+feed print a false price and the market liquidate you on it, then prove the price was false and take
+your collateral back. Every step is a real transaction. Your wallet plays the borrower and the prover.
+The feed's side is played by a small server that holds the feed operator's key. It derives every value
+from the chain and only makes the prints a case needs. The Cases tab lists every case on chain and how
+it ended.
+
 ## Why the price needs a second look
 
 A liquidation consumes a price and produces a payment. If the price was fabricated, the payment is real

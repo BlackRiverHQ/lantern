@@ -18,7 +18,8 @@
     subject: '0xf7ed0c5000d57be8bb1723e1298ee49e6a076692f4ef68d27dd00db178f57210',
     peer: '0x0bf35ab8318649a0b126cdc6fb6c89b2ebbb1659b37fbd0b3aca12e6eefa71a2',
     decimals: 6,
-    explorer: 'https://sepolia.arbiscan.io',
+    // Blockscout shows the verified source for every contract here; Arbiscan does not
+    explorer: 'https://arbitrum-sepolia.blockscout.com',
     rpc: 'https://sepolia-rollup.arbitrum.io/rpc'
   };
   // a test harness may supply its own, so the same page can run against a local chain
@@ -320,8 +321,9 @@
       return { ok: false, reason: reason || (e && e.message) || 'the chain refused it' };
     }
   }
-  async function send(label, to, calldata, value) {
+  async function send(label, to, calldata, value, onHash) {
     var hash = await request('eth_sendTransaction', [txFields(to, calldata, value)]);
+    if (onHash) { try { onHash(hash); } catch (e) { } }
     var entry = { label: label, hash: hash, status: 'pending', to: to };
     log.unshift(entry);
     notify();
@@ -383,7 +385,7 @@
     connect: connect, switchChain: switchChain, refreshBalances: refreshBalances,
     encode: encode, decodeError: decodeError, keccak256: keccak256,
     parseUnits: parseUnits, formatUnits: formatUnits, stringToBytes: stringToBytes, bytesToHex: bytesToHex,
-    send: send, simulate: simulate, log: log, onChange: function (f) { listeners.push(f); },
+    send: send, wait: wait, simulate: simulate, log: log, onChange: function (f) { listeners.push(f); },
     request: request, allowanceOf: allowanceOf, ensureAllowance: ensureAllowance, encAddress: encAddress
   };
 })();
