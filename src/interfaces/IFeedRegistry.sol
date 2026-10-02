@@ -5,16 +5,22 @@ import {IHistory} from "./IHistory.sol";
 
 /// @title Registry of consumed feeds and the reports that priced liquidations.
 interface IFeedRegistry {
+    /// @notice A recorded report, plus the band that surrounded the value before it landed.
+    /// @dev The pre-band is snapshotted so a challenge can recompute what the rule would have
+    ///      said at the time, without trusting anyone's recollection.
     struct Report {
-        uint256 value;       // feed-scaled price
+        uint256 value;
+        uint256 prevValue;
+        uint256 prevBandLo;
+        uint256 prevBandHi;
         uint64  round;
         uint64  timestamp;
-        bytes32 payloadHash; // provenance of the exact payload
+        bytes32 payloadHash;
         address signer;
         bool    exists;
     }
 
-    function registerFeed(bytes32 feedId, bytes32 signerSet, uint8 decimals) external;
+    function registerFeed(bytes32 feedId, address operator, bytes32 signerSet, uint8 decimals) external;
     function recordReport(bytes32 feedId, uint256 value, uint64 round, uint64 timestamp,
                           bytes32 payloadHash, address signer) external;
     function reportAt(bytes32 feedId, uint64 round) external view returns (Report memory);
