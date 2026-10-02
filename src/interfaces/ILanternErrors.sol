@@ -37,4 +37,6 @@ interface ILanternErrors {
     error PeerAlreadyDeclared(bytes32 feedId);
     error BadPeer(bytes32 feedId, bytes32 peer);
 
+    error ReportTooThin(bytes32 feedId, uint64 samples, uint64 required);
+
 }
