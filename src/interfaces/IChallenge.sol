@@ -21,6 +21,5 @@ interface IChallenge {
         uint64  openedAt;
     }
 
-    function challenge(uint256 challengeId) external view returns (Record memory);
-    function open(uint256 liquidationId, Rule rule, bytes calldata evidence) external payable returns (uint256 challengeId);
+    function challengeOf(uint256 liquidationId) external view returns (Record memory);
 }
