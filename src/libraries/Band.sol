@@ -18,7 +18,9 @@ library Band {
     function observeMove(State memory s, uint256 value) internal pure returns (uint32 moveBps) {
         if (s.anchor == 0) return Constants.MIN_WIDTH_BPS;
         uint256 observed = FixedPoint.absDiffBps(value, s.anchor);
-        uint256 cap = Constants.MAX_WIDTH_BPS;
+        // A print cannot widen the feed's tolerance by more than the band it just contradicted.
+        // Otherwise one outlier print buys headroom and the next one is no longer contestable.
+        uint256 cap = widthBps(s);
         if (observed > cap) observed = cap;
         uint256 blended = (uint256(s.moveBps) * ((1 << Constants.MOVE_EWMA_SHIFT) - 1) + observed)
             >> Constants.MOVE_EWMA_SHIFT;
