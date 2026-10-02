@@ -30,9 +30,9 @@ contract ChainlinkSource {
     /// @return round the aggregator's own round id, truncated to 64 bits
     /// @return updatedAt when the aggregator says the answer was published
     function latest() external view returns (uint256 value, uint64 round, uint64 updatedAt) {
-        (, int256 answer, , uint256 updated, ) = aggregator.latestRoundData();
-        if (answer <= 0) revert NoAnswer(answer);
-        return (_scale(uint256(answer)), uint64(updated), uint64(updated));
+    (uint80 roundId, int256 answer, , uint256 updated, ) = aggregator.latestRoundData();
+    if (answer <= 0) revert NoAnswer(answer);
+    return (_scale(uint256(answer)), _round(roundId), uint64(updated));
     }
 
     /// @notice The same read, refusing an answer older than `maxAge`. A stale aggregator is an
