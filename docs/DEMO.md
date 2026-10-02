@@ -1,7 +1,7 @@
 # Demo
 
-Six acts, each a state change you can watch on chain. The caught acts are driven by scripts, so anyone
-can reproduce them rather than take a video's word for it.
+Seven acts, each a state change you can watch on chain. The caught acts are driven by scripts, so
+anyone can reproduce them rather than take a video's word for it.
 
 ## Acts
 
@@ -11,32 +11,42 @@ can reproduce them rather than take a video's word for it.
    surrounded it is snapshotted.
 3. **Liquidate.** A market reports a liquidation that consumed that round. Debt repayment and the
    position close are untouched; only the profit above principal and fees is held.
-4. **Contest.** The same round is printed a second time with a different value. The disagreement is
-   recorded on chain. A prover opens a challenge on the held bonus.
-5. **Adjudicate.** The verdict is recomputed from state: the value cannot be reconciled with the
-   round's first print. The bonus goes to the borrower, the prover is paid from the signer's bond, and
-   the feed's error count moves.
-6. **Settle.** A liquidation nobody contests releases its bonus to the liquidator once the window
-   closes.
+4. **Contest.** A rule is offered as a claim. The verdict is recomputed from state.
+5. **Declare a peer.** The feed names an independent source - on Arbitrum Sepolia, the live Chainlink
+   ETH/USD aggregator.
+6. **Catch by comparison.** The aggregator's answer is published through Lantern for the same round, a
+   liquidation consumes the feed's print, and a challenger opens `CROSS_SOURCE`. The contract compares
+   the two and redirects the bonus.
+7. **Settle.** A liquidation nobody contests releases its bonus to the liquidator once the window
+   closes. A challenge nobody defends is voided after the grace, and its stake answers for the delay.
 
 ## Reproduce
 
 ```
-export PRIVATE_KEY=...                        # testnet key, gas only
-forge script script/Deploy.s.sol --rpc-url arbitrum_sepolia --broadcast -vv
+export PRIVATE_KEY=...                          # testnet key, gas only
+export RPC_URL=https://sepolia-rollup.arbitrum.io/rpc
 
-export TOKEN=0x25939dB67A1bA238001444fad8D879f787A374e4
-export LANTERN=0xF3e59109d72D052888B1Df97D82d8E920067b1C9
-export MARKET=0x504945EC11AD3CA5Bf4920496b3C613eb83a7A17
-forge script script/DemoRun.s.sol --rpc-url arbitrum_sepolia --broadcast -vv   # acts 1-5
-forge script script/DemoSettle.s.sol --rpc-url arbitrum_sepolia --broadcast -vv # act 6, after the window
+forge script script/Deploy.s.sol                  --rpc-url $RPC_URL --broadcast -vv
+
+export LANTERN=0x9420b6B3e5Cc8FC028b34206F9C0388230a6B772
+export MARKET=0x53fFF340f1e6796F905985E43e7a784b0e687066
+
+forge script script/DemoRun.s.sol                 --rpc-url $RPC_URL --broadcast -vv
+export ROUND=8
+forge script script/ReportFromChainlink.s.sol     --rpc-url $RPC_URL --broadcast -vv
+export LIQUIDATION_ID=10
+forge script script/ChallengeWithChainlink.s.sol  --rpc-url $RPC_URL --broadcast -vv
+forge script script/DemoSettle.s.sol              --rpc-url $RPC_URL --broadcast -vv
 ```
 
+None of these scripts take an address for the asset: they read `lantern.asset()`, so a redeployment
+cannot leave them pointing at the old one.
+
 The equivalent stories are also asserted in the test suite, where they run without a network:
-`test/fixtures/Scenarios.t.sol`.
+`test/fixtures/Scenarios.t.sol`, `test/unit/CrossSource.t.sol`.
 
 ## What to look at afterwards
 
-`feedErrors` on the feed, `bonusOutcome` on the escrow, and `bondOf` on the signer. Those three reads
-are the whole story: something was caught, the profit was redirected rather than paid, and the party
-who produced the price paid for it.
+`feedErrors` (how many prints were caught), `requiredBond` (what the feed must now carry),
+`peerOf` (which source it is reconciled against), `bonusOutcome` (whether a bonus was paid, redirected
+or still held). Those four reads are the whole story.
