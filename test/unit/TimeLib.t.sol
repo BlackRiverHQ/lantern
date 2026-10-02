@@ -15,13 +15,15 @@ contract TimeLibTest is Test {
     }
 
     function test_window_below_minimum_reverts() public {
-        vm.expectRevert(bytes("WINDOW"));
-        TimeLib.validateWindow(Constants.MIN_HOLD_WINDOW - 1);
+    WindowProbe probe = new WindowProbe();
+    vm.expectRevert(bytes("WINDOW"));
+    probe.check(Constants.MIN_HOLD_WINDOW - 1);
     }
 
     function test_window_above_maximum_reverts() public {
-        vm.expectRevert(bytes("WINDOW"));
-        TimeLib.validateWindow(Constants.MAX_HOLD_WINDOW + 1);
+    WindowProbe probe = new WindowProbe();
+    vm.expectRevert(bytes("WINDOW"));
+    probe.check(Constants.MAX_HOLD_WINDOW + 1);
     }
 
     function test_deadline_adds_window() public pure {
