@@ -218,7 +218,7 @@ contract Lantern is IWindfall, ILanternErrors {
         if (!r.exists) revert UnknownFeed(feedId);
 
         uint256 nextExposure = f.exposure + bonus;
-        uint256 required = BondMath.exposureFloor(nextExposure);
+        uint256 required = BondMath.exposureFloor(nextExposure, minBond());
         if (f.bond < required) revert UnderBonded(feedId, f.bond, required);
 
         // Effects before interactions, for the same reason: the escrow must exist before any
