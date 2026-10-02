@@ -10,7 +10,9 @@ import {Hashing} from "../libraries/Hashing.sol";
 /// @dev Two facts live only here: whether a round was priced twice with different values, and
 ///      whether one payload was used for two different feeds.
 contract ReportBook is ILanternErrors {
-    struct Slot {
+using Bytes32Set for Bytes32Set.Set;
+
+struct Slot {
         uint256 firstValue;
         uint256 otherValue;
         uint64  round;
