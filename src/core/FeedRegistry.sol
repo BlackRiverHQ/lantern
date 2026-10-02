@@ -32,7 +32,7 @@ contract FeedRegistry is IFeedRegistry, ILanternErrors {
     constructor(address controller_) {
         if (controller_ == address(0)) revert ZeroAddress();
         controller = controller_;
-        history = new History(address(this));
+        _history = new History(address(this));
         book = new ReportBook(address(this));
     }
 
