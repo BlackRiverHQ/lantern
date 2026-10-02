@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lantern | Dashboard</title>
+<meta name="description" content="Live Lantern state on Arbitrum Sepolia: held bonuses, feed bonds, challenges and verdicts.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%278%27 fill=%27%23ddff46%27/%3E%3Ctext x=%2716%27 y=%2723%27 text-anchor=%27middle%27 font-family=%27sans-serif%27 font-weight=%27700%27 font-size=%2720%27 fill=%27%23191919%27%3EL%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/assets/css/dashboard.css">
+</head>
+<body>
+<div class="app">
+
+  <aside class="side" id="side">
+    <a class="brand" href="/" aria-label="Lantern home"><span class="word">Lantern</span></a>
+
+    <nav class="side-nav" aria-label="Dashboard">
+      <div class="side-label">Monitor</div>
+      <a href="#overview" data-view="overview" class="active"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 3h6v6H3zM11 3h6v4h-6zM11 9h6v8h-6zM3 11h6v6H3z"/></svg>Overview</a>
+      <a href="#liquidations" data-view="liquidations"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2 2 6v8l8 4 8-4V6zM2 6l8 4 8-4M10 10v8"/></svg>Liquidations</a>
+      <a href="#bonds" data-view="bonds"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2 3 5v5c0 4 3 7 7 8 4-1 7-4 7-8V5z"/></svg>Feeds &amp; bonds</a>
+      <a href="#rules" data-view="rules"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4h12M4 8h12M4 12h8M4 16h6"/></svg>Rules</a>
+      <a href="#events" data-view="events"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 10h3l2-6 4 12 2-6h5"/></svg>Event log</a>
+    </nav>
+
+    <div class="side-foot">
+      <div class="net"><span class="dot" id="netDot"></span><span id="netText">Connecting…</span></div>
+      <div class="side-meta">Arbitrum Sepolia · testnet only</div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="top">
+      <button class="menu" id="menuBtn" aria-label="Open menu"><span></span><span></span></button>
+      <div class="crumbs"><span class="muted">Dashboard</span><span class="sep">/</span><span id="crumb">Overview</span></div>
+      <div class="top-right">
+        <span class="chip" id="blockChip">block —</span>
+        <span class="chip" id="ageChip">updated —</span>
+        <button class="btn-lime" id="refreshBtn"><span>Refresh</span><span class="arrow"><svg width="16" height="12" viewBox="0 0 16 12" aria-hidden="true"><path fill="currentColor" d="M11.283 11.714c.14-3.008 1.827-4.8 4.336-5.035V5.014C13.11 4.78 11.423 3.01 11.283 0L9.416.427A6 6 0 0 0 10.48 3.35c.622.853 1.325 1.408 2.128 1.664H0V6.68h12.608c-.803.256-1.506.81-2.128 1.685a6 6 0 0 0-1.064 2.902z"/></svg></span></button>
+      </div>
+    </header>
+
+    <div class="err" id="errBox" role="alert"></div>
+
+    <!-- OVERVIEW -->
+    <section class="view active" id="view-overview">
+      <div class="head">
+        <h1>Hold the bonus.<br>Prove the price.</h1>
+        <p>Every number here is read from Arbitrum Sepolia in your browser. Nothing is typed in by hand; if the chain can't be reached, the fields stay empty.</p>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi dark"><div class="k">Bonus held now</div><div class="v" data-read="held">—</div><div class="s">waiting out the window</div></div>
+        <div class="kpi"><div class="k">Hold window</div><div class="v" data-read="windowShort">—</div><div class="s">before release is possible</div></div>
+        <div class="kpi"><div class="k">Prover bounty</div><div class="v" data-read="bountyShort">—</div><div class="s">of a redirected bonus</div></div>
+        <div class="kpi"><div class="k">Minimum feed bond</div><div class="v" data-read="minBondShort">—</div><div class="s">to register a feed</div></div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><h3>Verdicts</h3><span class="tag">all liquidations</span></div>
+          <div class="stack" id="verdictBar"></div>
+          <div class="legend" id="verdictLegend"></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><h3>Subject feed</h3><span class="pill" id="priceablePill">—</span></div>
+          <div class="mini-rows">
+            <div><span>Caught prints</span><b data-read="errors">—</b></div>
+            <div><span>Required bond</span><b data-read="requiredShort">—</b></div>
+            <div><span>Escalation</span><b data-read="mult">—</b></div>
+            <div><span>Second source</span><b data-read="peer">—</b></div>
+          </div>
+          <div class="meter"><i id="multBarO"></i></div>
+          <div class="meter-cap"><span>1.0×</span><span>ceiling 3.0×</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h3>Recent liquidations</h3><a class="link" href="#liquidations">All liquidations →</a></div>
+        <div class="table" id="recentTable"><div class="empty">Reading events…</div></div>
+      </div>
+    </section>
+
+    <!-- LIQUIDATIONS -->
+    <section class="view" id="view-liquidations">
+      <div class="head"><h1>Liquidations</h1><p>Each liquidation pays out at once except for its bonus, which waits out the hold window. Pick one to see what happened to it, event by event.</p></div>
+      <div class="split">
+        <div class="list" id="caseList"><div class="empty">Reading events…</div></div>
+        <div class="card detail" id="caseDetail"><div class="empty">Select a liquidation.</div></div>
+      </div>
+    </section>
+
+    <!-- BONDS -->
+    <section class="view" id="view-bonds">
+      <div class="head"><h1>Feeds &amp; bonds</h1><p>A feed must post a bond at least as large as the exposure it prices. Every upheld challenge raises that requirement by 20%, up to three times exposure.</p></div>
+      <div class="kpis">
+        <div class="kpi"><div class="k">Exposure</div><div class="v" data-read="exposureShort">—</div><div class="s">open position value priced</div></div>
+        <div class="kpi dark"><div class="k">Required bond</div><div class="v" data-read="requiredShort">—</div><div class="s" data-read="multS">—</div></div>
+        <div class="kpi"><div class="k">Posted bond</div><div class="v" data-read="bondShort">—</div><div class="s" data-read="coverS">—</div></div>
+        <div class="kpi"><div class="k">Caught prints</div><div class="v" data-read="errors">—</div><div class="s">upheld against this feed</div></div>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><h3>Bond against exposure</h3><span class="tag">subject feed</span></div>
+          <div class="bars">
+            <div class="bar"><span>Exposure</span><div class="track"><i id="mExp" class="c-blue"></i></div><b data-read="exposureShort">—</b></div>
+            <div class="bar"><span>Required</span><div class="track"><i id="mReq" class="c-red"></i></div><b data-read="requiredShort">—</b></div>
+            <div class="bar"><span>Posted</span><div class="track"><i id="mBond" class="c-lime"></i></div><b data-read="bondShort">—</b></div>
+          </div>
+          <p class="note" id="bondNote"></p>
+        </div>
+        <div class="card">
+          <div class="card-h"><h3>Escalation</h3><span class="tag">+20% per caught print</span></div>
+          <div class="steps" id="escSteps"></div>
+          <p class="note">The requirement grows with the feed's own record. No admin sets it and no committee can lower it.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- RULES -->
+    <section class="view" id="view-rules">
+      <div class="head"><h1>Rules</h1><p>A challenger names one rule. The contract recomputes it from state it already holds; the challenger brings no oracle of their own.</p></div>
+      <div class="rules" id="rulesList"></div>
+    </section>
+
+    <!-- EVENTS -->
+    <section class="view" id="view-events">
+      <div class="head"><h1>Event log</h1><p>Every event the protocol has emitted since deployment, newest first.</p></div>
+      <div class="filters" id="evFilters"></div>
+      <div class="card flush"><div class="table" id="evTable"><div class="empty">Reading events…</div></div></div>
+    </section>
+
+    <footer class="foot"><span>©2026 Lantern</span><span>Testnet only</span></footer>
+  </div>
+</div>
+<script src="/assets/js/dashboard.js"></script>
+</body>
+</html>

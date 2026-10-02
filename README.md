@@ -71,6 +71,9 @@ declaration, and after it is set it cannot be changed.
 | Asset | `0xfF062343892989373F422F7543F0587581594249` |
 | Second source | `0x3Fba7aBB9f393446917c9cAA5BD99b40FC85DF98` |
 
+Lantern's constructor builds the feed registry and, under it, the history store and the report book; all
+three addresses are in [docs/DEPLOYMENTS.md](docs/DEPLOYMENTS.md) with the block they landed at.
+
 Machine-readable in [deployments.json](deployments.json); the ABI in [abi/](abi/); every read and
 command in [docs/DEPLOYMENTS.md](docs/DEPLOYMENTS.md).
 
@@ -90,8 +93,14 @@ forge test --match-path "test/invariants/*"      # stateful invariants over rand
 forge test --match-path "test/gas/*" --gas-report
 forge script script/Deploy.s.sol --rpc-url arbitrum_sepolia --broadcast -vv
 forge script script/DemoRun.s.sol --rpc-url arbitrum_sepolia --broadcast -vv
+forge script script/ReportFromChainlink.s.sol --rpc-url arbitrum_sepolia --broadcast -vv
 forge script script/ChallengeWithChainlink.s.sol --rpc-url arbitrum_sepolia --broadcast -vv
 ```
+
+The four scripts run in order and each later one needs the addresses the first printed, so
+`make redeploy` runs the whole sequence against the addresses it just made and refuses to run the demo
+against a deploy that did not land. `make deploy`, `make demo`, `make report`, and `make challenge` run
+them one at a time; `.env.example` lists every variable they read.
 
 ## Documentation
 
