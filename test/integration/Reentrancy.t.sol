@@ -36,11 +36,14 @@ contract ReentrancyTest is Test {
         token.approve(address(lantern), type(uint256).max);
         lantern.registerFeed(FEED, keccak256("SIGNERS"), 18);
         lantern.depositBond(FEED, 1_000e18);
-        lantern.recordReport(FEED, 100e18, 1, uint64(block.timestamp), keccak256("p1"), OPERATOR);
+        for (uint64 r = 1; r <= 4; r++) {
+            lantern.recordReport(FEED, 100e18, r, uint64(block.timestamp), keccak256(abi.encode("p", r)), OPERATOR);
+        }
+        lantern.recordReport(FEED, 100e18, 5, uint64(block.timestamp), keccak256("p1"), OPERATOR);
         vm.stopPrank();
 
         vm.prank(LIQUIDATOR);
-        market.liquidate(1, FEED, 1, BONUS, BORROWER);
+        market.liquidate(1, FEED, 5, BONUS, BORROWER);
     }
 
     function _armReentryIntoOpenChallenge(uint256 stake) internal {
