@@ -99,6 +99,15 @@ contract LanternTest is Test {
         round = _push(feedId, 115e18);
     }
 
+    /// @notice A sequence of prints that each contradict the previous anchor by 10%.
+    uint256 internal suspicionCounter = 115e18;
+
+    function _escalatingPrint(bytes32 feedId) internal returns (uint64 round) {
+        vm.warp(block.timestamp + 60);
+        round = _push(feedId, suspicionCounter);
+        suspicionCounter = suspicionCounter + (suspicionCounter / 10);
+    }
+
     /// @notice Push with a payload the caller chooses, for provenance tests.
     function _pushWithPayload(bytes32 feedId, uint256 value, bytes32 payload) internal returns (uint64 round) {
         round = ++roundCounter;
