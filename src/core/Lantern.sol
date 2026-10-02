@@ -78,6 +78,7 @@ contract Lantern is IWindfall, ILanternErrors {
     mapping(uint256 => Escrow) private _escrows;
     mapping(uint256 => ChallengeRec) private _challenges;
     uint256 private _heldTotal;
+    bool private _locked;
 
     uint256 public recorded;
     uint256 public challengesOpened;
