@@ -16,7 +16,10 @@ import {WaterfallMath} from "../src/libraries/WaterfallMath.sol";
 contract DemoRun is Script {
     uint256 internal constant BOND = 1_000e18;
     uint256 internal constant BONUS = 10e18;
-    uint64 internal constant ROUND = 1;
+    /// @dev A round may only be priced with MIN_SAMPLES_FOR_PRICING prints behind it, so the caught
+    ///      round is the fifth one, not the first: four warming prints, then the conflict.
+    uint64 internal constant WARMUP = 4;
+    uint64 internal constant ROUND = WARMUP + 1;
 
     function run() external {
         uint256 pk = vm.envUint("PRIVATE_KEY");
@@ -37,24 +40,30 @@ contract DemoRun is Script {
         console2.log("bonded", lantern.bondOf(feedId));
         console2.log("priceable", lantern.isPriceable(feedId));
 
-        // 2. a clean print, then a second print of the same round with a different value
+        // 2. the depth first: a round can only be priced once prints stand behind it
+        for (uint64 r = 1; r <= WARMUP; r++) {
+            lantern.recordReport(feedId, 100e18, r, uint64(block.timestamp), keccak256(abi.encode("warmup", r)), operator);
+        }
+        console2.log("priceable after the warmup", lantern.isPriceable(feedId));
+
+        // 3. the caught case: the same round printed twice with two different values
         lantern.recordReport(feedId, 100e18, ROUND, uint64(block.timestamp), keccak256("payload:1"), operator);
-        lantern.recordReport(feedId, 105e18, ROUND, uint64(block.timestamp), keccak256("payload:2"), operator);
+        lantern.recordReport(feedId, 101e18, ROUND, uint64(block.timestamp), keccak256("payload:2"), operator);
         console2.log("slot conflicted", lantern.reg().book().slotOf(feedId, ROUND).conflicted);
 
-        // 3. a liquidation consumes that round; only the profit is held
+        // 4. a liquidation consumes that round; only the profit is held
         token.mint(address(market), BONUS);
         market.liquidate(1, feedId, ROUND, BONUS, operator);
         console2.log("held", lantern.heldTotal());
         console2.log("liquidator paid out already", token.balanceOf(operator));
 
-        // 4. anyone can contest it from the evidence alone
+        // 5. anyone can contest it from the evidence alone
         uint256 stake = WaterfallMath.stakeFloor(BONUS, lantern.minStake());
         token.mint(operator, stake);
         lantern.openChallenge(1, IChallenge.Rule.SLOT_UNIQUENESS, abi.encode(ROUND), stake);
         console2.log("stake posted", stake);
 
-        // 5. the adjudicator recomputes the claim from state
+        // 6. the adjudicator recomputes the claim from state
         bool upheld = lantern.adjudicate(1);
         console2.log("upheld", upheld);
 

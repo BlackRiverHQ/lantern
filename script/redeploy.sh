@@ -21,6 +21,24 @@ RPC_URL="${RPC_URL:-https://sepolia-rollup.arbitrum.io/rpc}"
 CHAIN_ID=421614
 ART="broadcast/Deploy.s.sol/421614/run-latest.json"
 
+# One feed id for every step. Deploy and DemoRun default to FEED:DEMO while both Chainlink scripts
+# default to FEED:ARB-SEPOLIA-DEMO, so a run with nothing exported would populate one feed and then
+# police another. The label is hashed once here and handed to all four, as the bytes32 they expect.
+FEED_LABEL="${FEED_LABEL:-FEED:ARB-SEPOLIA-DEMO}"
+PEER_LABEL="${PEER_LABEL:-FEED:ETH-USD-PEER}"
+FEED_ID="$(cast keccak "$FEED_LABEL")"
+PEER_FEED_ID="$(cast keccak "$PEER_LABEL")"
+SUBJECT_FEED_ID="$FEED_ID"
+
+# Same reasoning for the round and the ids the two Chainlink steps share: the report step defaults to
+# round 1 and the challenge step to round 7, and the comparison is by the subject's round, so left
+# alone they publish the peer on one round and price another. One value for both.
+ROUND="${ROUND:-7}"
+LIQUIDATION_ID="${LIQUIDATION_ID:-9}"
+BONUS="${BONUS:-1000000000000000000}"
+BOND="${BOND:-1000000000000000000}"
+export FEED_ID SUBJECT_FEED_ID PEER_FEED_ID ROUND LIQUIDATION_ID BONUS BOND
+
 step() { printf '\n== %s\n' "$1"; }
 
 step "deploy"
