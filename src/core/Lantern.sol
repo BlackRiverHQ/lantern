@@ -148,7 +148,7 @@ contract Lantern is IWindfall, ILanternErrors {
 
     function isPriceable(bytes32 feedId) public view returns (bool) {
         FeedState storage f = _feeds[feedId];
-        return f.registered && BondMath.isPriceable(f.bond, f.exposure);
+        return f.registered && BondMath.isPriceable(f.bond, f.exposure, minBond());
     }
 
     function priceable(bytes32 feedId) external view returns (bool) { return isPriceable(feedId); }
