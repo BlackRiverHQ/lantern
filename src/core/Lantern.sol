@@ -248,7 +248,7 @@ contract Lantern is IWindfall, ILanternErrors {
         IChallenge.Rule rule,
         bytes calldata evidence,
         uint256 stake
-    ) external returns (uint256) {
+    ) external nonReentrant returns (uint256) {
         Escrow storage e = _escrows[liquidationId];
         if (!e.exists) revert UnknownLiquidation(liquidationId);
         if (e.outcome != 0) revert LiquidationAlreadySettled(liquidationId);
