@@ -44,6 +44,10 @@ report:
 challenge:
 	forge script script/ChallengeWithChainlink.s.sol --rpc-url arbitrum_sepolia --broadcast -vv
 
+# Where the seized collateral ends up: the market's claim, run after a verdict or after the window.
+settle:
+	forge script script/DemoSettle.s.sol --rpc-url arbitrum_sepolia --broadcast -vv
+
 # The whole sequence in one order, against the addresses the deploy just made, then the record
 # rewritten from the broadcast. Refuses to run the demo against a deploy that did not land.
 redeploy:
