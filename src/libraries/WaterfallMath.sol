@@ -33,8 +33,9 @@ library WaterfallMath {
     }
 
     /// @notice Minimum stake a prover must post for a given held bonus.
-    function stakeFloor(uint256 bonus) internal pure returns (uint256) {
-        uint256 proportional = FixedPoint.bpsOf(bonus, Constants.MIN_STAKE_BPS);
-        return FixedPoint.max(proportional, Constants.MIN_STAKE_ABSOLUTE);
+    /// @param minStakeAbsolute the smallest stake this deployment accepts, in the asset's own units.
+    function stakeFloor(uint256 bonus, uint256 minStakeAbsolute) internal pure returns (uint256) {
+    uint256 proportional = FixedPoint.bpsOf(bonus, Constants.MIN_STAKE_BPS);
+    return FixedPoint.max(proportional, minStakeAbsolute);
     }
 }
