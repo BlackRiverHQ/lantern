@@ -247,19 +247,12 @@ contract Lantern is IWindfall, ILanternErrors {
         revert ReportTooThin(feedId, r.prevSamples, Constants.MIN_SAMPLES_FOR_PRICING);
         }
 
-        uint256 nextExposure = f.exposure + bonus;
-        uint256 required = BondMath.penalisedFloor(
-        BondMath.exposureFloor(nextExposure, minBond()), f.errors, Constants.ERROR_BOND_PENALTY_BPS
-        );
-        // Recovery is bounded by the collateral, not by the held profit, so the bond has to answer
-        // for a share of what the liquidation actually put at risk.
-        uint256 forNotional = BondMath.notionalFloor(notional, Constants.NOTIONAL_COVERAGE_BPS);
-        if (forNotional > required) required = forNotional;
+        uint256 required = _requiredBond(f, bonus, notional);
         if (f.bond < required) revert UnderBonded(feedId, f.bond, required);
 
         // Effects before interactions, for the same reason: the escrow must exist before any
         // token code runs.
-        f.exposure = nextExposure;
+        f.exposure += bonus;
         _heldTotal += bonus;
 
         _escrows[liquidationId] = Escrow({
@@ -279,6 +272,18 @@ contract Lantern is IWindfall, ILanternErrors {
     }
 
     // --- challenges --------------------------------------------------------
+
+    /// @dev Both floors, whichever is higher: the escrow the feed is already carrying, penalised for
+    ///      the times it has been caught, and the share of the notional this liquidation put at risk.
+    ///      Split out so the liquidation path keeps its locals within reach of the stack.
+    function _requiredBond(FeedState storage f, uint256 bonus, uint256 notional) private view returns (uint256) {
+        uint256 exposureFloor =
+            BondMath.exposureFloor(f.exposure + bonus, minBond());
+        uint256 required =
+            BondMath.penalisedFloor(exposureFloor, f.errors, Constants.ERROR_BOND_PENALTY_BPS);
+        uint256 forNotional = BondMath.notionalFloor(notional, Constants.NOTIONAL_COVERAGE_BPS);
+        return forNotional > required ? forNotional : required;
+    }
 
     /// @notice One challenge per liquidation; the liquidation id is the challenge id. Stakes are
     ///         denominated in the same asset as the held bonus.
