@@ -6,6 +6,8 @@
     rpcs: ['https://sepolia-rollup.arbitrum.io/rpc', 'https://arbitrum-sepolia-rpc.publicnode.com'],
     chainId: 421614,
     lantern: '0xcdce3a1b3ebf7fe1e340ab670e25fe768195ac54',
+    // the settlement asset's scale: an amount means nothing without the token it is denominated in
+    decimals: 6,
     subject: '0xf7ed0c5000d57be8bb1723e1298ee49e6a076692f4ef68d27dd00db178f57210',
     peer: '0x0bf35ab8318649a0b126cdc6fb6c89b2ebbb1659b37fbd0b3aca12e6eefa71a2',
     fromBlock: 315054532,
@@ -48,15 +50,16 @@
   var clamp = function (v, a, b) { return Math.min(b, Math.max(a, v)); };
 
   /* ---------- formatting ---------- */
-  var E18 = 10n ** 18n;
+  var E = 10n ** BigInt(CFG.decimals);
   function units(big, dp) {
     dp = dp == null ? 3 : dp;
     var neg = big < 0n; if (neg) big = -big;
-    var whole = big / E18, frac = big % E18;
-    var f = (frac + E18).toString().slice(1, 1 + dp).replace(/0+$/, '');
+    var whole = big / E, frac = big % E;
+    var f = (frac + E).toString().slice(1, 1 + dp).replace(/0+$/, '');
     var w = whole.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     return (neg ? '-' : '') + w + (f ? '.' + f : '');
   }
+  function asNumber(v) { return Number(v) / Math.pow(10, CFG.decimals); }
   function short(h) { return h.slice(0, 6) + '\u2026' + h.slice(-4); }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function dur(sec) { sec = Number(sec); if (sec % 86400 === 0) return sec / 86400 + 'd'; if (sec % 3600 === 0) return sec / 3600 + 'h'; if (sec % 60 === 0) return sec / 60 + 'm'; return sec + 's'; }
@@ -137,7 +140,7 @@
     pill.className = 'pill ' + (s.priceable ? 'ok' : 'bad');
     $('#multBarO').style.setProperty('--w', clamp((mult - 1) / 2 * 100, 0, 100) + '%');
 
-    var exp = Number(s.exposure) / 1e18, req = Number(s.required) / 1e18, bond = Number(s.bond) / 1e18;
+    var exp = asNumber(s.exposure), req = asNumber(s.required), bond = asNumber(s.bond);
     var top = Math.max(req, exp) * 1.6;
     var w = function (v) { return clamp(v / top * 100, 0, 100) + '%'; };
     $('#mExp').style.setProperty('--w', w(exp));
