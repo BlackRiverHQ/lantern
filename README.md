@@ -44,7 +44,7 @@ constructor arguments; `Lantern` builds its own registry, so nothing is trusted 
 
 ```
 forge build
-forge test                                  # 510 tests: unit, fuzz, integration, invariants
+forge test                                  # 533 tests: unit, fuzz, integration, invariants
 forge test --match-path "test/invariants/*"  # stateful invariants over random action sequences
 forge script script/Deploy.s.sol --rpc-url arbitrum_sepolia --broadcast -vv
 forge script script/DemoRun.s.sol --rpc-url arbitrum_sepolia --broadcast -vv
