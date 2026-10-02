@@ -227,7 +227,7 @@ contract LifecycleTest is LanternTest {
     function test_errors_accumulate_across_caught_prints() public {
         _warm(FEED, 40);
         for (uint256 i = 1; i <= 3; i++) {
-            uint64 round = _suspiciousPrint(FEED);
+        uint64 round = _escalatingPrint(FEED);
             _liquidate(i, round, BONUS);
             _challenge(i, IChallenge.Rule.SELF_HISTORY, _stake());
             lantern.adjudicate(i);
