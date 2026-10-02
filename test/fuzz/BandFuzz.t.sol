@@ -4,6 +4,7 @@ pragma solidity 0.8.28;
 import {Test} from "forge-std/Test.sol";
 import {Band} from "../../src/libraries/Band.sol";
 import {Constants} from "../../src/libraries/Constants.sol";
+import {FixedPoint} from "../../src/libraries/FixedPoint.sol";
 
 contract BandFuzzTest is Test {
     function _state(uint256 anchor, uint32 moveBps, uint32 samples) internal pure returns (Band.State memory) {
