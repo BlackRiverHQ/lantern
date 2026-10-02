@@ -33,4 +33,8 @@ interface ILanternErrors {
 
     error Reentrancy();
 
+    error ChallengeStillFresh(uint256 liquidationId);
+    error PeerAlreadyDeclared(bytes32 feedId);
+    error BadPeer(bytes32 feedId, bytes32 peer);
+
 }
