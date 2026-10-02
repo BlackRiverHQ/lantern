@@ -134,5 +134,30 @@ contract Lantern is IWindfall, ILanternErrors {
     function bonusOutcome(uint256 liquidationId) external view returns (uint8) { return _escrows[liquidationId].outcome; }
     function queueRemaining(bytes32 feedId) external view returns (uint256) { return _queue[feedId].length - _queueHead[feedId]; }
 
+    // --- feeds and bonds ---------------------------------------------------
+
+    function registerFeed(bytes32 feedId, bytes32 signerSet, uint8 decimals) external {
+        if (_feeds[feedId].registered) revert FeedAlreadyRegistered(feedId);
+        _feeds[feedId] = FeedState({operator: msg.sender, bond: 0, exposure: 0, errors: 0, registered: true});
+        reg.registerFeed(feedId, msg.sender, signerSet, decimals);
+        emit FeedRegistered(feedId, msg.sender);
+    }
+
+    function depositBond(bytes32 feedId, uint256 amount) external onlyOperator(feedId) knownFeed(feedId) {
+        if (amount == 0) revert ZeroAmount();
+        SafeTransfer.pull(asset, msg.sender, amount);
+        _feeds[feedId].bond += amount;
+        emit BondDeposited(feedId, amount, _feeds[feedId].bond);
+        _settleQueue(feedId);
+    }
+
+    function withdrawBond(bytes32 feedId, uint256 amount) external onlyOperator(feedId) knownFeed(feedId) {
+        FeedState storage f = _feeds[feedId];
+        uint256 allowed = BondMath.withdrawable(f.bond, f.exposure, amount);
+        if (allowed == 0) revert UnderBonded(feedId, f.bond, BondMath.exposureFloor(f.exposure));
+        f.bond -= allowed;
+        SafeTransfer.push(asset, msg.sender, allowed);
+    }
+
     // (continued)
 }
