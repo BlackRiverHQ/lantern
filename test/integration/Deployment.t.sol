@@ -71,12 +71,16 @@ contract DeploymentTest is Test {
         token.approve(address(lantern), type(uint256).max);
         lantern.registerFeed(FEED, keccak256("SIGNERS"), 18);
         lantern.depositBond(FEED, 1_000e18);
-        lantern.recordReport(FEED, 100e18, 1, uint64(block.timestamp), keccak256("p1"), OPERATOR);
+                // A feed with a past, because a liquidation may not be priced on a print without one.
+        for (uint64 r = 1; r <= 4; r++) {
+            lantern.recordReport(FEED, 100e18, r, uint64(block.timestamp), keccak256(abi.encode("p", r)), OPERATOR);
+        }
+        lantern.recordReport(FEED, 100e18, 5, uint64(block.timestamp), keccak256("p1"), OPERATOR);
         vm.stopPrank();
 
         token.mint(address(market), 1_000e18);
         vm.prank(LIQUIDATOR);
-        market.liquidate(1, FEED, 1, 10e18, BORROWER);
+        market.liquidate(1, FEED, 5, 10e18, BORROWER);
 
         uint256 stake = WaterfallMath.stakeFloor(10e18, Constants.MIN_STAKE_ABSOLUTE_18);
         token.mint(PROVER, stake);
@@ -85,7 +89,7 @@ contract DeploymentTest is Test {
         lantern.openChallenge(1, IChallenge.Rule.SELF_HISTORY, abi.encode(uint256(1)), stake);
         vm.stopPrank();
 
-        assertFalse(lantern.adjudicate(1), "a first print cannot contradict a band that did not exist");
+        assertFalse(lantern.adjudicate(1), "a print inside its own band cannot contradict it");
         assertEq(lantern.heldTotal(), 10e18);
     }
 
