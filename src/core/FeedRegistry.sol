@@ -15,7 +15,7 @@ import {Provenance} from "../libraries/Provenance.sol";
 ///      and left contestable.
 contract FeedRegistry is IFeedRegistry, ILanternErrors {
     address public immutable controller;
-    History public immutable history;
+    History private immutable _history;
     ReportBook public immutable book;
 
     struct Feed {
