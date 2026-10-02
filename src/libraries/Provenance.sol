@@ -6,7 +6,13 @@ import {Constants} from "./Constants.sol";
 /// @title Provenance
 /// @notice The four evidence rules, expressed as pure predicates over on-chain facts.
 library Provenance {
-    enum Rule { SLOT_UNIQUENESS, ROUND_ORDERING, SELF_HISTORY, PAYLOAD_PROVENANCE }
+    enum Rule {
+    SLOT_UNIQUENESS,    // two different values for one feed in one round
+    ROUND_ORDERING,     // the print was already stale when it priced
+    SELF_HISTORY,       // outside the band the feed's own moves imply
+    PAYLOAD_PROVENANCE, // the payload was signed for another asset
+    CROSS_SOURCE        // an independent source disagrees beyond tolerance
+    }
 
     /// @notice A round may not be re-priced with a different value.
     function slotConflict(uint256 firstValue, uint256 secondValue, uint64 firstRound, uint64 secondRound)
