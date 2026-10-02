@@ -14,6 +14,8 @@ import {Provenance} from "../libraries/Provenance.sol";
 ///      true is the job of a challenge, not of a gate — so the pre-report band is snapshotted
 ///      and left contestable.
 contract FeedRegistry is IFeedRegistry, ILanternErrors {
+    event SlotConflictRecorded(bytes32 indexed feedId, uint64 round, uint256 firstValue, uint256 secondValue);
+
     address public immutable controller;
     History private immutable _history;
     ReportBook public immutable book;
