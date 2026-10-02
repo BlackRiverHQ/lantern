@@ -54,7 +54,8 @@ contract HashingTest is Test {
     }
 
     function testFuzz_payload_binds_every_field(uint64 round, uint64 ts, uint256 value) public pure {
-        bytes32 base = Hashing.payload(FEED, value, round, ts, address(1));
+        vm.assume(round < type(uint64).max && value < type(uint256).max);
+            bytes32 base = Hashing.payload(FEED, value, round, ts, address(1));
         assertTrue(base != Hashing.payload(FEED, value + 1, round, ts, address(1)));
         assertTrue(base != Hashing.payload(FEED, value, round + 1, ts, address(1)));
     }
