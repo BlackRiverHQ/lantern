@@ -7,6 +7,7 @@ import {IWindfall} from "../../src/interfaces/IWindfall.sol";
 import {IChallenge} from "../../src/interfaces/IChallenge.sol";
 import {ILanternErrors} from "../../src/interfaces/ILanternErrors.sol";
 import {WaterfallMath} from "../../src/libraries/WaterfallMath.sol";
+import {Constants} from "../../src/libraries/Constants.sol";
 
 /// @notice The interface is the contract: everything callable is callable through IWindfall.
 contract ConformanceTest is LanternTest {

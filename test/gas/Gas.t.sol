@@ -4,6 +4,7 @@ pragma solidity 0.8.28;
 import {LanternTest} from "../base/LanternTest.t.sol";
 import {IChallenge} from "../../src/interfaces/IChallenge.sol";
 import {WaterfallMath} from "../../src/libraries/WaterfallMath.sol";
+import {Constants} from "../../src/libraries/Constants.sol";
 
 /// @notice Gas ceilings, asserted rather than recorded: if a flow gets materially more expensive,
 ///         these tests fail instead of a table going stale.

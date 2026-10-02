@@ -9,6 +9,7 @@ import {IERC20} from "../../src/interfaces/IERC20.sol";
 import {IWindfall} from "../../src/interfaces/IWindfall.sol";
 import {IChallenge} from "../../src/interfaces/IChallenge.sol";
 import {WaterfallMath} from "../../src/libraries/WaterfallMath.sol";
+import {Constants} from "../../src/libraries/Constants.sol";
 
 /// @notice The wiring assertions the deployment script relies on, checked locally.
 contract DeploymentTest is Test {

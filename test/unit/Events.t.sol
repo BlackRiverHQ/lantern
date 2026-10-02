@@ -4,6 +4,7 @@ pragma solidity 0.8.28;
 import {LanternTest} from "../base/LanternTest.t.sol";
 import {IChallenge} from "../../src/interfaces/IChallenge.sol";
 import {WaterfallMath} from "../../src/libraries/WaterfallMath.sol";
+import {Constants} from "../../src/libraries/Constants.sol";
 
 /// @notice Every state change announces itself, so an indexer never has to poll storage.
 contract EventsTest is LanternTest {

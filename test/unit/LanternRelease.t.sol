@@ -5,6 +5,7 @@ import {LanternTest} from "../base/LanternTest.t.sol";
 import {IChallenge} from "../../src/interfaces/IChallenge.sol";
 import {ILanternErrors} from "../../src/interfaces/ILanternErrors.sol";
 import {WaterfallMath} from "../../src/libraries/WaterfallMath.sol";
+import {Constants} from "../../src/libraries/Constants.sol";
 
 contract LanternReleaseTest is LanternTest {
     uint256 internal constant BONUS = 10e18;

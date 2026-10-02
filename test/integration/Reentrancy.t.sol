@@ -8,6 +8,7 @@ import {Lantern} from "../../src/core/Lantern.sol";
 import {IERC20} from "../../src/interfaces/IERC20.sol";
 import {IChallenge} from "../../src/interfaces/IChallenge.sol";
 import {WaterfallMath} from "../../src/libraries/WaterfallMath.sol";
+import {Constants} from "../../src/libraries/Constants.sol";
 
 /// @notice A token that calls back during transfers must not be able to duplicate state.
 contract ReentrancyTest is Test {
