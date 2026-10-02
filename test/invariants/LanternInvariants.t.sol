@@ -105,9 +105,14 @@ contract LanternInvariantsTest is StdInvariant, Test {
         assertLe(lantern.feedErrors(FEED_B), lantern.recorded());
     }
 
-    /// @notice Every recorded liquidation id is unique and monotone in creation.
+    /// @notice The recorded counter is exactly the number of escrows that exist.
     function invariant_recordedMatchesEscrows() public view {
-        assertEq(lantern.recorded(), handler.upheldSeen() + handler.redirects() >= 0 ? lantern.recorded() : 0);
+    uint256 seen = lantern.recorded();
+    uint256 existing = 0;
+    for (uint256 id = 1; id <= seen; id++) {
+    if (lantern.escrowOf(id).exists) existing++;
+    }
+    assertEq(existing, seen);
     }
 
     /// @notice A feed that is not priceable cannot be pushed further by a top-up that is too small.
