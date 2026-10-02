@@ -21,6 +21,11 @@ contract EscalationTest is LanternTest {
         token.approve(address(lantern), type(uint256).max);
         lantern.depositBond(THIN, Constants.MIN_BOND);
         vm.stopPrank();
+        // Thin means lightly collateralised, not uninformed: a print with no past behind it could not
+        // be priced at all, which is a different test than this one.
+        for (uint256 i = 0; i < Constants.MIN_SAMPLES_FOR_PRICING; i++) {
+            _push(THIN, 100e18);
+        }
     }
 
     function test_a_clean_feed_is_asked_only_for_its_exposure() public {
