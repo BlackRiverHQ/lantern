@@ -291,15 +291,12 @@ contract Lantern is IWindfall, ILanternErrors {
 
         // Borrower first, then the prover out of the at-fault party's bond.
         SafeTransfer.push(asset, e.borrower, e.bonus);
+        // The bond must cover exposure 1:1, so the bounty is always payable here.
+        // No deferral path exists, and none is pretended.
         uint256 bounty = FixedPoint.bpsOf(e.bonus, bountyBps);
-        (uint256 paid, uint256 shortfall) = BondMath.chargeable(f.bond, bounty);
+        (uint256 paid, ) = BondMath.chargeable(f.bond, bounty);
         f.bond -= paid;
         SafeTransfer.push(asset, c.prover, c.stake + paid);
-        if (shortfall > 0) {
-        _queued[liquidationId] = shortfall;
-        _queues[e.feedId].enqueue(liquidationId);
-        emit ShortfallQueued(liquidationId, shortfall);
-        }
         emit ChallengeUpheld(liquidationId, c.rule, observed, bound);
         return true;
     }
@@ -321,39 +318,5 @@ contract Lantern is IWindfall, ILanternErrors {
         e.outcome = 1;
         SafeTransfer.push(asset, e.liquidator, e.bonus);
         emit BonusReleased(liquidationId, e.liquidator, e.bonus);
-    }
-
-    /// @notice Pay queued remainders as the bond is topped up. Never trims: only pays.
-    function settleQueue(bytes32 feedId) external {
-        _settleQueue(feedId);
-    }
-
-    function _settleQueue(bytes32 feedId) internal {
-    FeedState storage f = _feeds[feedId];
-    EscrowLedger.Queue storage q = _queues[feedId];
-    uint256 floor = BondMath.exposureFloor(f.exposure);
-
-    while (true) {
-    (bool has, uint256 id) = q.peek();
-    if (!has) break;
-
-    uint256 owed = _queued[id];
-    if (owed == 0) {
-    q.pop();
-    continue;
-    }
-
-    uint256 spare = f.bond > floor ? f.bond - floor : 0;
-    if (spare == 0) break;
-
-    uint256 pay = spare < owed ? spare : owed;
-    f.bond -= pay;
-    _queued[id] -= pay;
-    SafeTransfer.push(asset, _challenges[id].prover, pay);
-    emit ShortfallPaid(id, pay);
-
-    if (_queued[id] == 0) q.pop();
-    else break;
-    }
     }
 }
