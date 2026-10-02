@@ -1,30 +1,35 @@
 # Cost
 
-Measured on Arbitrum Sepolia, at the gas price the transactions actually paid: 0.0420 gwei. The figures
-below are read back from the receipts of the current deployment - every transaction hash is in
+Measured on Arbitrum Sepolia, at the gas price the transactions actually paid: 0.041932 gwei. The
+figures below are read back from the receipts of the current deployment - every transaction hash is in
 `broadcast/`, so each row can be recomputed rather than taken on trust.
 
 | Action | Transactions | Gas | What it buys |
 |---|---|---|---|
-| Deploy | 3 | 5,936,603 | the asset, Lantern, and the market |
-| The caught case, end to end | 15 | 3,315,025 | register, bond, five prints, a liquidation, a challenge, an adjudication |
-| A live Chainlink report | 7 | 1,370,654 | deploy the source, bond the peer feed, publish one aggregator answer |
-| A live Chainlink challenge | 8 | 1,142,069 | a second liquidation, a challenge against it, and the adjudication |
+| Deploy | 3 | 8,536,792 | the settlement asset, Lantern, and a lending market |
+| The caught case, end to end | 16 | 3,586,760 | a claim, a feed, its bond, four prints, a position, the lying print, a liquidation |
+| A live Chainlink report | 6 | 1,332,795 | deploy the source, bond the peer feed, publish one aggregator answer |
+| A live Chainlink challenge | 3 | 380,118 | the challenge, and the adjudication that upheld it |
+| Settling it | 1 | 111,547 | the market handing the seized collateral back |
 
-Thirty-three transactions, 11,764,351 gas, 0.0004947 ETH as measured by the balance before and after.
+Twenty-nine transactions, 13,948,012 gas, 0.0005849 ETH at the price the run paid. The signing account's
+balance fell by 0.0006356: the difference is the wrapped ether the demo put up as collateral, which is
+the borrower's again once the verdict returns it.
 
-The deploy breaks down as the asset at 406,564 gas, Lantern at 5,246,522, and the market at 283,517 -
-Lantern is the whole cost, and almost all of it is the contract itself rather than the constructor.
+The deploy breaks down as the settlement asset at 645,273 gas, Lantern at 5,485,125, and the market at
+2,406,394 for 10,391 bytes of code. The market is the number that moved: what it replaced was 283,517 gas
+of test double that let a caller declare a liquidation, and a real market prices from a feed, holds
+collateral in custody, computes what a close puts at risk, and escrows the seizure until a verdict
+decides where it goes. That is what those bytes buy, and it is worth them.
 
-The caught case is four transactions heavier than it was before the pricing floor existed: the demo now
-warms four rounds at one value and prints the conflict on the fifth, because a round cannot be priced
-with fewer than four prints behind it. Those four prints are the difference, and they are the reason the
-sequence is coherent rather than the reason it is expensive.
+The caught case is four transactions heavier than it would otherwise be because a round cannot be priced
+with fewer than four prints behind it: the demo warms four rounds at one value and then prints 18.2%
+below it on the fifth. Those four prints are the reason the sequence is coherent rather than the reason
+it is expensive.
 
-In ETH: the deployment cost 0.000249, the caught case 0.000139, the Chainlink report 0.000058, and the
-Chainlink challenge 0.000048. All four together are under 0.0005 ETH. Nothing here is expensive: the
-design adds one escrow write and one adjudication read per liquidation, and a challenge is a single
-transaction against state that is already on-chain.
+In ETH: the deploy cost 0.000358, the caught case 0.000150, the Chainlink report 0.000056, the challenge
+0.000016, and the settlement 0.000005. All five together are under 0.0006 ETH, and the largest single
+item is Lantern's own bytecode rather than anything the mechanism does at runtime.
 
 The gas suite asserts ceilings rather than recording them, so these numbers cannot drift upward
 unnoticed: a cold report stays under 520k, recording a liquidation under 300k, releasing under 120k,

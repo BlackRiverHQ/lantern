@@ -11,8 +11,8 @@
 #   export PRIVATE_KEY=...        # testnet key, gas only
 #   ./script/redeploy.sh
 #
-# Env, all optional apart from PRIVATE_KEY: RPC_URL, AGGREGATOR, ROUND, BONUS, LIQUIDATION_ID, BOND,
-# FEED_ID, HOLD_WINDOW, BOUNTY_BPS. See .env.example.
+# Env, all optional apart from PRIVATE_KEY: RPC_URL, COLLATERAL, AGGREGATOR, ROUND, LIQUIDATION_ID,
+# BOND, FEED_ID, HOLD_WINDOW, BOUNTY_BPS, FAUCET_CLAIM, and the market's own knobs. See .env.example.
 
 set -euo pipefail
 
@@ -33,11 +33,16 @@ SUBJECT_FEED_ID="$FEED_ID"
 # Same reasoning for the round and the ids the two Chainlink steps share: the report step defaults to
 # round 1 and the challenge step to round 7, and the comparison is by the subject's round, so left
 # alone they publish the peer on one round and price another. One value for both.
-ROUND="${ROUND:-7}"
+# The demo prints its lying value on the fifth round, which is the first a feed may price at all
+# (MIN_SAMPLES_FOR_PRICING is four), so the peer has to be reported on that same round.
+ROUND="${ROUND:-5}"
 LIQUIDATION_ID="${LIQUIDATION_ID:-9}"
-BONUS="${BONUS:-1000000000000000000}"
-BOND="${BOND:-1000000000000000000}"
-export FEED_ID SUBJECT_FEED_ID PEER_FEED_ID ROUND LIQUIDATION_ID BONUS BOND
+# What the chainlink step backs its peer feed with: a feed below the floor cannot price at all.
+BOND="${BOND:-100000}"
+
+# Collateral is the chain's wrapped ether, because collateral nobody put up is not collateral.
+COLLATERAL="${COLLATERAL:-0x980B62Da83eFf3D4576C647993b0c1D7faf17c73}"
+export FEED_ID SUBJECT_FEED_ID PEER_FEED_ID ROUND LIQUIDATION_ID BOND COLLATERAL
 
 step() { printf '\n== %s\n' "$1"; }
 
@@ -56,8 +61,8 @@ for t in d['transactions']:
 out = ['lantern', 'market', 'asset', 'registry', 'history', 'reportbook']
 vals = {
     'lantern': made.get('Lantern', ''),
-    'market': made.get('MockMarket', ''),
-    'asset': made.get('MockToken', ''),
+    'market': made.get('LendingMarket', ''),
+    'asset': made.get('FaucetToken', ''),
     'registry': extra.get('FeedRegistry', ''),
     'history': extra.get('History', ''),
     'reportbook': extra.get('ReportBook', ''),
@@ -92,10 +97,13 @@ forge script script/ReportFromChainlink.s.sol --rpc-url "$RPC_URL" --broadcast -
 step "chainlink challenge"
 forge script script/ChallengeWithChainlink.s.sol --rpc-url "$RPC_URL" --broadcast -vv
 
+step "settle"
+forge script script/DemoSettle.s.sol --rpc-url "$RPC_URL" --broadcast -vv
+
 step "write deployments.json"
-python3 - "$RPC_URL" "$CHAIN_ID" "$LANTERN" "$MARKET" "$ASSET" "$REGISTRY" "$HISTORY" "$REPORTBOOK" <<'PY'
+python3 - "$RPC_URL" "$CHAIN_ID" "$LANTERN" "$MARKET" "$ASSET" "$REGISTRY" "$HISTORY" "$REPORTBOOK" "$COLLATERAL" <<'PY'
 import json, subprocess, sys
-rpc, chain, lantern, market, asset, registry, history, book = sys.argv[1:9]
+rpc, chain, lantern, market, asset, registry, history, book, collateral = sys.argv[1:10]
 
 def cast(*a, chain=False):
     cmd = ["cast", *a] + (["--rpc-url", rpc] if chain else [])
@@ -118,6 +126,7 @@ record = {
     "lantern": lantern,
     "market": market,
     "asset": asset,
+    "collateral": collateral,
     "registry": registry,
     "history": history,
     "reportBook": book,
@@ -125,6 +134,12 @@ record = {
     "chainlinkEthUsd": "0xd30e2101a97dcbAeBCBC04F14C3f624E67A35165",
     "subjectFeed": cast("keccak", "FEED:ARB-SEPOLIA-DEMO"),
     "peerFeed": cast("keccak", "FEED:ETH-USD-PEER"),
+    "marketParams": {
+        "collateralFactorBps": 7000,
+        "liquidationBonusBps": 500,
+        "closeFactorBps": 5000,
+        "note": "read them off the market itself if it matters: collateralFactorBps(), liquidationBonusBps(), closeFactorBps()",
+    },
 }
 json.dump(record, open("deployments.json", "w"), indent=2)
 open("deployments.json", "a").write("\n")

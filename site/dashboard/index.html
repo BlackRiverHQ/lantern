@@ -161,7 +161,7 @@
           <div class="act-h"><h3>Register a feed</h3><span class="tag">operator</span></div>
           <label>feed id <input data-f="feedId" value="FEED:ARB-SEPOLIA-DEMO" spellcheck="false"></label>
           <label>signer set <input data-f="signerSet" value="SIGNERS:OPS" spellcheck="false"></label>
-          <label>decimals <input data-f="decimals" value="18" inputmode="numeric"></label>
+          <label>decimals <input data-f="decimals" value="6" inputmode="numeric"></label>
           <div class="cta"><button class="go" data-act="registerFeed">Send transaction</button><button class="ghost" data-preview>Preview calldata</button></div>
           <div class="preview"></div>
         </div>
@@ -185,10 +185,10 @@
         <div class="act" data-role="operator">
           <div class="act-h"><h3>Publish a print</h3><span class="tag">operator</span></div>
           <label>feed id <input data-f="feedId" value="FEED:ARB-SEPOLIA-DEMO" spellcheck="false"></label>
-          <label>value <input data-f="value" value="100" inputmode="decimal"></label>
-          <label>round <input data-f="round" value="7" inputmode="numeric"></label>
+          <label>value <input data-f="value" value="2690" inputmode="decimal"></label>
+          <label>round <input data-f="round" value="5" inputmode="numeric"></label>
           <label>observed at <input data-f="timestamp" value="" placeholder="unix seconds" inputmode="numeric"></label>
-          <label>payload hash <input data-f="payloadHash" value="PAYLOAD:ROUND-7" spellcheck="false"></label>
+          <label>payload hash <input data-f="payloadHash" value="PAYLOAD:ROUND-5" spellcheck="false"></label>
           <label>signer <input data-f="signer" placeholder="0x…  (or leave blank for my wallet)" spellcheck="false"></label>
           <div class="cta"><button class="go" data-act="recordReport">Send transaction</button><button class="ghost" data-preview>Preview calldata</button></div>
           <div class="preview"></div>
@@ -198,7 +198,7 @@
           <div class="act-h"><h3>Liquidate</h3><span class="tag">liquidator</span></div>
           <label>liquidation id <input data-f="liquidationId" value="11" inputmode="numeric"></label>
           <label>feed id <input data-f="feedId" value="FEED:ARB-SEPOLIA-DEMO" spellcheck="false"></label>
-          <label>round <input data-f="round" value="7" inputmode="numeric"></label>
+          <label>round <input data-f="round" value="5" inputmode="numeric"></label>
           <label>bonus <input data-f="bonus" value="1" inputmode="decimal"></label>
           <label>notional <input data-f="notional" value="100" inputmode="decimal"></label>
           <label>borrower <input data-f="borrower" placeholder="0x…  (or leave blank for my wallet)" spellcheck="false"></label>
@@ -206,19 +206,47 @@
           <div class="preview"></div>
         </div>
 
+        <div class="act" data-role="lender">
+          <div class="act-h"><h3>Lend the market</h3><span class="tag">lender</span></div>
+          <label>amount <input data-f="amount" value="0.5" inputmode="decimal"></label>
+          <div class="cta"><button class="go" data-act="supply">Send transaction</button><button class="ghost" data-preview>Preview calldata</button></div>
+          <div class="preview"></div>
+        </div>
+
+        <div class="act" data-role="borrower">
+          <div class="act-h"><h3>Post wrapped ether</h3><span class="tag">borrower</span></div>
+          <label>amount <input data-f="amount" value="0.00005" inputmode="decimal"></label>
+          <div class="cta"><button class="go" data-act="depositCollateral">Send transaction</button><button class="ghost" data-preview>Preview calldata</button></div>
+          <div class="preview"></div>
+        </div>
+
+        <div class="act" data-role="borrower">
+          <div class="act-h"><h3>Borrow against it</h3><span class="tag">borrower</span></div>
+          <label>amount <input data-f="amount" value="0.088" inputmode="decimal"></label>
+          <div class="cta"><button class="go" data-act="borrow">Send transaction</button><button class="ghost" data-preview>Preview calldata</button></div>
+          <div class="preview"></div>
+        </div>
+
+        <div class="act" data-role="anyone">
+          <div class="act-h"><h3>Claim the seizure</h3><span class="tag">once the verdict is in</span></div>
+          <label>liquidation id <input data-f="liquidationId" value="9" inputmode="numeric"></label>
+          <div class="cta"><button class="go" data-act="claim">Send transaction</button><button class="ghost" data-preview>Preview calldata</button></div>
+          <div class="preview"></div>
+        </div>
+
         <div class="act" data-role="prover">
           <div class="act-h"><h3>Open a challenge</h3><span class="tag">prover</span></div>
-          <label>liquidation id <input data-f="liquidationId" value="10" inputmode="numeric"></label>
+          <label>liquidation id <input data-f="liquidationId" value="9" inputmode="numeric"></label>
           <label>rule <select data-f="rule"><option value="4">CROSS_SOURCE</option><option value="0">SLOT_UNIQUENESS</option><option value="1">ROUND_ORDERING</option><option value="2">SELF_HISTORY</option><option value="3">PAYLOAD_PROVENANCE</option></select></label>
-          <label>evidence <input data-f="evidence" value="peer disagreed on the same round" spellcheck="false"></label>
-          <label>stake <input data-f="stake" value="0.01" inputmode="decimal"></label>
+          <label>evidence <input data-f="evidence" value="0x0bf35ab8318649a0b126cdc6fb6c89b2ebbb1659b37fbd0b3aca12e6eefa71a2" spellcheck="false"></label>
+          <label>stake <input data-f="stake" value="0.001" inputmode="decimal"></label>
           <div class="cta"><button class="go" data-act="openChallenge">Send transaction</button><button class="ghost" data-preview>Preview calldata</button></div>
           <div class="preview"></div>
         </div>
 
         <div class="act" data-role="prover">
           <div class="act-h"><h3>Adjudicate</h3><span class="tag">anyone</span></div>
-          <label>liquidation id <input data-f="liquidationId" value="10" inputmode="numeric"></label>
+          <label>liquidation id <input data-f="liquidationId" value="9" inputmode="numeric"></label>
           <div class="cta"><button class="go" data-act="adjudicate">Send transaction</button><button class="ghost" data-preview>Preview calldata</button></div>
           <div class="preview"></div>
         </div>

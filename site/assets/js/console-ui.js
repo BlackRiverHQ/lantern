@@ -21,9 +21,22 @@
       args: function (f) { return [f('feedId'), C.parseUnits(f('amount'))]; } },
     recordReport: { to: 'lantern', sig: 'recordReport', types: ['bytes32', 'uint256', 'uint64', 'uint64', 'bytes32', 'address'],
       args: function (f) { return [f('feedId'), C.parseUnits(f('value')), f('round'), f('timestamp') || now(), f('payloadHash'), f('signer') || W.account]; } },
-    liquidate: { to: 'market', sig: 'liquidateWithNotional',
-      types: ['uint256', 'bytes32', 'uint64', 'uint256', 'uint256', 'address'],
-      args: function (f) { return [f('liquidationId'), f('feedId'), f('round'), C.parseUnits(f('bonus')), C.parseUnits(f('notional')), f('borrower') || W.account]; } },
+    // the market prices from the feed itself, so the caller says which position and how much of it
+    // to close - not what the price is, and not what the profit should be
+    liquidate: { to: 'market', sig: 'liquidate',
+      types: ['address', 'uint256', 'uint64', 'uint256'],
+      args: function (f) { return [f('borrower') || W.account, f('liquidationId'), f('round'), C.parseUnits(f('repay'))]; } },
+    claim: { to: 'market', sig: 'claim', types: ['uint256'],
+      args: function (f) { return [f('liquidationId')]; } },
+    supply: { to: 'market', sig: 'supply', types: ['uint256'],
+      approve: function (f) { return C.parseUnits(f('amount')); },
+      args: function (f) { return [C.parseUnits(f('amount'))]; } },
+    borrow: { to: 'market', sig: 'borrow', types: ['uint256'],
+      args: function (f) { return [C.parseUnits(f('amount'))]; } },
+    depositCollateral: { to: 'market', sig: 'depositCollateral', types: ['uint256'],
+      approveTo: 'collateral', units: 18,
+      approve: function (f) { return units(f('amount'), 18); },
+      args: function (f) { return [units(f('amount'), 18)]; } },
     openChallenge: { to: 'lantern', sig: 'openChallenge', types: ['uint256', 'uint8', 'bytes', 'uint256'],
       approve: function (f) { return C.parseUnits(f('stake')); },
       args: function (f) { return [f('liquidationId'), f('rule'), f('evidence'), C.parseUnits(f('stake'))]; } },
@@ -33,6 +46,15 @@
   };
 
   function now() { return String(Math.floor(Date.now() / 1000)); }
+  // the collateral is wrapped ether at eighteen decimals while the settlement asset is at six, so an
+  // amount's scale belongs to the token it is denominated in rather than to the page
+  function units(v, d) {
+    var m = String(v).trim().match(/^(\d*)\.?(\d*)$/);
+    if (!m) throw new Error('not a number: ' + v);
+    var frac = (m[2] || '').slice(0, d);
+    while (frac.length < d) frac += '0';
+    return BigInt(m[1] || '0') * 10n ** BigInt(d) + BigInt(frac || '0');
+  }
   function short(a) { return a ? a.slice(0, 6) + '…' + a.slice(-4) : '—'; }
   function fail(msg) { var e = $('wErr'); e.textContent = msg || ''; e.style.display = msg ? 'block' : 'none'; }
 
@@ -108,7 +130,8 @@
       if (!sim.ok) {
         var aboutApproval = /TransferFromFailed|InsufficientAllowance/.test(sim.reason || '');
         if (need && W.allowance < need && aboutApproval) {
-          await C.send(label + ' — approve', CFG.asset, C.encode('approve', ['address', 'uint256'], [CFG[spec.to], need]));
+          var payWith = spec.approveTo ? CFG[spec.approveTo] : CFG.asset;
+          await C.send(label + ' — approve', payWith, C.encode('approve', ['address', 'uint256'], [CFG[spec.to], need]));
           await C.refreshBalances();
           sim = await C.simulate(CFG[spec.to], data);
         }

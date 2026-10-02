@@ -56,9 +56,9 @@ PRIVATE_KEY="$REHEARSAL_KEY" RPC_URL="$FORK" ./script/redeploy.sh
 printf '\n== what the rehearsal spent\n'
 GAS_PRICE="$(cast gas-price --rpc-url "$FORK" 2>/dev/null || echo 0)"
 python3 - "$GAS_PRICE" <<'PY'
-import json, os
+import json, os, sys
 total = txs = 0
-for name in ['Deploy.s.sol', 'DemoRun.s.sol', 'ReportFromChainlink.s.sol', 'ChallengeWithChainlink.s.sol']:
+for name in ['Deploy.s.sol', 'DemoRun.s.sol', 'ReportFromChainlink.s.sol', 'ChallengeWithChainlink.s.sol', 'DemoSettle.s.sol']:
     f = 'broadcast/%s/421614/run-latest.json' % name
     if not os.path.exists(f):
         continue

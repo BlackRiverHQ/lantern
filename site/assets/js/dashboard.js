@@ -5,10 +5,10 @@
   var CFG = {
     rpcs: ['https://sepolia-rollup.arbitrum.io/rpc', 'https://arbitrum-sepolia-rpc.publicnode.com'],
     chainId: 421614,
-    lantern: '0x83b4E869a471638c374De4Bcf4Ab6Ba2396f9040',
+    lantern: '0xcdce3a1b3ebf7fe1e340ab670e25fe768195ac54',
     subject: '0xf7ed0c5000d57be8bb1723e1298ee49e6a076692f4ef68d27dd00db178f57210',
     peer: '0x0bf35ab8318649a0b126cdc6fb6c89b2ebbb1659b37fbd0b3aca12e6eefa71a2',
-    fromBlock: 315044920,
+    fromBlock: 315054532,
     explorer: 'https://sepolia.arbiscan.io'
   };
   // the same override the console honours, so one page can be pointed at a local chain or a redeploy

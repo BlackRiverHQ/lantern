@@ -59,6 +59,10 @@ would otherwise walk through.
   have the fifth rule.
 - **The market is trusted to report liquidations honestly.** Lantern cannot verify that a liquidation
   was real; it verifies the value it consumed. A market that fabricates liquidations is out of scope.
+  The market this is deployed with is a real one - collateral in custody, priced from the feed, closing
+  a position only when its own rule says the position is unhealthy - but that makes the trust concrete
+  rather than removing it: the address is fixed in Lantern's constructor, so the trust is exactly one
+  contract, and the notional it declares is the number the hold and the bond are computed from.
 - **A challenge is a claim, not a proof of loss.** When it succeeds, the borrower is restored from the
   held bonus. If the borrower's actual loss exceeded the bonus, the rest is not recovered here.
 - **Escalation is capped.** A feed with ten or more caught prints is asked for three times its floor,

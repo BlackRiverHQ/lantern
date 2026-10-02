@@ -7,18 +7,25 @@ anyone can reproduce them rather than take a video's word for it.
 
 1. **List and bond.** A feed is registered and a bond is posted. It cannot price until the bond covers
    what it is underwriting.
-2. **Print.** A value is reported. It is folded into the feed's own history, and the band that
-   surrounded it is snapshotted.
-3. **Liquidate.** A market reports a liquidation that consumed that round. Debt repayment and the
-   position close are untouched; only the profit above principal and fees is held.
-4. **Contest.** A rule is offered as a claim. The verdict is recomputed from state.
-5. **Declare a peer.** The feed names an independent source - on Arbitrum Sepolia, the live Chainlink
-   ETH/USD aggregator.
-6. **Catch by comparison.** The aggregator's answer is published through Lantern for the same round, a
-   liquidation consumes the feed's print, and a challenger opens `CROSS_SOURCE`. The contract compares
-   the two and redirects the bonus.
-7. **Settle.** A liquidation nobody contests releases its bonus to the liquidator once the window
-   closes. A challenge nobody defends is voided after the grace, and its stake answers for the delay.
+2. **Print.** Four prints establish a price, because a round cannot be priced with fewer behind it, and
+   the band that surrounds it is snapshotted.
+3. **A real position.** A borrower puts up wrapped ether as collateral and borrows the settlement asset
+   against it, at a loan the market's own limit allows. The collateral is in the market's custody, not
+   in a number.
+4. **The lie.** The feed prints 18.2% below what it has been printing: inside the 20% a single report
+   may move, and outside the 5% that two sources must agree within.
+5. **Liquidate.** The market prices from that feed and nothing else, so by its own rule the position is
+   now unhealthy, and it closes part of it - reporting the notional the close actually consumed. Only
+   the profit above principal and fees is held, and the seized collateral sits in the market's escrow
+   until Lantern says where it goes.
+6. **Catch by comparison.** The source the feed named in advance is read on chain - the live Chainlink
+   ETH/USD aggregator - and published through Lantern for the same round. A challenger opens
+   `CROSS_SOURCE`; the contract compares the two and upholds it, because they disagree by more than the
+   tolerance.
+7. **Settle.** The verdict hands the seized collateral back to the borrower, and the profit with it,
+   leaving the liquidator their principal and nothing else - the liquidation is undone rather than the
+   liquidator robbed. A liquidation nobody contests releases its bonus to the liquidator once the window
+   closes, and a challenge nobody defends is voided after the grace.
 
 ## Reproduce
 
@@ -28,11 +35,13 @@ export RPC_URL=https://sepolia-rollup.arbitrum.io/rpc
 
 forge script script/Deploy.s.sol                  --rpc-url $RPC_URL --broadcast -vv
 
-export LANTERN=0x83b4E869a471638c374De4Bcf4Ab6Ba2396f9040
-export MARKET=0x4b41D14D0aD565E1135676af0aD270227Bf879dF
+export LANTERN=0xcdce3a1b3ebf7fe1e340ab670e25fe768195ac54
+export MARKET=0x290714d09f6d1ab50f7c31698eda92993ab01f95
+# the collateral is the chain's wrapped ether; the deploy script defaults to it on this chain
+export COLLATERAL=0x980B62Da83eFf3D4576C647993b0c1D7faf17c73
 
 forge script script/DemoRun.s.sol                 --rpc-url $RPC_URL --broadcast -vv
-export ROUND=7
+export ROUND=5
 forge script script/ReportFromChainlink.s.sol     --rpc-url $RPC_URL --broadcast -vv
 export LIQUIDATION_ID=9
 forge script script/ChallengeWithChainlink.s.sol  --rpc-url $RPC_URL --broadcast -vv
@@ -40,7 +49,12 @@ forge script script/DemoSettle.s.sol              --rpc-url $RPC_URL --broadcast
 ```
 
 None of these scripts take an address for the asset: they read `lantern.asset()`, so a redeployment
-cannot leave them pointing at the old one.
+cannot leave them pointing at the old one. `script/redeploy.sh` runs all five in this order and reads
+each address out of the broadcast record as it goes, so the round, the ids and the feeds cannot drift
+apart - which is how a demo ends up replaying a previous deployment.
+
+Nothing mints the settlement asset. The demo claims it from the faucet, one capped claim per address per
+cooldown, and spends what it claimed.
 
 The equivalent stories are also asserted in the test suite, where they run without a network:
 `test/fixtures/Scenarios.t.sol`, `test/unit/CrossSource.t.sol`.

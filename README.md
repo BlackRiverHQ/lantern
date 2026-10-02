@@ -66,10 +66,11 @@ declaration, and after it is set it cannot be changed.
 
 | Contract | Address |
 |---|---|
-| Lantern | `0x83b4E869a471638c374De4Bcf4Ab6Ba2396f9040` |
-| Market | `0x4b41D14D0aD565E1135676af0aD270227Bf879dF` |
-| Asset | `0xf00Ffe2F1e3f49F225124107b7f8218255F722eE` |
-| Second source | `0xf7Bb2294b01D5ADb2470cad3F856A4C4C49Cf4d9` |
+| Lantern | `0xcdce3a1b3ebf7fe1e340ab670e25fe768195ac54` |
+| Market (a lending market) | `0x290714d09f6d1ab50f7c31698eda92993ab01f95` |
+| Collateral | `0x980B62Da83eFf3D4576C647993b0c1D7faf17c73` (Arbitrum's wrapped ether) |
+| Asset (settlement) | `0x185690fb4d3c765bac544423a34953b2b8b03a22` |
+| Second source (Chainlink) | `0xe682D11a014E82D62eb0fAaCb1bc60E12ce2De6c` |
 
 Lantern's constructor builds the feed registry and, under it, the history store and the report book; all
 three addresses are in [docs/DEPLOYMENTS.md](docs/DEPLOYMENTS.md) with the block they landed at.
@@ -77,17 +78,30 @@ three addresses are in [docs/DEPLOYMENTS.md](docs/DEPLOYMENTS.md) with the block
 Machine-readable in [deployments.json](deployments.json); the ABI in [abi/](abi/); every read and
 command in [docs/DEPLOYMENTS.md](docs/DEPLOYMENTS.md).
 
-The chain currently says two caught prints (`feedErrors` 2). The second was decided by comparing the
-feed's own print against a live price aggregator on the same round, with the verdict recomputed in the
-contract. The feed's required bond has escalated to 1.4x its floor as a result.
+The chain currently says one caught print (`feedErrors` 1), on a market that is a real one. A borrower
+put up wrapped ether, borrowed the settlement asset against it, and the feed then printed 18.2% below
+what both sources agree on - inside the 20% a single report may move, outside the 5% two sources must
+agree within. The market prices from that feed and nothing else, so by its own rule the position was
+unhealthy and it closed part of it, reporting the notional it actually consumed. The verdict compared
+the print with a live aggregator on the same round, upheld the challenge, handed the seized collateral
+back to the borrower, and redirected the liquidator's profit to them: the liquidator kept their
+principal and nothing else. As a result the feed's required bond is 120,000 against a 100,000 floor -
+twenty per cent more, which is what a caught print costs it until it tops up.
+
+The collateral is Arbitrum's own wrapped ether, so a position is backed by something a borrower really
+parted with. The settlement asset is a faucet token because on a testnet a stablecoin cannot be minted
+on demand, and a test double with an open `mint` would let anyone conjure a bond out of nothing; this one
+is claimed, one capped claim per address per cooldown. On mainnet that constructor argument is a
+stablecoin and nothing else about the system moves.
 
 This deployment is the current source. `script/verify-source.sh` checks it the way it has to be checked:
 deployed runtime code cannot be byte-identical to the artifact, because the constructor substitutes the
 immutables into it, so the check is that the two are the same length, that the metadata trailer is
 identical - which pins compiler, sources and settings - and that every differing byte is a slot the
-artifact leaves zero. Lantern passes with 30 such slots, the registry with 22. And
-`FeedRegistry.samplesOf`, the depth accessor the pricing floor reads through, absent from the previous
-deployment, answers with 6. The floor and the notional requirement are live, not merely in the tests.
+artifact leaves zero. Lantern passes with 38 such slots, the market with 66, the asset with 7, the
+registry with 15, the history store with 6 and the report book with 6 - all six read from
+`deployments.json` rather than typed into the script, so a redeploy cannot leave the check proving an
+instance nobody is using. The floor and the notional requirement are live, not merely in the tests.
 
 All six contracts verify on Sourcify with an exact match on creation and runtime bytecode
 (`make verify-source` for the bytecode check), and the source is readable on the public explorer with
@@ -97,7 +111,7 @@ no key at `arbitrum-sepolia.blockscout.com/address/<address>`.
 
 ```
 forge build
-forge test                                      # 637 tests: unit, fuzz, integration, invariants
+forge test                                      # 648 tests: unit, fuzz, integration, invariants
 forge test --match-path "test/invariants/*"      # stateful invariants over random action sequences
 forge test --match-path "test/gas/*" --gas-report
 forge script script/Deploy.s.sol --rpc-url arbitrum_sepolia --broadcast -vv

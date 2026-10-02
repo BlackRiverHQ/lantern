@@ -9,10 +9,11 @@
   var CHAIN = 421614;
   var CFG = {
     chainId: CHAIN,
-    lantern: '0x83b4E869a471638c374De4Bcf4Ab6Ba2396f9040',
-    market: '0x4b41D14D0aD565E1135676af0aD270227Bf879dF',
-    asset: '0xf00Ffe2F1e3f49F225124107b7f8218255F722eE',
-    decimals: 18,
+    lantern: '0xcdce3a1b3ebf7fe1e340ab670e25fe768195ac54',
+    market: '0x290714d09f6d1ab50f7c31698eda92993ab01f95',
+    asset: '0x185690fb4d3c765bac544423a34953b2b8b03a22',
+    collateral: '0x980B62Da83eFf3D4576C647993b0c1D7faf17c73',
+    decimals: 6,
     explorer: 'https://sepolia.arbiscan.io',
     rpc: 'https://sepolia-rollup.arbitrum.io/rpc'
   };
@@ -30,8 +31,16 @@
     adjudicate: '0xcf8d0657',           // adjudicate(uint256)
     voidStaleChallenge: '0x6b3f5fe2',   // voidStaleChallenge(uint256)
     release: '0x37bdc99b',              // release(uint256)
-    liquidate: '0xb9ebf0f0',            // liquidate(uint256,bytes32,uint64,uint256,address)
-    liquidateWithNotional: '0xdfa60838', // liquidateWithNotional(uint256,bytes32,uint64,uint256,uint256,address)
+    // the market's own surface: it prices from the feed and decides for itself what to close
+    supply: '0x35403023',              // supply(uint256)
+    depositCollateral: '0xbad4a01f',   // depositCollateral(uint256)
+    withdrawCollateral: '0x6112fe2e',  // withdrawCollateral(uint256)
+    borrow: '0xc5ebeaec',              // borrow(uint256)
+    repay: '0x371fd8e6',               // repay(uint256)
+    claim: '0x379607f5',               // claim(uint256)
+    liquidate: '0x36eb326d',           // liquidate(address,uint256,uint64,uint256)
+    accountOf: '0x8086b8ba',           // accountOf(address)
+    collateralValueOf: '0x7f242e24',   // collateralValueOf(address,uint256)
     balanceOf: '0x70a08231',            // balanceOf(address)
     allowance: '0xdd62ed3e'             // allowance(address,address)
   };

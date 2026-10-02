@@ -4,7 +4,7 @@ pragma solidity 0.8.28;
 import {Script, console2} from "forge-std/Script.sol";
 import {Lantern} from "../src/core/Lantern.sol";
 import {ChainlinkSource} from "../src/integrations/ChainlinkSource.sol";
-import {MockToken} from "../src/mocks/MockToken.sol";
+import {FaucetToken} from "../src/token/FaucetToken.sol";
 
 /// @notice Reads a live Arbitrum aggregator and publishes its answer through Lantern, so a feed's
 ///         own print can be reconciled against a source that lives on this chain.
@@ -13,20 +13,26 @@ import {MockToken} from "../src/mocks/MockToken.sol";
 contract ReportFromChainlink is Script {
     address internal constant ETH_USD_ARB_SEPOLIA = 0xd30e2101a97dcbAeBCBC04F14C3f624E67A35165;
 
-    function _ensureFeed(Lantern lantern, bytes32 feedId, uint256 bond) internal {
-        MockToken asset = MockToken(address(lantern.asset()));
+    /// @dev `signer` is passed rather than read: inside a script `msg.sender` is Foundry's default
+    ///      sender during simulation, not the account that broadcasts, so a balance check against it
+    ///      reads zero and would take a claim that is not needed.
+    function _ensureFeed(Lantern lantern, address signer, bytes32 feedId, uint256 bond) internal {
+        FaucetToken asset = FaucetToken(address(lantern.asset()));
+        asset.approve(address(lantern), type(uint256).max);
         if (lantern.operatorOf(feedId) == address(0)) {
             lantern.registerFeed(feedId, keccak256("CHAINLINK"), lantern.assetDecimals());
         }
-        asset.mint(msg.sender, bond);
-        asset.approve(address(lantern), type(uint256).max);
+        // the asset is claimed, never minted, and only if what is already held does not cover it
+        if (asset.balanceOf(signer) < bond) asset.claim();
         lantern.depositBond(feedId, bond);
     }
 
     /// @dev The comparison is by the subject feed's round, so the peer's print must land on the
     ///      round the subject will use. The aggregator's own round id is informational: Chainlink
     ///      encodes its phase into an id too large to carry, so it is reported as zero.
-    function _publish(Lantern lantern, ChainlinkSource source, bytes32 feedId, address aggregator) internal {
+    function _publish(Lantern lantern, ChainlinkSource source, bytes32 feedId, address aggregator, address signer)
+    internal
+    {
     (uint256 value, , ) = source.latest();
     uint64 round = uint64(vm.envOr("ROUND", uint256(1)));
     lantern.recordReport(
@@ -35,7 +41,7 @@ contract ReportFromChainlink is Script {
     round,
     uint64(block.timestamp),
     keccak256(abi.encode("chainlink", aggregator, round)),
-    msg.sender
+    signer
     );
     console2.log("published value", value);
     console2.log("published at round", round);
@@ -50,8 +56,8 @@ contract ReportFromChainlink is Script {
 
         vm.startBroadcast(vm.envUint("PRIVATE_KEY"));
         ChainlinkSource source = new ChainlinkSource(aggregator, lantern.assetDecimals());
-        _ensureFeed(lantern, peerFeed, vm.envOr("BOND", uint256(1e18)));
-        _publish(lantern, source, peerFeed, aggregator);
+        _ensureFeed(lantern, deployer, peerFeed, vm.envOr("BOND", uint256(100_000)));
+        _publish(lantern, source, peerFeed, aggregator, deployer);
         if (lantern.peerOf(subject) == bytes32(0)) {
             lantern.setPeerFeed(subject, peerFeed);
         }

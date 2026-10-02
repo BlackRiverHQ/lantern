@@ -34,13 +34,17 @@ const cases = [
   ['adjudicate', ['uint256'], ['10'], 'adjudicate(uint256)', [10]],
   ['voidStaleChallenge', ['uint256'], ['9'], 'voidStaleChallenge(uint256)', [9]],
   ['release', ['uint256'], ['1'], 'release(uint256)', [1]],
-  ['liquidate', ['uint256', 'bytes32', 'uint64', 'uint256', 'address'],
-    ['11', SUBJECT, '8', '1000000000000000000', BOB],
-    'liquidate(uint256,bytes32,uint64,uint256,address)', [11, SUBJECT, 8, '1000000000000000000', BOB]],
-  ['liquidateWithNotional', ['uint256', 'bytes32', 'uint64', 'uint256', 'uint256', 'address'],
-    ['12', SUBJECT, '9', '1000000000000000000', '100000000000000000000', BOB],
-    'liquidateWithNotional(uint256,bytes32,uint64,uint256,uint256,address)',
-    [12, SUBJECT, 9, '1000000000000000000', '100000000000000000000', BOB]],
+  // the market prices from the feed itself, so the caller names the position and the amount to close
+  ['liquidate', ['address', 'uint256', 'uint64', 'uint256'],
+    [BOB, '9', '5', '30000'],
+    'liquidate(address,uint256,uint64,uint256)', [BOB, 9, 5, '30000']],
+  ['claim', ['uint256'], ['9'], 'claim(uint256)', [9]],
+  ['supply', ['uint256'], ['500000'], 'supply(uint256)', ['500000']],
+  ['borrow', ['uint256'], ['88000'], 'borrow(uint256)', ['88000']],
+  ['repay', ['uint256'], ['30000'], 'repay(uint256)', ['30000']],
+  ['withdrawCollateral', ['uint256'], ['50000000000000'], 'withdrawCollateral(uint256)', ['50000000000000']],
+  // the collateral is wrapped ether at eighteen decimals, so this one is parsed at eighteen
+  ['depositCollateral', ['uint256'], ['50000000000000'], 'depositCollateral(uint256)', ['50000000000000']],
   ['approve', ['address', 'uint256'], [BOB, '1000000000000000000'], 'approve(address,uint256)', [BOB, '1000000000000000000']]
 ];
 
@@ -92,8 +96,9 @@ for (const [data, expect] of errCases) {
 }
 
 // unit parsing
-const unitCases = [['1', '1000000000000000000'], ['0.5', '500000000000000000'], ['2.25', '2250000000000000000'],
-  ['1000', '1000000000000000000000'], ['.5', '500000000000000000']];
+// the settlement asset is six decimals, so a unit is a millionth of one
+const unitCases = [['1', '1000000'], ['0.5', '500000'], ['2.25', '2250000'],
+  ['1000', '1000000000'], ['.5', '500000']];
 for (const [text, expect] of unitCases) {
   const got = C.parseUnits(text).toString();
   const ok = got === expect;

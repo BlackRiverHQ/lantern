@@ -24,8 +24,14 @@ src/
     WaterfallMath.sol  payout order and stake floors
     Bytes32Set.sol     membership used by payload provenance
     Constants.sol      every number a reviewer might argue with
-  interfaces/          IWindfall, IFeedRegistry, IHistory, IChallenge, IERC20, IAggregatorV3, ILanternErrors
-  mocks/               MockToken, MockToken6, MockMarket, MockAggregator, FeeToken, ReentrantToken
+  market/              LendingMarket: the market this is deployed with - collateral in custody, priced
+                       from the feed, computing its own liquidations and reporting what they consumed
+  token/               FaucetToken: the testnet settlement asset - real balances, issuance by claim
+  integrations/        ChainlinkSource: a live aggregator answer, scaled to the asset's decimals
+  interfaces/          IWindfall, IWindfallMarket, IFeedRegistry, IHistory, IChallenge, IERC20, IWETH,
+                       IAggregatorV3, ILanternErrors
+  mocks/               test doubles, deployed nowhere: MockToken, MockToken6, MockMarket, MockAggregator,
+                       FeeToken, ReentrantToken
 script/                Deploy, DemoRun, DemoSettle, ReportFromChainlink, ChallengeWithChainlink
 abi/                   the exported interfaces an integrator needs
 deployments.json       what is deployed, chain id included

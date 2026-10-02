@@ -2,37 +2,41 @@
 pragma solidity 0.8.28;
 
 import {Script, console2} from "forge-std/Script.sol";
-import {MockToken} from "../src/mocks/MockToken.sol";
-import {MockMarket} from "../src/mocks/MockMarket.sol";
 import {Lantern} from "../src/core/Lantern.sol";
+import {LendingMarket} from "../src/market/LendingMarket.sol";
 
 /// @title DemoSettle
-/// @notice The other half of the story: an uncontested liquidation, settled once the window has
-///         closed. Run it after the hold window has passed.
+/// @notice Where the seized collateral ends up, once Lantern has decided.
 ///
-/// LANTERN=0x.. MARKET=0x.. forge script script/DemoSettle.s.sol --rpc-url $RPC_URL --broadcast -vv
+///         A caught print redirects the held bonus to the wronged borrower and hands the collateral
+///         back, while the liquidator keeps only the principal they paid - which is the point: the
+///         liquidation is undone, not the liquidator robbed. An uncontested liquidation waits out the
+///         hold window and then pays the liquidator, which is what the window is for.
+///
+///         Run it after the challenge has been adjudicated, or after the window has closed.
+///
+/// LANTERN=0x.. MARKET=0x.. LIQUIDATION_ID=9 forge script script/DemoSettle.s.sol --rpc-url $RPC_URL --broadcast -vv
 contract DemoSettle is Script {
     function run() external {
-        uint256 pk = vm.envUint("PRIVATE_KEY");
         Lantern lantern = Lantern(vm.envAddress("LANTERN"));
-        MockToken token = MockToken(address(lantern.asset()));
-        MockMarket market = MockMarket(vm.envAddress("MARKET"));
-        bytes32 feedId = vm.envOr("FEED_ID", keccak256("FEED:DEMO"));
+        LendingMarket market = LendingMarket(vm.envAddress("MARKET"));
+        uint256 liquidationId = vm.envOr("LIQUIDATION_ID", uint256(9));
 
-        uint256 bonus = 10e18;
-        uint64 round = uint64(vm.envOr("ROUND", uint256(2)));
+        bool settled = lantern.bonusSettled(liquidationId);
+        uint64 deadline = lantern.escrowOf(liquidationId).deadline;
 
-        vm.startBroadcast(pk);
-
-        token.mint(address(market), bonus);
-        market.liquidate(2, feedId, round, bonus, vm.addr(pk));
-        console2.log("held", lantern.heldTotal());
-        console2.log("deadline", lantern.escrowOf(2).deadline);
-
-        // A release before the window closes is refused; uncomment once it has passed.
-        // lantern.release(2);
-        console2.log("outcome", lantern.bonusOutcome(2));
-
+        vm.startBroadcast(vm.envUint("PRIVATE_KEY"));
+        if (!settled && block.timestamp >= deadline) {
+            lantern.release(liquidationId);
+            console2.log("the window closed unopposed, so the hold was released");
+        }
+        bool released = market.claim(liquidationId);
         vm.stopBroadcast();
+
+        console2.log("outcome (0 open, 1 to the liquidator, 2 redirected)", lantern.bonusOutcome(liquidationId));
+        console2.log("collateral went to the liquidator", released);
+        console2.log("collateral seized", market.seizureOf(liquidationId).collateralAmount);
+        console2.log("the liquidator's principal", market.seizureOf(liquidationId).repayAmount);
+        console2.log("held after the verdict", lantern.heldTotal());
     }
 }

@@ -75,9 +75,33 @@ print(f"  VERDICT: {name} on chain is this source, with its {len(diff)} immutabl
 PY
 }
 
+# The defaults are the live deployment. They are read from the record the deploy wrote rather than
+# typed here, so a redeploy cannot leave this proving the wrong instance: a verification that checks
+# an address nobody is using passes while the live one goes unchecked.
+RECORD="deployments.json"
+if [ -f "$RECORD" ]; then
+  read -r R_LANTERN R_MARKET R_ASSET R_REGISTRY R_HISTORY R_BOOK < <(python3 -c '
+import json, sys
+d = json.load(open(sys.argv[1]))
+print(" ".join(d.get(k, "") for k in ("lantern", "market", "asset", "registry", "history", "reportBook")))
+' "$RECORD")
+fi
+
 if [ "$WHICH" = "all" ] || [ "$WHICH" = "lantern" ]; then
-  check "Lantern"      "src/core/Lantern.sol:Lantern"           "${LANTERN:-0x83b4E869a471638c374De4Bcf4Ab6Ba2396f9040}"
+  check "Lantern"      "src/core/Lantern.sol:Lantern"           "${LANTERN:-${R_LANTERN:-0x83b4E869a471638c374De4Bcf4Ab6Ba2396f9040}}"
+fi
+if [ "$WHICH" = "all" ] || [ "$WHICH" = "market" ]; then
+  check "LendingMarket" "src/market/LendingMarket.sol:LendingMarket" "${MARKET:-${R_MARKET:-0x290714D09f6d1AB50F7c31698EDa92993ab01F95}}"
+fi
+if [ "$WHICH" = "all" ] || [ "$WHICH" = "asset" ]; then
+  check "FaucetToken"  "src/token/FaucetToken.sol:FaucetToken"  "${ASSET:-${R_ASSET:-0x185690fb4D3c765bAc544423A34953B2b8b03A22}}"
 fi
 if [ "$WHICH" = "all" ] || [ "$WHICH" = "registry" ]; then
-  check "FeedRegistry" "src/core/FeedRegistry.sol:FeedRegistry" "${REGISTRY:-0x8a57442AC47d2ceC7D3B9cE6E1323603012EF57B}"
+  check "FeedRegistry" "src/core/FeedRegistry.sol:FeedRegistry" "${REGISTRY:-${R_REGISTRY:-0x8a57442AC47d2ceC7D3B9cE6E1323603012EF57B}}"
+fi
+if [ "$WHICH" = "all" ] || [ "$WHICH" = "history" ]; then
+  check "History"      "src/core/History.sol:History"           "${HISTORY:-${R_HISTORY:-0x60bac9cae4551e4e1900898b29bece48b6cac9e4}}"
+fi
+if [ "$WHICH" = "all" ] || [ "$WHICH" = "book" ]; then
+  check "ReportBook"   "src/core/ReportBook.sol:ReportBook"     "${BOOK:-${R_BOOK:-0xcc12b22e7ce416eec9f5f5b1d68c02cc8252da5a}}"
 fi
