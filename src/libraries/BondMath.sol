@@ -13,7 +13,7 @@ library BondMath {
     return FixedPoint.max(minBond, FixedPoint.bpsOf(exposure, Constants.COVERAGE_BPS));
     }
 
-    function isPriceable(uint256 bond, uint256 exposure) internal pure returns (bool) {
+    function isPriceable(uint256 bond, uint256 exposure, uint256 minBond) internal pure returns (bool) {
         return bond >= exposureFloor(exposure);
     }
 
