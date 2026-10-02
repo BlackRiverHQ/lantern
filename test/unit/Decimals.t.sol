@@ -123,11 +123,14 @@ contract DecimalsTest is Test {
         token.approve(address(lantern), type(uint256).max);
         lantern.registerFeed(FEED, keccak256("SIGNERS"), 6);
         lantern.depositBond(FEED, 1e5);
-        lantern.recordReport(FEED, 1e6, 1, uint64(block.timestamp), keccak256("p"), OPERATOR);
+        for (uint64 r = 1; r <= 4; r++) {
+            lantern.recordReport(FEED, 1e6, r, uint64(block.timestamp), keccak256(abi.encode("p", r)), OPERATOR);
+        }
+        lantern.recordReport(FEED, 1e6, 5, uint64(block.timestamp), keccak256("p"), OPERATOR);
         vm.stopPrank();
 
         vm.prank(LIQUIDATOR);
-        market.liquidate(1, FEED, 1, 1e5, BORROWER);
+        market.liquidate(1, FEED, 5, 1e5, BORROWER);
 
         // The proportional stake is 1% of 0.1 USDC = 0.001 USDC, which is exactly the floor; at
         // an 18-decimal floor this would have been 1e15 units, or a billion USDC.
