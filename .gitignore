@@ -16,3 +16,6 @@ out/
 .env
 .env.*
 !.env.example
+
+# Broadcast logs are never committed, dry-run or otherwise
+/broadcast/Deploy.s.sol/
