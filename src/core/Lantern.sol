@@ -335,30 +335,31 @@ contract Lantern is IWindfall, ILanternErrors {
     }
 
     function _settleQueue(bytes32 feedId) internal {
-        FeedState storage f = _feeds[feedId];
-        uint256 floor = BondMath.exposureFloor(f.exposure);
-        uint256 head = _queueHead[feedId];
-        uint256 len = _queue[feedId].length;
+    FeedState storage f = _feeds[feedId];
+    EscrowLedger.Queue storage q = _queues[feedId];
+    uint256 floor = BondMath.exposureFloor(f.exposure);
 
-        while (head < len) {
-            uint256 id = _queue[feedId][head];
-            uint256 owed = _queued[id];
-            if (owed == 0) {
-                head++;
-                continue;
-            }
-            uint256 spare = f.bond > floor ? f.bond - floor : 0;
-            if (spare == 0) break;
+    while (true) {
+    (bool has, uint256 id) = q.peek();
+    if (!has) break;
 
-            uint256 pay = spare < owed ? spare : owed;
-            f.bond -= pay;
-            _queued[id] -= pay;
-            SafeTransfer.push(asset, _challenges[id].prover, pay);
-            emit ShortfallPaid(id, pay);
+    uint256 owed = _queued[id];
+    if (owed == 0) {
+    q.pop();
+    continue;
+    }
 
-            if (_queued[id] == 0) head++;
-            else break;
-        }
-        _queueHead[feedId] = head;
+    uint256 spare = f.bond > floor ? f.bond - floor : 0;
+    if (spare == 0) break;
+
+    uint256 pay = spare < owed ? spare : owed;
+    f.bond -= pay;
+    _queued[id] -= pay;
+    SafeTransfer.push(asset, _challenges[id].prover, pay);
+    emit ShortfallPaid(id, pay);
+
+    if (_queued[id] == 0) q.pop();
+    else break;
+    }
     }
 }
