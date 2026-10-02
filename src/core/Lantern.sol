@@ -141,7 +141,6 @@ contract Lantern is IWindfall, ILanternErrors {
         SafeTransfer.pull(asset, msg.sender, amount);
         _feeds[feedId].bond += amount;
         emit BondDeposited(feedId, amount, _feeds[feedId].bond);
-        _settleQueue(feedId);
     }
 
     function withdrawBond(bytes32 feedId, uint256 amount) external knownFeed(feedId) onlyOperator(feedId) {
