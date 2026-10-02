@@ -54,21 +54,21 @@ contract LanternLiquidationTest is LanternTest {
         uint64 round = _push(FEED, 100e18);
         vm.prank(OTHER);
         vm.expectRevert(abi.encodeWithSelector(ILanternErrors.NotMarket.selector, OTHER));
-        lantern.recordLiquidation(1, FEED, round, bonus, LIQUIDATOR, BORROWER);
+        lantern.recordLiquidation(1, FEED, round, bonus, bonus * 10, LIQUIDATOR, BORROWER);
     }
 
     function test_unknown_round_reverts() public {
         _push(FEED, 100e18);
         vm.prank(address(market));
         vm.expectRevert(abi.encodeWithSelector(ILanternErrors.UnknownFeed.selector, FEED));
-        lantern.recordLiquidation(1, FEED, 999_999, bonus, LIQUIDATOR, BORROWER);
+        lantern.recordLiquidation(1, FEED, 999_999, bonus, bonus * 10, LIQUIDATOR, BORROWER);
     }
 
     function test_unknown_feed_reverts() public {
         uint64 round = _push(FEED, 100e18);
         vm.prank(address(market));
         vm.expectRevert(abi.encodeWithSelector(ILanternErrors.UnknownFeed.selector, FEED_B));
-        lantern.recordLiquidation(1, FEED_B, round, bonus, LIQUIDATOR, BORROWER);
+        lantern.recordLiquidation(1, FEED_B, round, bonus, bonus * 10, LIQUIDATOR, BORROWER);
     }
 
     function test_double_liquidation_id_reverts() public {

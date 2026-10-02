@@ -25,7 +25,7 @@ contract ConformanceTest is LanternTest {
         token.mint(address(market), 1_000e18);
         vm.startPrank(address(market));
         token.approve(address(lantern), type(uint256).max);
-        w.recordLiquidation(1, FEED, round, BONUS, LIQUIDATOR, BORROWER);
+        w.recordLiquidation(1, FEED, round, BONUS, BONUS * 10, LIQUIDATOR, BORROWER);
         vm.stopPrank();
         assertEq(w.bonusOutcome(1), 0);
     }
@@ -34,7 +34,7 @@ contract ConformanceTest is LanternTest {
         IWindfall w = IWindfall(address(lantern));
         vm.prank(OTHER);
         vm.expectRevert(abi.encodeWithSelector(ILanternErrors.NotMarket.selector, OTHER));
-        w.recordLiquidation(1, FEED, round, BONUS, LIQUIDATOR, BORROWER);
+        w.recordLiquidation(1, FEED, round, BONUS, BONUS * 10, LIQUIDATOR, BORROWER);
     }
 
     function test_challenge_and_release_are_reachable() public {

@@ -334,7 +334,7 @@ contract Lantern is IWindfall, ILanternErrors {
 
         bytes32 peer = _peer[e.feedId];
         IFeedRegistry.Report memory pr = peer == bytes32(0)
-        ? IFeedRegistry.Report(0, 0, 0, 0, 0, 0, bytes32(0), address(0), false)
+        ? IFeedRegistry.Report(0, 0, 0, 0, 0, 0, bytes32(0), address(0), 0, false)
         : reg.reportAt(peer, e.round);
 
         uint256 observed;
