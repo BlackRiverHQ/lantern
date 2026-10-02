@@ -10,10 +10,3 @@ interface IHistory {
         uint64 updatedAt;      // last accepted timestamp
         uint32 moveBps;        // realized move, bps, exponentially weighted
         uint32 samples;        // accepted reports observed
-        uint32 errors;         // upheld challenges against this feed
-    }
-
-    function snapshot(bytes32 feedId) external view returns (Snapshot memory);
-    function observe(bytes32 feedId, uint256 value, uint64 round, uint64 timestamp) external;
-    function recordError(bytes32 feedId) external;
-}
