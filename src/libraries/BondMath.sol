@@ -7,6 +7,12 @@ import {FixedPoint} from "./FixedPoint.sol";
 /// @title BondMath
 /// @notice A feed's required bond is a function of what it has already underwritten.
 library BondMath {
+    /// @notice A feed that has been caught pays for the next one in collateral, not in apologies.
+    function penalisedFloor(uint256 floor, uint256 errors, uint16 penaltyBps) internal pure returns (uint256) {
+    uint256 steps = errors > Constants.MAX_ERROR_STEPS ? Constants.MAX_ERROR_STEPS : errors;
+    return floor * (Constants.BPS + steps * penaltyBps) / Constants.BPS;
+    }
+
     /// @param minBond the smallest bond this deployment accepts, in the asset's own units, so a
     ///        6-decimal asset is not asked for a 18-decimal minimum.
     function exposureFloor(uint256 exposure, uint256 minBond) internal pure returns (uint256) {
