@@ -108,6 +108,22 @@ contract Lantern is IWindfall, ILanternErrors {
         reg = new FeedRegistry(address(this));
     }
 
+    /// @dev A token that will not answer decimals() is treated as 18-decimal, which is the common
+    ///      case for the assets this was written against. Above 18 is refused rather than rounded.
+    function _readDecimals(address token) private view returns (uint8) {
+    (bool ok, bytes memory data) = token.staticcall(abi.encodeWithSignature("decimals()"));
+    if (!ok || data.length < 32) return 18;
+    uint256 d = abi.decode(data, (uint256));
+    if (d > 18) revert BadDecimals(d);
+    return uint8(d);
+    }
+
+    /// @notice The smallest bond this deployment accepts: 0.1 of the asset.
+    function minBond() public view returns (uint256) { return 10 ** assetDecimals / 10; }
+
+    /// @notice The smallest stake this deployment accepts: 0.001 of the asset.
+    function minStake() public view returns (uint256) { return 10 ** assetDecimals / 1000; }
+
     // --- views -------------------------------------------------------------
 
     function operatorOf(bytes32 feedId) external view returns (address) { return _feeds[feedId].operator; }
