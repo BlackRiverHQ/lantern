@@ -336,8 +336,10 @@ contract Lantern is IWindfall, ILanternErrors {
                 otherValueForRound: slot.otherValue,
                 payloadFeed: payloadFeed,
                 thisFeed: e.feedId,
-                liquidationTime: e.recordedAt
-            })
+                liquidationTime: e.recordedAt,
+                peerValue: pr.value,
+                peerExists: pr.exists
+                })
         );
         c.resolved = true;
         c.upheld = upheld;
