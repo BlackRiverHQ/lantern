@@ -39,6 +39,10 @@ library Constants {
         // Reconciliation across independent sources
         uint16 internal constant CROSS_SOURCE_TOLERANCE_BPS = 500; // two sources may differ by 5%
 
+        // Collateral adequacy
+        uint16 internal constant NOTIONAL_COVERAGE_BPS = 100;  // the bond must cover 1% of the notional
+        uint64 internal constant MIN_SAMPLES_FOR_PRICING = 4;  // a feed may print freely, but not price
+
         // Liveness
         uint64 internal constant CHALLENGE_GRACE = 6 hours; // after this, an unresolved challenge is void
 }
