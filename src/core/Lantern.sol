@@ -283,7 +283,7 @@ contract Lantern is IWindfall, ILanternErrors {
         if (TimeLib.isClosed(block.timestamp, e.deadline)) revert WindowClosed(liquidationId, e.deadline);
         if (_challenges[liquidationId].prover != address(0)) revert ChallengeAlreadyOpen(liquidationId);
         if (evidence.length == 0) revert EmptyEvidence();
-        if (uint8(rule) > uint8(IChallenge.Rule.PAYLOAD_PROVENANCE)) revert BadRuleKind(uint8(rule));
+        if (uint8(rule) > uint8(IChallenge.Rule.CROSS_SOURCE)) revert BadRuleKind(uint8(rule));
 
         uint256 floor = WaterfallMath.stakeFloor(e.bonus, minStake());
         if (stake < floor) revert StakeBelowMinimum(stake, floor);
