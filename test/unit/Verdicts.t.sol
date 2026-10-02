@@ -21,6 +21,7 @@ contract VerdictsTest is Test {
             timestamp: ts,
             payloadHash: keccak256("p"),
             signer: address(1),
+            prevSamples: 8,
             exists: true
         });
     }
