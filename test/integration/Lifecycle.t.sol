@@ -12,7 +12,7 @@ contract LifecycleTest is LanternTest {
 
     function setUp() public override {
         super.setUp();
-        _openFeed(FEED);
+        _openFeedCold(FEED);
     }
 
     function _stake() internal pure returns (uint256) {
@@ -130,7 +130,7 @@ contract LifecycleTest is LanternTest {
     // --- act five: a payload signed for another asset ---------------------------
 
     function test_cross_asset_path() public {
-        _openFeed(FEED_B);
+        _openFeedCold(FEED_B);
         bytes32 shared = keccak256("shared");
         _pushWithPayload(FEED_B, 100e18, shared);
         uint64 round = _pushWithPayload(FEED, 100e18, shared);
@@ -199,7 +199,7 @@ contract LifecycleTest is LanternTest {
     }
 
     function test_two_feeds_stay_independent() public {
-        _openFeed(FEED_B);
+        _openFeedCold(FEED_B);
         uint64 roundA = _push(FEED, 100e18);
         uint64 roundB = _push(FEED_B, 50e18);
         _liquidateOn(FEED, 1, roundA, BONUS);
