@@ -111,7 +111,6 @@ contract Lantern is IWindfall, ILanternErrors {
     function exposureOf(bytes32 feedId) external view returns (uint256) { return _feeds[feedId].exposure; }
     function feedErrors(bytes32 feedId) external view returns (uint256) { return _feeds[feedId].errors; }
     function heldTotal() external view returns (uint256) { return _heldTotal; }
-    function queuedOf(uint256 liquidationId) external view returns (uint256) { return _queued[liquidationId]; }
 
     function exposureFloor(bytes32 feedId) external view returns (uint256) {
         return BondMath.exposureFloor(_feeds[feedId].exposure);
