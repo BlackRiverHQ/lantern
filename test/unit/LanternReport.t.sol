@@ -67,12 +67,15 @@ contract LanternReportTest is LanternTest {
     }
 
     function test_two_feeds_may_share_a_round_number() public {
-        _openFeed(FEED);
-        _openFeed(FEED_B);
-        _push(FEED, 100e18);
-        _push(FEED_B, 50e18);
-        assertTrue(lantern.reg().reportAt(FEED, roundCounter).exists);
-        assertTrue(lantern.reg().reportAt(FEED_B, roundCounter).exists);
+    _openFeed(FEED);
+    _openFeed(FEED_B);
+    uint64 shared = 7_777;
+    vm.startPrank(OPERATOR);
+    lantern.recordReport(FEED, 100e18, shared, uint64(block.timestamp), keccak256("a"), OPERATOR);
+    lantern.recordReport(FEED_B, 50e18, shared, uint64(block.timestamp), keccak256("b"), OPERATOR);
+    vm.stopPrank();
+    assertTrue(lantern.reg().reportAt(FEED, shared).exists);
+    assertTrue(lantern.reg().reportAt(FEED_B, shared).exists);
     }
 
     function test_report_event_carries_value() public {
