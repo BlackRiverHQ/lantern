@@ -17,8 +17,8 @@ interface IWindfall is IWindfallMarket {
         address borrower
     ) external;
 
-    function openChallenge(uint256 liquidationId, IChallenge.Rule rule, bytes calldata evidence)
-        external payable returns (uint256 challengeId);
+    function openChallenge(uint256 liquidationId, IChallenge.Rule rule, bytes calldata evidence, uint256 stake)
+    external returns (uint256 challengeId);
 
     function adjudicate(uint256 liquidationId) external returns (bool upheld);
     function release(uint256 liquidationId) external;
