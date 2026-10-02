@@ -78,11 +78,21 @@ contract FeedRegistry is IFeedRegistry, ILanternErrors {
         if (Provenance.stale(timestamp, block.timestamp)) revert ReportTooOld(feedId, timestamp, uint64(block.timestamp));
 
         Report storage last = _last[feedId];
-        if (last.exists && Provenance.nonMonotone(round, last.round)) {
-            revert RoundNotMonotone(feedId, round, last.round);
+
+        // Claim the slot before anything else: a second print for one round with a different value
+        // must leave a mark, otherwise the rule that proves it can never fire. The first print
+        // stands as the report; the disagreement is the evidence.
+        bool fresh = book.claimSlot(feedId, round, value);
+        if (!fresh) {
+        ReportBook.Slot memory slot = book.slotOf(feedId, round);
+        if (slot.conflicted) {
+        emit SlotConflictRecorded(feedId, round, slot.firstValue, value);
+        return;
         }
-        if (!book.claimSlot(feedId, round, value)) {
-            if (book.slotOf(feedId, round).conflicted) revert SlotConflict(feedId, round);
+        revert SlotConflict(feedId, round);
+        }
+        if (last.exists && Provenance.nonMonotone(round, last.round)) {
+        revert RoundNotMonotone(feedId, round, last.round);
         }
         if (!book.claimPayload(feedId, round, payloadHash)) revert PayloadReused(payloadHash);
 
