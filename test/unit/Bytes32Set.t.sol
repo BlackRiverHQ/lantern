@@ -5,6 +5,7 @@ import {Test} from "forge-std/Test.sol";
 import {Bytes32Set} from "../../src/libraries/Bytes32Set.sol";
 
 contract Bytes32SetTest is Test {
+    using Bytes32Set for Bytes32Set.Set;
     Bytes32Set.Set internal set;
 
     function test_add_returns_true_first_time() public {
