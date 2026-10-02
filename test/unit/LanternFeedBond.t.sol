@@ -59,6 +59,7 @@ contract LanternFeedBondTest is LanternTest {
 
     function test_deposit_moves_tokens() public {
         _openFeed(FEED);
+        token.mint(OPERATOR, 5e18);
         uint256 before = token.balanceOf(address(lantern));
         vm.startPrank(OPERATOR);
         lantern.depositBond(FEED, 5e18);
