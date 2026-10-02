@@ -23,18 +23,22 @@ contract ReportFromChainlink is Script {
         lantern.depositBond(feedId, bond);
     }
 
+    /// @dev The comparison is by the subject feed's round, so the peer's print must land on the
+    ///      round the subject will use. The aggregator's own round id is informational: Chainlink
+    ///      encodes its phase into an id too large to carry, so it is reported as zero.
     function _publish(Lantern lantern, ChainlinkSource source, bytes32 feedId, address aggregator) internal {
-        (uint256 value, uint64 round, ) = source.latest();
-        lantern.recordReport(
-            feedId,
-            value,
-            round == 0 ? 1 : round,
-            uint64(block.timestamp),
-            keccak256(abi.encode("chainlink", aggregator, round)),
-            msg.sender
-        );
-        console2.log("published value", value);
-        console2.log("published round", round);
+    (uint256 value, , ) = source.latest();
+    uint64 round = uint64(vm.envOr("ROUND", uint256(1)));
+    lantern.recordReport(
+    feedId,
+    value,
+    round,
+    uint64(block.timestamp),
+    keccak256(abi.encode("chainlink", aggregator, round)),
+    msg.sender
+    );
+    console2.log("published value", value);
+    console2.log("published at round", round);
     }
 
     function run() external {
