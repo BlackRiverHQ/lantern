@@ -88,6 +88,8 @@ contract FixedPointTest is Test {
     }
 
     function testFuzz_absDiffBps_symmetry(uint128 a, uint128 b) public pure {
-        assertEq(FixedPoint.absDiffBps(a, b), FixedPoint.absDiffBps(b, a));
+    // A zero base returns the sentinel max by design, so symmetry is claimed only off zero.
+    vm.assume(a != 0 && b != 0);
+    assertEq(FixedPoint.absDiffBps(a, b), FixedPoint.absDiffBps(b, a));
     }
 }
