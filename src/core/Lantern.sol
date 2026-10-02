@@ -70,6 +70,9 @@ contract Lantern is IWindfall, ILanternErrors {
     address public immutable market;
     uint64 public immutable holdWindow;
     uint16 public immutable bountyBps;
+    /// @notice The asset's own decimals, read once. The minimum bond and the minimum stake are
+    ///         derived from it, so a 6-decimal asset is not asked for an 18-decimal floor.
+    uint8 public immutable assetDecimals;
 
     mapping(bytes32 => FeedState) private _feeds;
     mapping(uint256 => Escrow) private _escrows;
