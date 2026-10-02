@@ -26,7 +26,7 @@ contract PricingGateTest is LanternTest {
     function test_one_sample_short_of_the_floor_is_still_refused() public {
         _openFeedCold(FEED);
         uint64 round = 0;
-        for (uint256 i = 0; i < Constants.MIN_SAMPLES_FOR_PRICING - 1; i++) {
+        for (uint256 i = 0; i < Constants.MIN_SAMPLES_FOR_PRICING - 2; i++) {
             round = _push(FEED, valueCounter);
         }
         round = _push(FEED, valueCounter);
@@ -44,9 +44,10 @@ contract PricingGateTest is LanternTest {
     function test_at_the_floor_it_prices() public {
         _openFeedCold(FEED);
         uint64 round = 0;
-        for (uint256 i = 0; i <= Constants.MIN_SAMPLES_FOR_PRICING - 1; i++) {
+        for (uint256 i = 0; i < Constants.MIN_SAMPLES_FOR_PRICING; i++) {
             round = _push(FEED, valueCounter);
         }
+        round = _push(FEED, valueCounter);
 
         // The priced print itself is the fifth, judged against four that came before it.
         vm.prank(LIQUIDATOR);
