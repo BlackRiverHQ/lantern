@@ -44,7 +44,7 @@ contract ReportFromChainlink is Script {
         bytes32 peerFeed = vm.envOr("PEER_FEED_ID", keccak256("FEED:ETH-USD-PEER"));
         bytes32 subject = vm.envOr("SUBJECT_FEED_ID", keccak256("FEED:ARB-SEPOLIA-DEMO"));
 
-        vm.startBroadcast(deployer);
+        vm.startBroadcast(vm.envUint("PRIVATE_KEY"));
         ChainlinkSource source = new ChainlinkSource(aggregator, lantern.assetDecimals());
         _ensureFeed(lantern, peerFeed, vm.envOr("BOND", uint256(1e18)));
         _publish(lantern, source, peerFeed, aggregator);

@@ -23,7 +23,7 @@ contract ChallengeWithChainlink is Script {
         uint64 round = uint64(vm.envOr("ROUND", uint256(7)));
         uint256 bonus = vm.envOr("BONUS", uint256(1e18));
 
-        vm.startBroadcast(deployer);
+        vm.startBroadcast(vm.envUint("PRIVATE_KEY"));
 
         // The feed prints through Lantern the way it always does.
         token.approve(address(lantern), type(uint256).max);
@@ -32,7 +32,7 @@ contract ChallengeWithChainlink is Script {
         // A liquidation consumes that round.
         token.mint(address(market), bonus);
         vm.stopBroadcast();
-        vm.startBroadcast(deployer);
+        vm.startBroadcast(vm.envUint("PRIVATE_KEY"));
         market.liquidate(vm.envOr("LIQUIDATION_ID", uint256(9)), subject, round, bonus, address(0xB0B));
 
         // A challenger points at the declared source and lets the contract do the comparing.
