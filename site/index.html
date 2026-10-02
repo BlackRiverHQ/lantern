@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lantern — the liquidator's bonus becomes provisional</title>
+<meta name="description" content="Lantern holds a liquidation's bonus for a window and lets anyone prove, from on-chain state alone, that the price behind it was one the feed could not honestly have published. Live on Arbitrum Sepolia.">
+<link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23ddff46'/%3E%3Cpath d='M11 8h10M13 8v3l-3 3v8l3 3h6l3-3v-8l-3-3V8' fill='none' stroke='%23191919' stroke-width='2.2' stroke-linejoin='round'/%3E%3Ccircle cx='16' cy='18' r='2.6' fill='%23191919'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<header class="header" id="top">
+  <div class="header-bar">
+    <a class="wordmark" href="#top" aria-label="Lantern home">
+      <span class="wordmark-tile" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 32 32"><path d="M11 6h10M13 6v4l-4 4v9l4 4h6l4-4v-9l-4-4V6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/><circle cx="16" cy="18.5" r="3" fill="currentColor"/></svg>
+      </span>
+      <span class="wordmark-text">Lantern</span>
+    </a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#how">How it works</a>
+      <a href="#rules">Rules</a>
+      <a href="#bond">Bonds</a>
+      <a href="#live">Live chain</a>
+      <a href="#verify">Verify</a>
+    </nav>
+    <div class="header-cta">
+      <a class="pill" href="https://github.com/subheeksh5599/lantern" target="_blank" rel="noopener">Source</a>
+      <a class="pill pill-lime" href="#live">See it on chain</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- ======================= HERO ======================= -->
+  <section class="hero" id="hero">
+    <div class="hero-grid-bg" aria-hidden="true"></div>
+
+    <div class="hero-content" id="heroContent">
+      <h1 class="h1">Hold the bonus.<br>Prove the price.</h1>
+      <p class="hero-sub" id="heroSub">A liquidator is paid on a price. Lantern holds that payment back for a few minutes and lets anyone prove, from state already on chain, that the price was one the feed could not honestly have published.</p>
+      <div class="hero-actions" id="heroActions">
+        <div class="addr-pill">
+          <span>Lantern&nbsp; <span id="heroAddr">0x9420…B772</span></span>
+          <button class="copy" type="button" data-copy="0x9420b6B3e5Cc8FC028b34206F9C0388230a6B772">Copy</button>
+        </div>
+        <a class="btn btn-lime" href="#live">Read the live chain
+          <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 9h11M10 4.5 14.5 9 10 13.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </div>
+      <div class="hero-status" aria-live="polite"><span class="dot" id="netDot"></span><span id="netText">Connecting to Arbitrum Sepolia…</span></div>
+    </div>
+
+    <div class="hero-canvas" id="heroCanvas">
+      <div class="widget-grid" id="widgetGrid">
+        <div class="widget-stack">
+          <div class="widget">
+            <div class="widget-head">Held right now <span class="tagchip">heldTotal()</span></div>
+            <div class="big" data-read="held">—<small>HOLD</small></div>
+          </div>
+          <div class="widget">
+            <div class="widget-head">Hold window <span class="tagchip">immutable</span></div>
+            <dl class="kv">
+              <dt>holdWindow</dt><dd data-read="window">—</dd>
+              <dt>bountyBps</dt><dd data-read="bounty">—</dd>
+              <dt>minBond</dt><dd data-read="minBond">—</dd>
+            </dl>
+          </div>
+        </div>
+        <div class="widget">
+          <div class="widget-head">Subject feed <span class="tagchip mono">0xf7ed…7210</span></div>
+          <dl class="kv">
+            <dt>caught prints</dt><dd data-read="errors">—</dd>
+            <dt>bond posted</dt><dd data-read="bond">—</dd>
+            <dt>bond required</dt><dd data-read="required">—</dd>
+            <dt>exposure</dt><dd data-read="exposure">—</dd>
+            <dt>priceable</dt><dd data-read="priceable">—</dd>
+          </dl>
+          <div style="margin-top:18px">
+            <div class="kv"><dt>requirement vs exposure</dt><dd data-read="mult">—</dd></div>
+            <div class="bar red"><i id="multBar"></i></div>
+          </div>
+        </div>
+        <div class="widget">
+          <div class="widget-head">Latest verdicts <span class="tagchip">events</span></div>
+          <div class="feedlist" id="heroVerdicts">
+            <div><span class="k">reading logs…</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <svg class="corner corner-left" id="cornerL" viewBox="0 0 560 560" aria-hidden="true">
+      <defs><radialGradient id="gl" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ddff46" stop-opacity=".55"/><stop offset=".55" stop-color="#ddff46" stop-opacity=".08"/><stop offset="1" stop-color="#ddff46" stop-opacity="0"/></radialGradient></defs>
+      <circle cx="280" cy="280" r="280" fill="url(#gl)"/>
+      <g fill="none" stroke="#ddff46" stroke-opacity=".35"><circle cx="280" cy="280" r="120"/><circle cx="280" cy="280" r="180" stroke-dasharray="4 10"/></g>
+    </svg>
+    <svg class="corner corner-right" id="cornerR" viewBox="0 0 560 560" aria-hidden="true">
+      <defs><radialGradient id="gr" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#7084ff" stop-opacity=".55"/><stop offset=".6" stop-color="#7084ff" stop-opacity=".07"/><stop offset="1" stop-color="#7084ff" stop-opacity="0"/></radialGradient></defs>
+      <circle cx="280" cy="280" r="280" fill="url(#gr)"/>
+      <g fill="none" stroke="#7084ff" stroke-opacity=".4"><rect x="170" y="170" width="220" height="220" rx="28"/><rect x="120" y="120" width="320" height="320" rx="40" stroke-dasharray="4 10"/></g>
+    </svg>
+  </section>
+
+  <!-- ======================= FACT MARQUEE ======================= -->
+  <section class="marquee facts" aria-label="Facts">
+    <div class="marquee-track" data-marquee="-30">
+      <div><b>637</b> tests</div><div class="sep"></div>
+      <div><b>5</b> provable rules</div><div class="sep"></div>
+      <div><b>0</b> admin keys</div><div class="sep"></div>
+      <div><b>15</b> stateful invariants</div><div class="sep"></div>
+      <div>verdict recomputed <b>in the contract</b></div><div class="sep"></div>
+      <div>debt settles <b>at liquidation</b></div><div class="sep"></div>
+      <div>only the <b>profit</b> is provisional</div><div class="sep"></div>
+      <div>live on <b>Arbitrum Sepolia</b></div><div class="sep"></div>
+    </div>
+  </section>
+
+  <!-- ======================= HOW IT WORKS (light panel, stacked cards) ======================= -->
+  <section class="frame" id="how">
+    <div class="panel">
+      <div class="flow">
+        <div class="flow-aside">
+          <p class="eyebrow">How it works</p>
+          <h2 class="h2">The debt settles. The profit waits.</h2>
+          <p class="lede">Checking a price before the liquidation means knowing the true price. Afterwards is easier: the feed has published a history and its signer has posted collateral behind it.</p>
+          <div class="flow-tabs" role="tablist" aria-label="Lifecycle">
+            <button class="flow-tab active" role="tab" data-step="0" style="--tab-color:#191919"><span class="n">01</span>Liquidate</button>
+            <button class="flow-tab" role="tab" data-step="1" style="--tab-color:#7084ff"><span class="n">02</span>Hold</button>
+            <button class="flow-tab" role="tab" data-step="2" style="--tab-color:#d6402e"><span class="n">03</span>Prove</button>
+            <button class="flow-tab" role="tab" data-step="3" style="--tab-color:#4a7a00"><span class="n">04</span>Settle</button>
+          </div>
+        </div>
+        <div class="flow-cards">
+          <article class="flow-card" style="--i:0;--c:#191919" data-card="0">
+            <div>
+              <div class="step"><i></i>Step 01 · Liquidate</div>
+              <h3>The market liquidates as it always did.</h3>
+              <p>Repayment and the closing of the position happen at the moment of liquidation. The market hands Lantern only the liquidator's bonus, plus the exposure the liquidation put at risk.</p>
+            </div>
+            <div class="flow-viz">
+              <div class="row"><span class="k">debt repaid</span><span class="hl">immediately</span></div>
+              <div class="row"><span class="k">position closed</span><span class="hl">immediately</span></div>
+              <div class="row"><span class="k">bonus</span><span>→ escrow</span></div>
+              <div class="row"><span class="k">event</span><span>LiquidationRecorded(id, feedId, bonus, deadline)</span></div>
+            </div>
+          </article>
+          <article class="flow-card" style="--i:1;--c:#7084ff" data-card="1">
+            <div>
+              <div class="step"><i></i>Step 02 · Hold</div>
+              <h3>The bonus sits behind a window.</h3>
+              <p>The window and the bounty share are constructor arguments. No one can shorten the window, lengthen it, or reach into the escrow while it runs.</p>
+            </div>
+            <div class="flow-viz">
+              <div class="row"><span class="k">holdWindow</span><span data-read="window">—</span></div>
+              <div class="row"><span class="k">bountyBps</span><span data-read="bounty">—</span></div>
+              <div class="row"><span class="k">held now</span><span class="hl" data-read="heldPlain">—</span></div>
+            </div>
+          </article>
+          <article class="flow-card" style="--i:2;--c:#d6402e" data-card="2">
+            <div>
+              <div class="step"><i></i>Step 03 · Prove</div>
+              <h3>Anyone may accuse, with a stake.</h3>
+              <p>A challenger names a rule and supplies evidence, not an answer. At adjudication the contract recomputes the verdict from state it already holds, so a wrong accusation costs the stake.</p>
+            </div>
+            <div class="flow-viz">
+              <div class="row"><span class="k">openChallenge</span><span>(id, rule, evidence, stake)</span></div>
+              <div class="row"><span class="k">adjudicate</span><span>(id) → recomputed on chain</span></div>
+              <div class="row"><span class="k">upheld</span><span class="rd">bond pays bounty, feed escalates</span></div>
+              <div class="row"><span class="k">refused</span><span>stake forfeited</span></div>
+            </div>
+          </article>
+          <article class="flow-card" style="--i:3;--c:#4a7a00" data-card="3">
+            <div>
+              <div class="step"><i></i>Step 04 · Settle</div>
+              <h3>The money goes where the proof says.</h3>
+              <p>Proof holds: the bonus returns to the borrower, the signer's bond pays the prover, and the feed must carry 20% more before it prints again. No proof: the liquidator is paid in full.</p>
+            </div>
+            <div class="flow-viz">
+              <div class="row"><span class="k">outcome 1</span><span class="hl">released to liquidator</span></div>
+              <div class="row"><span class="k">outcome 2</span><span class="rd">redirected to borrower</span></div>
+              <div class="row"><span class="k">abandoned challenge</span><span>void after 6h grace</span></div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= RULES (tag rows) ======================= -->
+  <section class="rules" id="rules">
+    <p class="eyebrow reveal">What a challenger can prove</p>
+    <h2 class="h1 reveal">Five rules. Each one a predicate over state.</h2>
+    <p class="lede reveal">No reference price set by hand. No committee. The challenger supplies the rule and the evidence; the contract decides.</p>
+
+    <div class="tag-rows" id="tagRows">
+      <div class="tag-row">
+        <span class="tag"><i class="sw" style="--c:#ddff46"></i>Two values, one round <code>SLOT_UNIQUENESS</code></span>
+        <span class="tag"><i class="sw" style="--c:#7084ff"></i>Stale when consumed <code>ROUND_ORDERING</code></span>
+        <span class="tag"><i class="sw" style="--c:#ff6b5b"></i>Outside its own band <code>SELF_HISTORY</code></span>
+      </div>
+      <div class="tag-row">
+        <span class="tag"><i class="sw" style="--c:#ffb547"></i>Payload signed for another slot <code>PAYLOAD_PROVENANCE</code></span>
+        <span class="tag"><i class="sw" style="--c:#5ee6c8"></i>A declared peer disagrees <code>CROSS_SOURCE</code></span>
+      </div>
+      <div class="tag-row">
+        <span class="tag">Printing is free</span>
+        <span class="tag">Pricing needs ≥ 4 prints</span>
+        <span class="tag">Bond ≥ exposure</span>
+        <span class="tag">+20% per caught print</span>
+      </div>
+    </div>
+
+    <div class="rule-list">
+      <div class="rule reveal" style="--c:#ddff46"><span class="num">RULE 0</span><h4>SLOT_UNIQUENESS</h4><p>One feed printed two different values for one round. The conflict is recorded rather than hidden behind a revert.</p></div>
+      <div class="rule reveal" style="--c:#7084ff"><span class="num">RULE 1</span><h4>ROUND_ORDERING</h4><p>The print was already stale, or out of order, when the liquidation consumed it.</p></div>
+      <div class="rule reveal" style="--c:#ff6b5b"><span class="num">RULE 2</span><h4>SELF_HISTORY</h4><p>The value falls outside the band implied by the feed's own realized moves, and nothing else.</p></div>
+      <div class="rule reveal" style="--c:#ffb547"><span class="num">RULE 3</span><h4>PAYLOAD_PROVENANCE</h4><p>The signed payload was issued for a different asset or a different slot.</p></div>
+      <div class="rule reveal" style="--c:#5ee6c8"><span class="num">RULE 4</span><h4>CROSS_SOURCE</h4><p>A second feed, declared in advance and fixed forever, disagrees beyond 5% on the same round.</p></div>
+    </div>
+  </section>
+
+  <!-- ======================= BOND ======================= -->
+  <section class="split" id="bond">
+    <div class="split-text reveal">
+      <p class="eyebrow">The bond answers for the position</p>
+      <h2 class="h2">Recovery isn't capped by the profit.</h2>
+      <p class="lede">A bond sized against the bonus can only give back the bonus. The market reports what the liquidation put at risk, and the bond must cover it.</p>
+      <ul>
+        <li>Bond ≥ exposure, 1:1, and ≥ 1% of the notional.</li>
+        <li>Each caught print raises the requirement 20%, up to 3×.</li>
+        <li>A feed that can't meet its requirement can't price a liquidation.</li>
+      </ul>
+    </div>
+    <div class="split-viz reveal" aria-label="Subject feed bond, read live">
+      <div class="bond-meter">
+        <div>
+          <div class="lbl"><span>exposure</span><b data-read="exposure">—</b></div>
+          <div class="meter"><i id="mExp" style="--c:#7084ff"></i></div>
+        </div>
+        <div>
+          <div class="lbl"><span>required (after <span data-read="errorsPlain">—</span> caught prints)</span><b data-read="required">—</b></div>
+          <div class="meter"><i id="mReq" style="--c:#ff6b5b"></i></div>
+        </div>
+        <div>
+          <div class="lbl"><span>posted</span><b data-read="bond">—</b></div>
+          <div class="meter"><i id="mBond" style="--c:#ddff46"></i></div>
+        </div>
+      </div>
+      <div class="bond-note" id="bondNote">Reading the subject feed from Arbitrum Sepolia…</div>
+    </div>
+  </section>
+
+  <!-- ======================= LANTERN (layered parallax) ======================= -->
+  <section class="mascot-wrap" aria-hidden="true" id="mascot">
+    <div class="mascot">
+      <svg width="900" height="560" viewBox="-450 -280 900 560">
+        <g class="layer" data-depth="-0.4">
+          <circle r="250" fill="#ddff46" fill-opacity=".05"/>
+          <circle r="170" fill="#ddff46" fill-opacity=".07"/>
+        </g>
+        <g class="layer" data-depth="-0.3">
+          <g fill="none" stroke="#ffffff" stroke-opacity=".12">
+            <path d="M-380 -40h120M260 -40h120M-340 60h90M250 60h90"/>
+            <circle cx="-300" cy="-150" r="5" fill="#7084ff" stroke="none"/>
+            <circle cx="320" cy="130" r="5" fill="#ff6b5b" stroke="none"/>
+            <circle cx="290" cy="-170" r="3" fill="#ddff46" stroke="none"/>
+          </g>
+        </g>
+        <g class="layer" data-depth="-0.6">
+          <path d="M-70 -190h140M-40 -190v-28h80v28" fill="none" stroke="#f8f8f8" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M-60 -190v34l-56 56v150l56 56h120l56-56v-150l-56-56v-34" fill="#232323" stroke="#f8f8f8" stroke-width="10" stroke-linejoin="round"/>
+          <path d="M-80 -78h160M-80 128h160" stroke="#f8f8f8" stroke-opacity=".25" stroke-width="4"/>
+        </g>
+        <g class="layer" data-depth="-0.2">
+          <circle cy="26" r="62" fill="#ddff46" fill-opacity=".18"/>
+          <path d="M0 -26c22 26 34 44 34 62a34 34 0 0 1-68 0c0-18 12-36 34-62z" fill="#ddff46"/>
+          <circle cy="44" r="12" fill="#191919" fill-opacity=".35"/>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ======================= PRICING FLOOR ======================= -->
+  <section class="split flip" id="floor">
+    <div class="split-text reveal">
+      <p class="eyebrow">Printing is free, pricing is not</p>
+      <h2 class="h2">A band from one print excuses anything.</h2>
+      <p class="lede">An attacker would arrange exactly that before printing a number they invented. So a liquidation may only be priced on a print with at least four behind it, snapshotted on the report itself.</p>
+      <ul>
+        <li>A feed below the floor keeps printing freely; that is how it builds history.</li>
+        <li>The count is stored per report, never recomputed later.</li>
+        <li>Floors scale to the asset's decimals; fee-on-transfer tokens are refused.</li>
+      </ul>
+    </div>
+    <div class="split-viz reveal">
+      <div class="prints" id="prints">
+        <div class="print" data-n="1" style="--h:42%"></div>
+        <div class="print" data-n="2" style="--h:55%"></div>
+        <div class="print" data-n="3" style="--h:48%"></div>
+        <div class="print" data-n="4" style="--h:62%"></div>
+        <div class="print" data-n="5" style="--h:58%"></div>
+        <div class="print" data-n="6" style="--h:66%"></div>
+        <div class="print" data-n="7" style="--h:60%"></div>
+        <div class="print" data-n="8" style="--h:71%"></div>
+      </div>
+      <div class="floor-legend">
+        <span><i style="--c:rgba(255,255,255,.12)"></i>print, history only</span>
+        <span><i style="--c:#7084ff"></i>counts toward the floor</span>
+        <span><i style="--c:#ddff46"></i>may price a liquidation</span>
+      </div>
+      <div class="floor-caption" id="floorCaption">Scroll to print.</div>
+    </div>
+  </section>
+
+  <!-- ======================= LIVE CHAIN ======================= -->
+  <section class="live" id="live">
+    <div class="panel">
+      <div class="live-head">
+        <div>
+          <p class="eyebrow">Live on Arbitrum Sepolia</p>
+          <h2 class="h2">Read straight from the chain, in your browser.</h2>
+        </div>
+        <div class="chain-meta">
+          <span><span class="dot" id="netDot2"></span><span id="blockText">block —</span></span>
+          <span>chain id 421614</span>
+          <span id="rpcText">sepolia-rollup.arbitrum.io</span>
+        </div>
+      </div>
+
+      <div class="reads">
+        <div class="read"><div class="k">feedErrors(subject)</div><div class="v" data-read="errorsPlain">—</div><div class="s">caught prints on the subject feed</div><code>0xf7ed0c50…f57210</code></div>
+        <div class="read"><div class="k">requiredBond(subject)</div><div class="v" data-read="requiredShort">—</div><div class="s">escalated from exposure <span data-read="exposureShort">—</span></div><code>+20% per caught print</code></div>
+        <div class="read"><div class="k">heldTotal()</div><div class="v" data-read="heldShort">—</div><div class="s">bonus currently in escrow</div><code>HOLD · 18 decimals</code></div>
+        <div class="read"><div class="k">peerOf(subject)</div><div class="v" style="font-size:22px;line-height:48px;letter-spacing:-.4px" data-read="peer">—</div><div class="s">declared once, fixed forever</div><code>ETH/USD second source</code></div>
+      </div>
+
+      <div class="cases">
+        <div class="case-tabs" id="caseTabs" role="tablist" aria-label="Liquidations">
+          <div class="case-empty" style="color:#55585c">Reading events…</div>
+        </div>
+        <div class="case-view" id="caseView" aria-live="polite">
+          <div class="case-empty">Reading events from block 314,930,000…</div>
+          <div class="nav-btns">
+            <button type="button" aria-label="Previous" id="casePrev"><svg viewBox="0 0 16 16"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <button type="button" aria-label="Next" id="caseNext"><svg viewBox="0 0 16 16"><path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div>
+        </div>
+      </div>
+      <div class="err-box" id="errBox"></div>
+    </div>
+  </section>
+
+  <!-- ======================= VERIFY ======================= -->
+  <section class="dev" id="verify">
+    <div class="dev-head reveal">
+      <p class="eyebrow">Don't trust this page</p>
+      <h2 class="h2">Every number here is one <code style="font-size:.8em;letter-spacing:-2px">cast call</code> away.</h2>
+      <p class="lede">No owner, no pause, no setter, no upgrade. The only operator-written value is the one-shot peer declaration.</p>
+    </div>
+    <div class="dev-grid">
+      <div class="terminal reveal">
+        <div class="term-bar">
+          <div class="term-tabs" role="tablist">
+            <button class="term-tab active" role="tab" data-term="0">Read</button>
+            <button class="term-tab" role="tab" data-term="1">Test</button>
+            <button class="term-tab" role="tab" data-term="2">Verdict</button>
+          </div>
+          <button class="copy-btn" type="button" id="termCopy">Copy</button>
+        </div>
+<pre class="term-body" id="termBody"></pre>
+      </div>
+      <div class="facts-grid">
+        <div class="fact reveal"><div class="v">637</div><div class="k">tests across 46 suites: unit, fuzz, integration, gas ceilings</div></div>
+        <div class="fact reveal"><div class="v">15</div><div class="k">invariants held over random action sequences</div></div>
+        <div class="fact reveal"><div class="v">0</div><div class="k">admin keys, pause switches or upgrade paths</div></div>
+        <div class="fact reveal"><div class="v">6h</div><div class="k">grace before an abandoned challenge can be voided</div></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ======================= FOOTER ======================= -->
+<footer class="footer">
+  <div class="footer-card">
+    <div class="marquee">
+      <div class="marquee-track" data-marquee="-40.5">
+        <div>Hold the bonus. Prove the price.</div>
+        <div>Hold the bonus. Prove the price.</div>
+      </div>
+    </div>
+    <div class="footer-cols">
+      <div>
+        <p class="footer-blurb">The liquidator's bonus becomes provisional. The debt doesn't.</p>
+      </div>
+      <div>
+        <h5>Contracts</h5>
+        <a href="https://sepolia.arbiscan.io/address/0x9420b6B3e5Cc8FC028b34206F9C0388230a6B772" target="_blank" rel="noopener">Lantern</a>
+        <a href="https://sepolia.arbiscan.io/address/0x53fFF340f1e6796F905985E43e7a784b0e687066" target="_blank" rel="noopener">Market</a>
+        <a href="https://sepolia.arbiscan.io/address/0x2Eb1fcd3c547a600D1b7e99e5D5bFc2132134997" target="_blank" rel="noopener">Feed registry</a>
+        <a href="https://sepolia.arbiscan.io/address/0x3Fba7aBB9f393446917c9cAA5BD99b40FC85DF98" target="_blank" rel="noopener">Second source</a>
+      </div>
+      <div>
+        <h5>Page</h5>
+        <a href="#how">How it works</a>
+        <a href="#rules">Rules</a>
+        <a href="#bond">Bonds</a>
+        <a href="#live">Live chain</a>
+      </div>
+      <div>
+        <h5>Network</h5>
+        <span>Arbitrum Sepolia</span>
+        <span class="mono">chain id 421614</span>
+        <span class="mono">testnet only</span>
+      </div>
+    </div>
+    <div class="footer-bottom"><span>Lantern</span><span>reads: public RPC · no wallet · no tracking</span></div>
+  </div>
+</footer>
+
+<script src="assets/js/site.js"></script>
+</body>
+</html>
