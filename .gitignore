@@ -17,5 +17,5 @@ out/
 .env.*
 !.env.example
 
-# Broadcast logs are never committed, dry-run or otherwise
-/broadcast/Deploy.s.sol/
+# Broadcast logs are machine-local and are never committed
+/broadcast/
