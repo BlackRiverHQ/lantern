@@ -63,3 +63,11 @@ contract TimeLibTest is Test {
     assertGe(TimeLib.deadline(uint256(nowTs), window), uint256(nowTs));
     }
 }
+
+
+/// @dev Reverts from a pure library cannot be observed through an internal call.
+contract WindowProbe {
+    function check(uint64 window) external pure returns (uint64) {
+        return TimeLib.validateWindow(window);
+    }
+}
