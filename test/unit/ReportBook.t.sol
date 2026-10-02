@@ -106,9 +106,9 @@ contract ReportBookTest is Test {
     }
 
     function testFuzz_conflict_detected_for_any_two_values(uint64 round, uint256 v1, uint256 v2) public {
-        vm.assume(a != b);
-        b.claimSlot(FEED, round, a);
-        b.claimSlot(FEED, round, b);
+        vm.assume(v1 != v2);
+        b.claimSlot(FEED, round, v1);
+        b.claimSlot(FEED, round, v2);
         assertTrue(b.slotOf(FEED, round).conflicted);
     }
 }
