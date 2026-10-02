@@ -126,7 +126,6 @@ contract Lantern is IWindfall, ILanternErrors {
     function challengeOf(uint256 liquidationId) external view returns (ChallengeRec memory) { return _challenges[liquidationId]; }
     function bonusSettled(uint256 liquidationId) external view returns (bool) { return _escrows[liquidationId].outcome != 0; }
     function bonusOutcome(uint256 liquidationId) external view returns (uint8) { return _escrows[liquidationId].outcome; }
-    function queueRemaining(bytes32 feedId) external view returns (uint256) { return _queues[feedId].size(); }
 
     // --- feeds and bonds ---------------------------------------------------
 
