@@ -40,8 +40,16 @@ library Verdicts {
             if (above) return (true, in_.report.value, in_.report.prevBandHi);
             return (false, in_.report.value, in_.report.prevBandHi);
         }
-        // PAYLOAD_PROVENANCE
+        if (rule == Provenance.Rule.PAYLOAD_PROVENANCE) {
         bool crossFeed = in_.payloadFeed != bytes32(0) && in_.payloadFeed != in_.thisFeed;
         return (crossFeed, crossFeed ? 1 : 0, 1);
+        }
+
+        // CROSS_SOURCE: an independent feed, for the same asset and the same round, disagrees by
+        // more than the tolerance. Two sources that agree cannot both be right, but two that
+        // disagree cannot both be right either - and here that is enough.
+        if (!in_.peerExists || in_.peerValue == 0) return (false, in_.report.value, 0);
+        uint256 spread = FixedPoint.absDiffBps(in_.report.value, in_.peerValue);
+        return (spread > Constants.CROSS_SOURCE_TOLERANCE_BPS, spread, Constants.CROSS_SOURCE_TOLERANCE_BPS);
     }
 }
