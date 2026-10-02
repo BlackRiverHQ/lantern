@@ -71,7 +71,11 @@ contract VerdictsFuzzTest is Test {
         Verdicts.Inputs memory in_ = _inputs(value, 0, loSet ? lo : 0, hiSet ? hi : 0, 0);
         (bool upheld, uint256 observed, ) = Verdicts.evaluate(Provenance.Rule.SELF_HISTORY, in_);
 
-        bool expected = (loSet && value < lo) || (hiSet && value > hi);
+        // A bound of zero is the encoding for "no bound", so a set flag is only meaningful when
+        // the value it carries is non-zero.
+        bool loOpen = loSet && lo != 0;
+        bool hiOpen = hiSet && hi != 0;
+        bool expected = (loOpen && value < lo) || (hiOpen && value > hi);
         assertEq(upheld, expected);
         assertEq(observed, value);
     }
