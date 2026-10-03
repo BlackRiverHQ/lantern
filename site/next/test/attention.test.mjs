@@ -48,7 +48,10 @@ ok(attention(snap(), [], NOW, null).length === 0, "a healthy feed with no cases 
     "the closed window offers release(7), got " + JSON.stringify(rows[0] && rows[0].action));
 }
 
-// a window still running: the move is a challenge, which needs evidence this page cannot manufacture
+// a window still running: the move is a challenge, and it is constructible from the page (the
+// evidence blob is opaque and the peer is read on-chain), but a challenge that the contract then
+// refuses costs the challenger their whole stake. So the row states the clock rather than putting
+// the reader's money behind a verdict this page has not recomputed.
 {
   const rows = attention(snap(), [cas({ id: 8, outcome: 0, deadline: NOW + 90 })], NOW, null);
   ok(rows.length === 1 && !rows[0].action, "a running window states its clock and offers no button");
