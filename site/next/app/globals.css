@@ -193,6 +193,11 @@ button { font: inherit; cursor: pointer; color: inherit; }
 .bar.near i { background: var(--amber); }
 .bar.over i { background: var(--red); }
 
+/* ---------- prove / feeds ---------- */
+.prove .r { grid-template-columns: 84px minmax(0, 1.2fr) minmax(0, 1.4fr) 96px minmax(0, 1.1fr) 176px; }
+.feed .r { grid-template-columns: minmax(0, 1.3fr) 104px minmax(0, 1.2fr) 92px 62px minmax(0, 1fr) 96px; }
+.prove .r .id a:hover, .feed .r a:hover { border-color: var(--ink) !important; }
+
 /* ---------- outcome ---------- */
 .outcome { border-radius: var(--r-card); padding: 20px 22px; margin-bottom: 16px; border: 1px solid var(--line); background: var(--card); }
 .outcome.win { border-color: #b7e4c7; background: linear-gradient(0deg, var(--card), var(--green-bg)); }
@@ -226,4 +231,8 @@ button { font: inherit; cursor: pointer; color: inherit; }
   .cases .r { grid-template-columns: 66px minmax(0, 1fr) 92px; }
   .cases .r > :nth-child(4), .cases .r > :nth-child(5), .cases-mini .r > :nth-child(4) { display: none; }
   .cases-mini .r { grid-template-columns: 62px minmax(0, 1fr) 104px; }
+  .prove .r { grid-template-columns: 68px minmax(0, 1fr) 150px; }
+  .prove .r > :nth-child(3), .prove .r > :nth-child(4), .prove .r > :nth-child(5) { display: none; }
+  .feed .r { grid-template-columns: minmax(0, 1.4fr) 88px minmax(0, 1fr); }
+  .feed .r > :nth-child(4), .feed .r > :nth-child(5), .feed .r > :nth-child(6) { display: none; }
 }

@@ -21,6 +21,13 @@ export type CaseRecord = {
   settled: boolean;
   /** A challenge is open and no verdict has landed on it, so `release` would still revert. */
   challengeOpen: boolean;
+  /** The round the case was recorded at and the feed that printed it, both read from the escrow:
+   *  a stranger's case can only be challenged by resolving these from the contract, never by
+   *  assuming the case belongs to the feed the dashboard shows. */
+  round: number | null;
+  feedId: string | null;
+  /** the escrow exists on chain under this id — read, never inferred from which events landed */
+  exists: boolean;
   deadline: number | null;
   outcome: number | null;
   ev: CaseEvent[];
@@ -59,7 +66,8 @@ export async function loadCases(): Promise<CaseRecord[]> {
     if (!c) {
       c = {
         id, block: 0, ts: null, bonus: 0n, borrower: null, liquidator: null, rule: null, gap: null,
-        result: "open", settled: false, challengeOpen: false, deadline: null, outcome: null, ev: [],
+        result: "open", settled: false, challengeOpen: false, round: null, feedId: null,
+        exists: false, deadline: null, outcome: null, ev: [],
       };
       by.set(id, c);
     }
@@ -94,18 +102,25 @@ export async function loadCases(): Promise<CaseRecord[]> {
   });
   cases.sort((x, y) => y.block - x.block);
 
-  // The escrow is the authority on whether a held bonus can be moved and who it is owed to, so read
-  // it for every case that has not been settled rather than inferring it from which events exist.
-  // Both passes run in chunks: the overview promises a row for every held bonus and every unclaimed
-  // seizure, and a cap here would quietly drop the older ones off that list.
-  const live = cases.filter((c) => !c.settled);
+  // The escrow is the authority on whether a held bonus can be moved, who it is owed to, and which
+  // round the case printed at, so it is read for EVERY case rather than only the unsettled ones: a
+  // decided case still has to say what it printed and what the second source said, or the prover
+  // console has nothing to hold its own comparison against. Both passes run in chunks: the overview
+  // promises a row for every held bonus and every unclaimed seizure, and a cap here would quietly
+  // drop the older ones off that list.
+  const live = cases;
   await inChunks(live, async (c) => {
     try {
       const e = words(await call(CFG.lantern, SEL.escrowOf + BigInt(c.id).toString(16).padStart(64, "0")));
       if (e[8] === 1n) {
+        // feedId, round, recordedAt, deadline, bonus, … — the round is what a challenge is
+        // adjudicated against, so a stranger's case carries the one the contract will recompute.
+        c.feedId = "0x" + (e[0] || 0n).toString(16).padStart(64, "0");
+        c.round = Number(e[1] || 0n);
         c.deadline = Number(e[3] || 0n);
         c.outcome = Number(e[7] || 0n);
         c.bonus = e[4] || c.bonus;
+        c.exists = true;
       }
     } catch { /* a case we cannot read keeps the result its events imply */ }
   });

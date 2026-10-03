@@ -69,6 +69,8 @@ export const SEL = {
   reg: "0x738fdd1a", // reg()
   operatorOf: "0x63ea4ab2", // operatorOf(bytes32)
   bondOf: "0x0fb585ba", // bondOf(bytes32)
+  exposureOf: "0x5e40b77b", // exposureOf(bytes32)
+  peerOf: "0x9730d3e5", // peerOf(bytes32)
   requiredBond: "0xcd8f9967", // requiredBond(bytes32)
   priceable: "0x7ea8464f", // priceable(bytes32)
   feedErrors: "0xc4334ab4", // feedErrors(bytes32)

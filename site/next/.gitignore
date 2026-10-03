@@ -4,6 +4,8 @@ public/
 .next/
 out/
 .test-build/
+# The Javascript `npm run live` compiles the chain layer into, to run it against the real chain.
+.probe-build/
 next-env.d.ts
 node_modules/
 tsconfig.tsbuildinfo

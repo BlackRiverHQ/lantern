@@ -4,13 +4,12 @@
     "lib": ["ES2020", "DOM"],
     "module": "commonjs",
     "moduleResolution": "node",
-    "outDir": ".test-build",
+    "outDir": ".probe-build",
     "rootDir": "lib",
     "strict": true,
     "skipLibCheck": true,
-    "noEmit": false,
     "declaration": false,
     "esModuleInterop": true
   },
-  "include": ["lib/chain/config.ts", "lib/chain/abi.ts", "lib/chain/rpc.ts", "lib/format.ts", "lib/attention.ts", "lib/case/prove.ts"]
+  "include": ["lib/**/*.ts"]
 }

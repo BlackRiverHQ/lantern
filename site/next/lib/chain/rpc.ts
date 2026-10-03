@@ -40,6 +40,10 @@ export function words(hex: string | undefined): bigint[] {
 export const w32 = (v: bigint | number | string): string => BigInt(v).toString(16).padStart(64, "0");
 export const id32 = (h: string): string => h.slice(2).toLowerCase();
 export const hexAddr = (w: bigint | undefined): string => "0x" + (w || 0n).toString(16).padStart(40, "0");
+/** A 32-byte value (a feed id, a round key) as hex. Never use hexAddr for one of these: an address
+ *  helper pads to 20 bytes and does not truncate, so an id whose leading nibble is zero comes back
+ *  63 characters and the calldata it is pasted into is rejected as odd-length. */
+export const b32 = (w: bigint | undefined): string => "0x" + (w || 0n).toString(16).padStart(64, "0");
 export const first = (hex: string | undefined): bigint => words(hex)[0] || 0n;
 
 export type Report = { value: bigint; prevValue: bigint; round: number; ts: number; samples: number; exists: boolean };

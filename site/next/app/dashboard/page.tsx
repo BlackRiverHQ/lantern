@@ -68,6 +68,35 @@ export default function Overview() {
         </div>
       </div>
 
+      <div className="tiles roles">
+        <Link className="tile" href="/dashboard/prove/">
+          <div className="k">Anyone can prove</div>
+          <div className="v" style={{ fontSize: 19 }}>Prove a price was false</div>
+          <div className="n">
+            {s ? openCases.length + " held bonus" + (openCases.length === 1 ? "" : "es") + " inside a window. " : ""}
+            Read the print and the second source for that round and stake on the difference.
+          </div>
+        </Link>
+        <Link className="tile" href="/dashboard/run/">
+          <div className="k">Borrower &amp; liquidator</div>
+          <div className="v" style={{ fontSize: 19 }}>Run a case</div>
+          <div className="n">Borrow against collateral, print a false price, get liquidated, and watch the profit get held.</div>
+        </Link>
+        <Link className="tile" href="/dashboard/feeds/">
+          <div className="k">Feed operator</div>
+          <div className="v" style={{ fontSize: 19 }}>Feeds &amp; bonds</div>
+          <div className="n">
+            {s ? (bondOk ? "The bond covers the exposure it stands behind." : "The bond is short of what it must hold.") : ""}
+            {" "}Register a feed, post its bond, declare its second source.
+          </div>
+        </Link>
+        <Link className="tile" href="/dashboard/cases/">
+          <div className="k">The record</div>
+          <div className="v" style={{ fontSize: 19 }}>{p.casesLoaded ? p.cases.length : "—"}</div>
+          <div className="n">liquidations on this deployment, each with the transactions that decided it.</div>
+        </Link>
+      </div>
+
       <div className="card" style={{ marginBottom: 18 }}>
         <div className="card-h">
           <h2>Needs a decision</h2>

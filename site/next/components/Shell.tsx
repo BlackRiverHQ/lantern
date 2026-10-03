@@ -15,6 +15,8 @@ const NAV = [
   { href: "/dashboard/", label: "Overview", view: "overview" },
   { href: "/dashboard/cases/", label: "Cases", view: "cases" },
   { href: "/dashboard/run/", label: "Run a case", view: "run" },
+  { href: "/dashboard/prove/", label: "Prove a price", view: "prove" },
+  { href: "/dashboard/feeds/", label: "Feeds & bonds", view: "feeds" },
 ];
 
 export function Shell({ children }: { children: React.ReactNode }) {
@@ -27,7 +29,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const CFG = config();
   const rows = p.s ? attention(p.s, p.cases, p.now, p.account) : [];
   const alarms = rows.filter((r) => r.action).length;
-  const current = NAV.find((n) => path.startsWith(n.href)) || NAV[0];
+  // "/dashboard/" is a prefix of every route, so the deepest match wins — otherwise the crumb and the
+  // highlight both stay stuck on Overview on every page.
+  const current = [...NAV].sort((a, b) => b.href.length - a.href.length).find((n) => path.startsWith(n.href)) || NAV[0];
 
   const wrong = mounted && p.account && p.chain !== null && p.chain !== CFG.chainId;
   const label = !mounted ? "Connect wallet" : !p.account ? "Connect wallet" : wrong ? "Switch network" : short(p.account);
@@ -39,7 +43,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <div className="side-group">Protocol</div>
         <nav className="side-nav" aria-label="Dashboard">
           {NAV.map((n) => (
-            <Link key={n.href} href={n.href} className={path.startsWith(n.href) ? "active" : ""}>
+            <Link key={n.href} href={n.href} className={n.href === current.href ? "active" : ""}>
               <Icon view={n.view} />
               {n.label}
               {n.view === "cases" && p.casesLoaded ? <span className="count">{p.cases.length}</span> : null}
@@ -89,6 +93,16 @@ function Icon({ view }: { view: string }) {
   if (view === "run") {
     return (
       <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 4v12l10-6z" /></svg>
+    );
+  }
+  if (view === "prove") {
+    return (
+      <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2.5 3.5 5v5c0 4 2.8 6.6 6.5 7.5 3.7-.9 6.5-3.5 6.5-7.5V5z" /><path d="M7.6 10.2l1.8 1.8 3.4-3.6" /></svg>
+    );
+  }
+  if (view === "feeds") {
+    return (
+      <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6.5h14v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" /><path d="M7 6.5V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1.5" /><path d="M3 10.5h14" /></svg>
     );
   }
   return (

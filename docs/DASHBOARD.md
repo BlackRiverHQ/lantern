@@ -1,6 +1,6 @@
 # The dashboard
 
-Three views over the deployed contracts, in `site/next/`. It is a Next.js app exported to static
+Five views over the deployed contracts, in `site/next/`. It is a Next.js app exported to static
 files; the same Convex deployment that serves the landing page serves it.
 
 Nothing on it is mocked, mirrored or cached. Every number shown is read from the chain in the
@@ -14,6 +14,8 @@ actually send.
 | `/dashboard` | whether the feed may price anything at all, and what money is waiting to be moved |
 | `/dashboard/cases` | every liquidation on chain, and the transactions that decided it |
 | `/dashboard/run` | the mechanism, drivable from a wallet in eight steps |
+| `/dashboard/prove` | the bonuses somebody else's liquidation is holding, and the claim anyone may stake on them |
+| `/dashboard/feeds` | what a feed must carry, and how an operator registers one, bonds it, and declares its second source |
 
 ## Overview
 
@@ -44,6 +46,37 @@ exactly which of them carry a button.
 The full event log across both contracts, oldest state folded away: how it ended, what was held, the
 rule that decided it, and the block each transaction landed in, each linking to its receipt.
 
+## Prove a price
+
+The page the protocol's argument rests on, and the only one whose subject is other people's money.
+Every row is a case that was already liquidated and whose bonus the chain is still holding. For each
+one the page reads the print the feed made for that case's own round and the print its declared
+second source made for the same round, re-runs the comparison `Verdicts.evaluate` will run, and
+offers the stake only where the contract's own arithmetic says the claim holds.
+
+That last part is the point. A refused challenge costs the challenger their whole stake, so an
+over-eager button here is the most expensive defect the dashboard could ship: `lib/case/prove.ts`
+computes the verdict and `lib/chain/prove.ts` resolves the real reports to feed it, but neither is
+the authority — the contract recomputes everything from the registry when the challenge lands, and
+the page only shows the reader the sum before they pay to find out.
+
+Beneath the held bonuses, the page lists the verdicts the deployment has already reached, with its
+own read beside the verdict the contract recorded. A row where the two disagree says so. This is how
+the page can be checked rather than trusted: `npm run live` asserts the same agreement against the
+live chain, so a reader can see the page reproduce a verdict the contract actually reached.
+
+## Feeds and bonds
+
+The operator's side. A feed is the thing that stands behind a print, so this page asks the contract
+for each of those facts rather than deriving any of them: the operator, the bond against the bond the
+contract requires, the exposure the bond must cover, how many times the feed has been caught, and the
+second source it was reconciled against.
+
+An operator registers a feed, bonds it, and declares its second source. The feed id is derived from
+the reader's address and the name they type, so the same name in two wallets is two different feeds,
+and the page recovers its own feed from the same derivation on the next visit. Declaring the second
+source is one-way, and the page says so before the button is pressed.
+
 ## Run a case
 
 The one page that signs. Eight steps, each a real transaction: claim test HOLD, print the honest
@@ -62,19 +95,29 @@ derives every value it prints from the chain and refuses to print anything a cas
 
 `lib/chain/config.ts` holds every address, selector and event topic. `lib/chain/abi.ts` is the
 encoder, written out rather than imported. `lib/chain/rpc.ts` talks JSON-RPC from the page.
-`lib/chain/read.ts` is the snapshot. `lib/case/plan.ts` turns the snapshot into the step table.
-`components/protocol.tsx` owns the state and is the only place the surface talks to the chain.
+`lib/chain/read.ts` is the snapshot. `lib/chain/cases.ts` folds the event log into the cases the
+other pages list. `lib/case/prove.ts` is the verdict arithmetic, kept pure so a test can pin it
+against the Solidity; `lib/chain/prove.ts` resolves the real reports that arithmetic is fed.
+`lib/chain/feeds.ts` is one feed as the contract holds it. `lib/case/plan.ts` turns the snapshot into
+the step table. `components/protocol.tsx` owns the state and is the only place the surface talks to
+the chain.
 
 ## Tests
 
 ```
 npm test
+npm run live
 ```
 
 Every selector and event topic the page uses is re-derived with `cast sig` / `cast keccak` and
 diffed, because a wrong selector does not throw: `eth_call` returns empty and the page would show
 zeros. `lib/chain/abi.ts` is executed and its calldata diffed against `cast calldata` for each action
 the page can send, and the custom-error decoder is checked against real revert bytes.
+
+`npm test` runs offline. `npm run live` compiles the chain layer and runs it against the real chain
+outside the browser, which is where a reader that builds malformed calldata or mis-formats an id
+fails with a stack trace instead of on the page. It also asserts the strongest thing the dashboard
+claims: that the comparison this page makes on a decided case is the verdict the contract reached.
 
 ## Build
 

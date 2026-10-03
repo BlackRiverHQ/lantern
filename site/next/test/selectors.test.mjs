@@ -12,6 +12,8 @@ const SIGNATURES = {
   reg: "reg()",
   operatorOf: "operatorOf(bytes32)",
   bondOf: "bondOf(bytes32)",
+  exposureOf: "exposureOf(bytes32)",
+  peerOf: "peerOf(bytes32)",
   requiredBond: "requiredBond(bytes32)",
   priceable: "priceable(bytes32)",
   feedErrors: "feedErrors(bytes32)",
