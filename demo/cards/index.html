@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Lantern — how it works</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #0d1117;
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        font-family: system-ui, -apple-system, sans-serif;
+        color: #f2f4f7;
+      }
+      .clip {
+        position: absolute;
+        inset: 0;
+        padding: 120px 160px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 44px;
+      }
+      .kicker {
+        font-size: 26px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: #6ee7a8;
+        font-weight: 600;
+      }
+      h1 {
+        font-size: 168px;
+        font-weight: 700;
+        letter-spacing: -0.045em;
+        line-height: 0.95;
+      }
+      h2 {
+        font-size: 82px;
+        font-weight: 650;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+        max-width: 1500px;
+      }
+      p {
+        font-size: 40px;
+        line-height: 1.45;
+        color: #c7ced8;
+        max-width: 1420px;
+      }
+      p.strong {
+        font-size: 46px;
+        color: #f2f4f7;
+        font-weight: 550;
+      }
+      .flow {
+        display: flex;
+        align-items: center;
+        gap: 34px;
+        margin-top: 18px;
+      }
+      .node {
+        font-size: 32px;
+        line-height: 1.3;
+        color: #f2f4f7;
+        border: 2px solid #2b3440;
+        border-radius: 18px;
+        padding: 30px 38px;
+        background: #141a22;
+        max-width: 470px;
+      }
+      .dash {
+        height: 3px;
+        width: 90px;
+        background: #2f3a47;
+        transform-origin: left center;
+      }
+      .bars {
+        display: flex;
+        flex-direction: column;
+        gap: 34px;
+        margin-top: 12px;
+      }
+      .bar-row {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+      }
+      .bar-label {
+        font-size: 30px;
+        color: #c7ced8;
+        width: 720px;
+      }
+      .bar-track {
+        width: 620px;
+        height: 22px;
+        border-radius: 11px;
+        background: #1b2230;
+        overflow: hidden;
+      }
+      .bar-fill {
+        height: 100%;
+        width: 100%;
+        border-radius: 11px;
+        transform-origin: left center;
+      }
+      .bar-fill.grey {
+        background: #8b93a1;
+      }
+      .bar-fill.green {
+        background: #6ee7a8;
+      }
+      .footnote {
+        font-size: 28px;
+        color: #8b93a1;
+      }
+      .accent {
+        color: #6ee7a8;
+      }
+      .rule {
+        height: 2px;
+        background: #232c38;
+        transform-origin: left center;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="intro"
+      data-start="0"
+      data-duration="25"
+      data-fps="30"
+      data-width="1920"
+      data-height="1080"
+    >
+      <!-- 1. what it is -->
+      <section id="s1" class="clip" data-start="0" data-duration="5" data-track-index="0">
+        <p class="kicker" id="s1-kicker">Lantern</p>
+        <h1 id="s1-title">Hold the bonus.<br />Prove the price.</h1>
+        <p id="s1-body">
+          A liquidation pays a bonus computed from whatever price the feed published. Lantern holds
+          that bonus back, so anyone can prove the price was false before the money is gone.
+        </p>
+      </section>
+
+      <!-- 2. the mechanic -->
+      <section id="s2" class="clip" data-start="5" data-duration="5.5" data-track-index="0">
+        <p class="kicker" id="s2-kicker">The problem</p>
+        <h2 id="s2-title">A feed's price decides what a loan is worth.</h2>
+        <div class="flow">
+          <div class="node" id="s2-a">the feed prints a price</div>
+          <div class="dash" id="s2-d1"></div>
+          <div class="node" id="s2-b">the market liquidates on it</div>
+          <div class="dash" id="s2-d2"></div>
+          <div class="node" id="s2-c">the bonus is paid on that price</div>
+        </div>
+      </section>
+
+      <!-- 3. the numbers the contract uses -->
+      <section id="s3" class="clip" data-start="10.5" data-duration="5" data-track-index="0">
+        <p class="kicker" id="s3-kicker">What the contract checks</p>
+        <h2 id="s3-title">Two sources have to agree within five per cent.</h2>
+        <div class="bars">
+          <div class="bar-row">
+            <div class="bar-label" id="s3-l1">20% — as far as one report is allowed to move</div>
+            <div class="bar-track"><div class="bar-fill grey" id="s3-b1"></div></div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label" id="s3-l2">5% — as far apart two sources may disagree</div>
+            <div class="bar-track"><div class="bar-fill green" id="s3-b2"></div></div>
+          </div>
+        </div>
+        <p class="footnote" id="s3-note">
+          A print that disagrees with the second source beyond the tolerance is the evidence itself.
+          Neither source has to be trusted, because the disagreement is measured, not judged.
+        </p>
+      </section>
+
+      <!-- 4. what is held, and what is not -->
+      <section id="s4" class="clip" data-start="15.5" data-duration="4.5" data-track-index="0">
+        <p class="kicker" id="s4-kicker">The hold</p>
+        <h2 id="s4-title">The bonus is held for five minutes. The debt is not.</h2>
+        <p id="s4-body">
+          Repayment and the closing of the position still happen at the moment of liquidation, exactly
+          as they did before. What becomes provisional is the profit.
+        </p>
+        <p class="strong" id="s4-body2">
+          When nobody contests the window, the liquidator is paid in full.
+        </p>
+      </section>
+
+      <!-- 5. what a proof does -->
+      <section id="s5" class="clip" data-start="20" data-duration="5" data-track-index="0">
+        <p class="kicker" id="s5-kicker">The proof</p>
+        <h2 id="s5-title">Anyone can challenge, and the contract decides.</h2>
+        <p class="strong" id="s5-body">
+          A challenger supplies the rule and the evidence. The verdict is recomputed in the contract at
+          adjudication, so neither side has to be believed.
+        </p>
+        <p id="s5-body2">
+          Upheld: the borrower gets the seized collateral back, the liquidator keeps their principal and
+          loses the profit, the prover is paid out of the feed's bond, and the feed must carry twenty per
+          cent more collateral before it prices anything again.
+        </p>
+      </section>
+    </div>
+    <script>
+      const tl = gsap.timeline({ paused: true });
+
+      // 1. title card
+      tl.fromTo("#s1-kicker", { opacity: 0, x: -18 }, { opacity: 1, x: 0, duration: 0.5, ease: "power2.out" }, 0.15);
+      tl.fromTo("#s1-title", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }, 0.35);
+      tl.fromTo("#s1-body", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" }, 1.05);
+
+      // 2. the three steps, one dash at a time
+      tl.fromTo("#s2-kicker", { opacity: 0, x: -18 }, { opacity: 1, x: 0, duration: 0.45, ease: "power2.out" }, 5.15);
+      tl.fromTo("#s2-title", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 5.35);
+      tl.fromTo("#s2-a", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 6.1);
+      tl.fromTo("#s2-d1", { scaleX: 0 }, { scaleX: 1, duration: 0.35, ease: "power2.inOut" }, 6.5);
+      tl.fromTo("#s2-b", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 6.8);
+      tl.fromTo("#s2-d2", { scaleX: 0 }, { scaleX: 1, duration: 0.35, ease: "power2.inOut" }, 7.2);
+      tl.fromTo("#s2-c", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 7.5);
+
+      // 3. the two tolerances, as bars
+      tl.fromTo("#s3-kicker", { opacity: 0, x: -18 }, { opacity: 1, x: 0, duration: 0.45, ease: "power2.out" }, 10.65);
+      tl.fromTo("#s3-title", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 10.85);
+      tl.fromTo("#s3-l1", { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.45, ease: "power2.out" }, 11.5);
+      tl.fromTo("#s3-b1", { scaleX: 0 }, { scaleX: 1, duration: 0.7, ease: "power2.inOut" }, 11.6);
+      tl.fromTo("#s3-l2", { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.45, ease: "power2.out" }, 12.35);
+      tl.fromTo("#s3-b2", { scaleX: 0 }, { scaleX: 0.25, duration: 0.7, ease: "power2.inOut" }, 12.45);
+      tl.fromTo("#s3-note", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 13.3);
+
+      // 4. the hold
+      tl.fromTo("#s4-kicker", { opacity: 0, x: -18 }, { opacity: 1, x: 0, duration: 0.45, ease: "power2.out" }, 15.65);
+      tl.fromTo("#s4-title", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 15.85);
+      tl.fromTo("#s4-body", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, 16.6);
+      tl.fromTo("#s4-body2", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, 17.6);
+
+      // 5. the proof
+      tl.fromTo("#s5-kicker", { opacity: 0, x: -18 }, { opacity: 1, x: 0, duration: 0.45, ease: "power2.out" }, 20.15);
+      tl.fromTo("#s5-title", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 20.35);
+      tl.fromTo("#s5-body", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, 21.1);
+      tl.fromTo("#s5-body2", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, 22.1);
+
+      window.__timelines["intro"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

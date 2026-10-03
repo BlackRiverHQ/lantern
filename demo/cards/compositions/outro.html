@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Lantern — what is live</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #0d1117;
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        font-family: system-ui, -apple-system, sans-serif;
+        color: #f2f4f7;
+      }
+      .clip {
+        position: absolute;
+        inset: 0;
+        padding: 120px 160px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 40px;
+      }
+      .kicker {
+        font-size: 26px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: #6ee7a8;
+        font-weight: 600;
+      }
+      h1 {
+        font-size: 92px;
+        font-weight: 650;
+        letter-spacing: -0.035em;
+        line-height: 1.05;
+      }
+      h2 {
+        font-size: 78px;
+        font-weight: 650;
+        letter-spacing: -0.03em;
+        line-height: 1.12;
+        max-width: 1500px;
+      }
+      p {
+        font-size: 40px;
+        line-height: 1.45;
+        color: #c7ced8;
+        max-width: 1450px;
+      }
+      .facts {
+        display: flex;
+        flex-direction: column;
+        gap: 26px;
+        margin-top: 6px;
+      }
+      .fact {
+        display: flex;
+        align-items: baseline;
+        gap: 26px;
+        font-size: 36px;
+        color: #c7ced8;
+      }
+      .tick {
+        color: #6ee7a8;
+        font-size: 34px;
+        font-weight: 700;
+      }
+      .url {
+        font-size: 68px;
+        font-weight: 650;
+        letter-spacing: -0.02em;
+        color: #f2f4f7;
+        border-bottom: 4px solid #6ee7a8;
+        padding-bottom: 14px;
+        display: inline-block;
+      }
+      .footnote {
+        font-size: 28px;
+        color: #8b93a1;
+      }
+      .accent {
+        color: #6ee7a8;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="outro"
+      data-start="0"
+      data-duration="12"
+      data-fps="30"
+      data-width="1920"
+      data-height="1080"
+    >
+      <!-- what the deployment is -->
+      <section id="o1" class="clip" data-start="0" data-duration="6" data-track-index="0">
+        <p class="kicker" id="o1-kicker">What is live</p>
+        <h2 id="o1-title">Six contracts on Arbitrum Sepolia, with no owner.</h2>
+        <div class="facts">
+          <div class="fact" id="o1-f1"><span class="tick">✓</span><span>No pause, no setter, no upgrade, no admin key. The hold window and the bounty share are constructor arguments.</span></div>
+          <div class="fact" id="o1-f2"><span class="tick">✓</span><span>648 tests, and the verdict itself is recomputed in the contract rather than reported by the page.</span></div>
+          <div class="fact" id="o1-f3"><span class="tick">✓</span><span>Three prints caught so far. Each one raised what the feed must carry by twenty per cent.</span></div>
+        </div>
+      </section>
+
+      <!-- where to look -->
+      <section id="o2" class="clip" data-start="6" data-duration="6" data-track-index="0">
+        <p class="kicker" id="o2-kicker">The dashboard</p>
+        <div id="o2-url-wrap"><span class="url" id="o2-url">friendly-fennec-31.convex.site/dashboard</span></div>
+        <p id="o2-body">
+          Five views. The overview reads the feed's bond against what the contract requires. Cases keeps
+          every liquidation and the transactions that decided it. Run a case takes a position through its
+          eight steps. Prove a price stakes on a disagreement. Feeds and bonds is the operator's side.
+        </p>
+        <p class="footnote" id="o2-note">Testnet only. No real funds.</p>
+      </section>
+    </div>
+    <script>
+      const tl = gsap.timeline({ paused: true });
+
+      tl.fromTo("#o1-kicker", { opacity: 0, x: -18 }, { opacity: 1, x: 0, duration: 0.5, ease: "power2.out" }, 0.15);
+      tl.fromTo("#o1-title", { opacity: 0, y: 34 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 0.35);
+      tl.fromTo("#o1-f1", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 1.1);
+      tl.fromTo("#o1-f2", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 1.8);
+      tl.fromTo("#o1-f3", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 2.5);
+
+      tl.fromTo("#o2-kicker", { opacity: 0, x: -18 }, { opacity: 1, x: 0, duration: 0.5, ease: "power2.out" }, 6.15);
+      tl.fromTo("#o2-url", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.65, ease: "power3.out" }, 6.35);
+      tl.fromTo("#o2-body", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 7.15);
+      tl.fromTo("#o2-note", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 8.1);
+
+      window.__timelines["outro"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

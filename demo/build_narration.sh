@@ -8,16 +8,16 @@
 set -euo pipefail
 
 HERE=$(cd "$(dirname "$0")" && pwd)
-VIDEO=${VIDEO:-$HERE/media/lantern-demo.mp4}
+VIDEO=${VIDEO:-$HERE/media/lantern-demo-full.mp4}
 SCRIPT=${SCRIPT:-$HERE/narration.tsv}
 VOICE=${VOICE:-en-US-AndrewMultilingualNeural}
 RATE=${RATE:-+4%}
 WORK=${WORK:-$HERE/narration}
 OUT=${OUT:-$HERE/media/lantern-demo-narrated.mp4}
 
-# End of each page segment on the cut, in seconds, from verify_cut.sh's measured map. A line must
-# finish inside the segment it describes.
-SEGMENT_ENDS=(4.5 12.5 18.5 32.5 40.0 44.0)
+# End of each page segment on the assembled timeline, in seconds: the explainer's own scene lengths
+# (25s total), then verify_cut.sh's measured map of the recording shifted by 25, then the end card.
+SEGMENT_ENDS=(5.0 10.5 15.5 20.0 25.0 29.5 37.5 43.5 57.5 65.0 69.0 75.0 81.0)
 
 mkdir -p "$WORK"
 rm -f "$WORK"/line*.mp3 "$WORK"/line*.wav "$WORK/measured.tsv"
@@ -47,7 +47,7 @@ done < "$SCRIPT"
 echo
 echo "line  start   ends   gap-to-next  window-end  text"
 if ! awk -v SEG="${SEGMENT_ENDS[*]}" -F'\t' '
-  BEGIN { split(SEG, S, " ") }
+  BEGIN { nwin = split(SEG, S, " ") }
   { idx[NR]=$1; st[NR]=$2; du[NR]=$3; tx[NR]=$4; n=NR }
   END {
     fail=0
@@ -55,7 +55,7 @@ if ! awk -v SEG="${SEGMENT_ENDS[*]}" -F'\t' '
       end = st[k] + du[k]
       gap = (k < n) ? st[k+1] - end : -1
       window = 9999
-      for (w=1; w<=6; w++) if (st[k] < S[w]) { window = S[w]; break }
+      for (w=1; w<=nwin; w++) if (st[k] < S[w]) { window = S[w]; break }
       flag = ""
       if (end > window) { flag = flag " OVERRUNS-WINDOW"; fail=1 }
       if (k < n && gap < 0.35) { flag = flag " TOO-TIGHT"; fail=1 }

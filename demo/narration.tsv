@@ -1,25 +1,41 @@
 # Narration for the demo, one line per row, pipe separated:
-#   <second on the cut's timeline>|<words>
+#   <second on the assembled timeline>|<words>
 #
-# Starts are placed against the measured page map from verify_cut.sh, not against the arithmetic in
-# build_cut.sh:
-#     0.0 -  4.5  the landing page
-#     4.5 - 12.5  the overview
-#    12.5 - 18.5  the case list
-#    18.5 - 32.5  run a case
-#    32.5 - 40.0  prove a price
-#    40.5 - 44.0  the landing page, closing
+# The assembled file is three pieces: the HyperFrames explainer (0-25s), the screen recording of the
+# deployed site (25-69s), and the HyperFrames end card (69-81s). Starts are placed against the page
+# map measured from the cut by verify_cut.sh, shifted by the explainer's length:
+#
+#     0.0 -  5.0  explainer: what it is
+#     5.0 - 10.5  explainer: the mechanic
+#    10.5 - 15.5  explainer: the two tolerances
+#    15.5 - 20.0  explainer: what is held and what is not
+#    20.0 - 25.0  explainer: the proof
+#    25.0 - 29.5  the landing page
+#    29.5 - 37.5  the overview
+#    37.5 - 43.5  the case list
+#    43.5 - 57.5  run a case
+#    57.5 - 65.0  prove a price
+#    65.0 - 69.0  the landing page, closing
+#    69.0 - 75.0  end card: what is live
+#    75.0 - 81.0  end card: where to look
 #
 # Numbers are spelled as they are spoken, there is no marketing vocabulary, and every claim is one
 # the viewer can check on screen in the same shot. Only rows that begin with a digit are read.
 # Length matters: this voice runs about 16 characters a second, and build_narration.sh refuses to
 # build a track whose line outlasts the segment it is talking about.
 
-0.3|A liquidation pays out on the feed's price.
-5.2|One block read: the bond against the requirement, and the bonuses still held.
-12.7|Six cases here, three of them caught lies.
-19.2|The feed prints the real price, then twenty percent low; the contract computes the gap.
-27.8|That gap is what a challenge stakes on.
-33.4|Anyone can challenge a case, no account needed.
-37.4|Read beside the verdict recorded on chain.
-40.6|Prices you can check, and a record you can read.
+0.4|A feed's price decides what a loan is worth.
+5.4|The bonus a liquidation pays is computed from that price.
+10.9|Two sources have to agree within five per cent.
+15.9|The bonus is held for five minutes. The debt is not.
+20.3|Anyone can challenge. The contract decides.
+25.3|The deployed site, reading the chain at one block.
+30.2|The bond against what the contract requires, and the bonuses still held.
+37.7|Six cases here, three of them caught lies.
+44.2|The feed prints the real price, then twenty percent low; the contract computes the gap.
+52.8|That gap is what a challenge stakes on.
+58.4|Anyone can challenge a case, no account needed.
+62.4|Read beside the verdict recorded on chain.
+65.6|Prices you can check, and a record you can read.
+69.0|Six contracts, no pause, no setter, no upgrade, no admin key.
+75.6|The dashboard is live, and every number on it is read from the chain.

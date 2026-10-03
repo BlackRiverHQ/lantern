@@ -9,6 +9,13 @@ fine/
 fp/
 sel_*/
 narration/
+cardcheck/
 pc_*.png
 poster_cand_*.png
 sheet_*.png
+# Joined from the cards and the cut by build_full.sh with ffmpeg alone, so it is not worth committing.
+media/lantern-demo-full.mp4
+# HyperFrames renders from npx, but ignore a local install if anyone makes one.
+cards/node_modules/
+cards/dist/
+cards/renders/

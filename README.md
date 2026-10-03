@@ -9,7 +9,7 @@
 ![license](https://img.shields.io/badge/license-MIT-lightgrey)
 ![stack](https://img.shields.io/badge/Solidity%200.8.28-Foundry%20%C2%B7%20Next.js-informational)
 
-[![watch the demo](https://img.shields.io/badge/watch%20demo-0%3A44-black)](demo/media/lantern-demo-narrated.mp4)
+[![watch the demo](https://img.shields.io/badge/watch%20demo-1%3A21-black)](demo/media/lantern-demo-narrated.mp4)
 [![local copy](https://img.shields.io/badge/local%20copy-mp4-black)](demo/media/lantern-demo-narrated.mp4)
 [![try it](https://img.shields.io/badge/click--through-dashboard-black)](https://friendly-fennec-31.convex.site/dashboard)
 [![honesty table](https://img.shields.io/badge/what%27s%20real-honesty%20table-black)](#whats-real-and-what-is-not)
@@ -46,9 +46,9 @@ Five views, each reading the chain rather than a mirror of it.
 - **Prove a price** is the arguer's side, and the one page whose subject is other people's money. It
   lists the bonuses a liquidation is still holding, and for each one reads the print the feed made for
   that case's own round against the print its declared second source made for the same round. It
-  offers the stake only where the comparison the contract will run says the claim holds — a refused
-  challenge costs the challenger their whole stake — and beneath the held bonuses it lists the
-  verdicts already reached, with its own read beside the verdict the contract recorded.
+  offers the stake only where the comparison the contract will run says the claim holds. A refused
+  challenge costs the challenger their whole stake. Beneath the held bonuses it lists the verdicts
+  already reached, with its own read beside the verdict the contract recorded.
 - **Feeds & bonds** is the operator's side: what a feed must carry, and how an operator registers
   one, bonds it, and declares the second source it is reconciled against. The feed id is derived from
   the reader's address and the name they type, so the page finds that feed again on the next visit.
@@ -76,18 +76,25 @@ the money that answers it is the bonus, which is held.
 | Held bonuses | 0.002969 at rest | `heldTotal` 2,969 in the asset's own units, and nothing is waiting on a decision |
 | Dashboard | live | five views at [friendly-fennec-31.convex.site/dashboard](https://friendly-fennec-31.convex.site/dashboard), each reading the chain rather than a mirror of it |
 | Suite | 648 passing | `forge test`: 47 suites, 648 tests, 0 failed, 0 skipped |
-| Demo | 44 seconds | `demo/media/lantern-demo-narrated.mp4`, recorded at block 315,320,157 |
+| Demo | 81 seconds | `demo/media/lantern-demo-narrated.mp4`: a rendered explainer, then the deployed site recorded at block 315,320,157, then an end card |
 
 ## ▶ Demo
 
 [![Lantern: the bonus is held, then somebody proves the price was false](demo/media/lantern-poster.webp)](demo/media/lantern-demo-narrated.mp4)
 
-`0:44` · [watch it](demo/media/lantern-demo-narrated.mp4) · [local copy](demo/media/lantern-demo-narrated.mp4)
+`1:21` · [watch it](demo/media/lantern-demo-narrated.mp4) · [local copy](demo/media/lantern-demo-narrated.mp4)
 
-_One pass through the deployed site: the landing page, the live overview, one case's ledger line by
-line, the run page taking a position through its eight steps to a confirmed transaction, and the
-prove page where this deployment's own read sits beside the verdict the contract recorded. Everything
-on screen is the real site reading real chain state at block 315,320,157._
+_Three parts. An explainer, animated from HTML by HyperFrames, that sets out the problem and the two
+tolerances the contract uses. Then the deployed site itself: the landing page, the live overview, one
+case's ledger line by line, the run page taking a position through its eight steps to a confirmed
+transaction, and the prove page where this deployment's own read sits beside the verdict the contract
+recorded. Then an end card with what is actually live. Everything in the middle is the real site
+reading real chain state at block 315,320,157._
+
+To rebuild it: `demo/build_cut.sh` cuts the recording, `demo/build_full.sh` joins the two cards around
+it, `demo/build_narration.sh` lays the voice track and refuses to build a line that outlasts the shot it
+is describing, and `demo/verify_cut.sh` reads the shipped file back at two frames a second and fails on
+any state the demo is not supposed to show. The cards are HyperFrames compositions in `demo/cards/`.
 
 ## The 20-second pitch
 
@@ -224,7 +231,7 @@ no key at `arbitrum-sepolia.blockscout.com/address/<address>`.
 | The rules are decided by the contract, not by the page | real | the verdict is recomputed inside `adjudicate`; a challenger supplies the rule and the evidence, never an answer |
 | Every button on the dashboard sends a real transaction | real | `site/next/scripts/wallet-e2e.cjs` drives each page with an injected wallet; the receipts are listed in `docs/DASHBOARD.md` |
 | The demo shows the deployed site, not a mock | real | recorded from the live domain at block 315,320,157, narrated, and committed in `demo/media/` |
-| The demo is an edit, not a raw capture | stated | the raw recording is 4m26s; the cuts drop idle time, a browser load overlay and a stuck wallet dialog — never a step of the flow |
+| The demo is an edit, not a raw capture | stated | the raw recording is 4m26s; the cuts drop idle time, a browser load overlay and a stuck wallet dialog. It never drops a step of the flow |
 | A visitor can run a whole case | real, with one dependency | every step is a transaction the visitor signs, so their own wallet needs testnet ether; step 1 links the faucet rather than hiding it |
 | The deployment can start a case for a visitor | real, and it says so when it cannot | the server holds the feed operator's key and needs a minimum balance; when it is short, the run page says the deployment is out of gas instead of failing a button |
 | Mainnet | not deployed | this is Arbitrum Sepolia, the footer says testnet only, and the settlement asset is a faucet token |
@@ -256,7 +263,7 @@ cd ../../convex-host && npm run deploy
 ```
 
 `npm run deploy` does the whole deploy: it builds the site, copies the export into `dist/`, pushes the
-functions, and uploads the files — in that order, one command. It targets this repository's production
+functions, and uploads the files, in that order, one command. It targets this repository's production
 deployment (`prod:friendly-fennec-31`) rather than whatever `.env.local` points at, because
 `convex deploy` refuses to choose a production target without being told and cannot be asked in a
 non-interactive shell. Deploy only the site or only the functions with
