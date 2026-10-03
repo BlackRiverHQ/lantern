@@ -1,0 +1,9 @@
+# The landing page and its assets are the site's source (site/), copied in at build time.
+public/
+# Next's own output, and the Javascript the drift tests compile the pure modules into.
+.next/
+out/
+.test-build/
+next-env.d.ts
+node_modules/
+tsconfig.tsbuildinfo

@@ -5,17 +5,27 @@ import { components, internal } from "./_generated/api";
 
 const http = httpRouter();
 
-// The landing page links to /dashboard. Static hosting matches exact file paths only, so the
-// clean URL is sent on to the file; the browser keeps the #view fragment across the redirect.
-const toDashboard = httpAction(async (_ctx, request) => {
+// The dashboard is a static export: every route is an index.html under its own directory, and static
+// hosting matches exact file paths only, so each clean URL is sent on to its file. Exact routes only —
+// a pathPrefix here would shadow the component's own routes and 404 the files under it. The query
+// string rides along, because the cases view reads the selected case from it.
+const FILE: Record<string, string> = {
+  "/dashboard": "/dashboard/index.html",
+  "/dashboard/": "/dashboard/index.html",
+  "/dashboard/cases": "/dashboard/cases/index.html",
+  "/dashboard/cases/": "/dashboard/cases/index.html",
+  "/dashboard/run": "/dashboard/run/index.html",
+  "/dashboard/run/": "/dashboard/run/index.html",
+};
+const toFile = httpAction(async (_ctx, request) => {
   const url = new URL(request.url);
-  return new Response(null, {
-    status: 308,
-    headers: { Location: `${url.origin}/dashboard/index.html${url.search}` },
-  });
+  const to = FILE[url.pathname];
+  if (!to) return new Response("Not found", { status: 404 });
+  return new Response(null, { status: 308, headers: { Location: to + url.search } });
 });
-http.route({ path: "/dashboard", method: "GET", handler: toDashboard });
-http.route({ path: "/dashboard/", method: "GET", handler: toDashboard });
+for (const path of Object.keys(FILE)) {
+  http.route({ path, method: "GET", handler: toFile });
+}
 
 // The demo feed: a visitor's wallet cannot print (the contract allows only the feed's operator), so
 // the three prints a case needs are made here, by the operator key, with every value derived from

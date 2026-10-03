@@ -1,5 +1,5 @@
 # Everything a reviewer needs, in the order they would need it.
-.PHONY: build test fast invariants gas sizes fmt clean deploy demo report challenge redeploy redeploy-account verify-source rehearse coverage
+.PHONY: build test fast invariants gas sizes fmt clean deploy demo report challenge redeploy redeploy-account verify-source rehearse coverage site site-test site-deploy
 
 build:
 	forge build
@@ -66,3 +66,14 @@ verify-source:
 # Prove the whole sequence on a fork of the live chain, for free, before paying for it.
 rehearse:
 	./script/rehearse-fork.sh
+
+# The dashboard. `site-test` diffs the page's encoder, selectors and formatters against cast; `site`
+# exports it to static files; `site-deploy` pushes the functions and uploads the export.
+site-test:
+	cd site/next && npm test
+
+site:
+	cd site/next && npm run build
+
+site-deploy:
+	cd convex-host && npm run deploy

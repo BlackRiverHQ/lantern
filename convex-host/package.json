@@ -3,7 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "rm -rf dist && mkdir dist && cp -r ../site/index.html ../site/dashboard ../site/assets dist/ && find dist -name '*.test.*' -delete",
+    "build:site": "npm --prefix ../site/next run build",
+    "build": "npm run build:site && rm -rf dist && cp -r ../site/next/out dist",
+    "dev": "npm --prefix ../site/next run dev",
+    "test:site": "npm --prefix ../site/next test",
     "deploy": "npx @convex-dev/static-hosting deploy --no-spa"
   },
   "dependencies": {

@@ -10,12 +10,26 @@ The debt is not held back. Repayment and the closing of the position still happe
 liquidation, exactly as they did before. What becomes provisional is the profit.
 
 **Try it: [friendly-fennec-31.convex.site/dashboard](https://friendly-fennec-31.convex.site/dashboard).**
-Connect any wallet on Arbitrum Sepolia and run a case from start to finish: take out a loan, watch the
-feed print a false price and the market liquidate you on it, then prove the price was false and take
-your collateral back. Every step is a real transaction. Your wallet plays the borrower and the prover.
-The feed's side is played by a small server that holds the feed operator's key. It derives every value
-from the chain and only makes the prints a case needs. The Cases tab lists every case on chain and how
-it ended.
+Three views, each reading the chain rather than a mirror of it.
+
+- **Overview** holds the four facts that decide whether the feed may price anything at all: the bond
+  it carries against the bond it must carry, the depth of its print history, the bonuses still held,
+  and the prints it was caught on. Below them, every held bonus whose window has closed and every
+  decided seizure is listed with the one transaction that moves it. Both are permissionless, so the
+  page offers the button rather than a paragraph about it. Where the move belongs to the feed
+  operator and not the visitor, the row says so instead of failing.
+- **Cases** is every liquidation on chain, newest first, with how it ended and the transactions that
+  decided it.
+- **Run a case** takes a visitor from no position to a proven lie: take out a loan, watch the feed
+  print a false price and the market liquidate you on it, then prove the price was false and take
+  your collateral back. Every step is a real transaction you sign. Your wallet plays the borrower and
+  the prover; the feed's side is played by a small server that holds the feed operator's key, derives
+  every value from the chain, and only makes the prints a case needs.
+
+The dashboard is a Next.js app under `site/next/`, exported to static files and served by the same
+Convex deployment as the landing page. The landing page and its assets under `site/` are the source of
+the marketing surface; the dashboard's encoder, formatters and selector tables are diffed against
+`cast` by the test suite in `site/next/`.
 
 ## Why the price needs a second look
 
@@ -133,6 +147,16 @@ The four scripts run in order and each later one needs the addresses the first p
 against a deploy that did not land. `make deploy`, `make demo`, `make report`, and `make challenge` run
 them one at a time; `.env.example` lists every variable they read.
 
+The dashboard is a separate build:
+
+```
+cd site/next && npm install
+npm test                              # diffs the page's encoder and selectors against cast
+npm run build                         # static export into site/next/out
+cd ../../convex-host && npm run build # builds the site and copies it into dist/
+npm run deploy                        # pushes functions and uploads dist/ to the Convex deployment
+```
+
 ## Documentation
 
 | Document | Contents |
@@ -152,4 +176,5 @@ them one at a time; `.env.example` lists every variable they read.
 | [docs/TESTING.md](docs/TESTING.md) | the shape of the suite and what it covers |
 | [docs/COVERAGE.md](docs/COVERAGE.md) | line and branch coverage, and what it leaves out |
 | [docs/DEMO.md](docs/DEMO.md) | the acts, and the commands that reproduce them |
+| [docs/DASHBOARD.md](docs/DASHBOARD.md) | the three views, what each reads, and how it is tested |
 | [GAS.md](GAS.md) | measured cost |
