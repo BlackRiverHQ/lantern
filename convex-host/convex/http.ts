@@ -16,6 +16,10 @@ const FILE: Record<string, string> = {
   "/dashboard/cases/": "/dashboard/cases/index.html",
   "/dashboard/run": "/dashboard/run/index.html",
   "/dashboard/run/": "/dashboard/run/index.html",
+  "/dashboard/prove": "/dashboard/prove/index.html",
+  "/dashboard/prove/": "/dashboard/prove/index.html",
+  "/dashboard/feeds": "/dashboard/feeds/index.html",
+  "/dashboard/feeds/": "/dashboard/feeds/index.html",
 };
 const toFile = httpAction(async (_ctx, request) => {
   const url = new URL(request.url);
