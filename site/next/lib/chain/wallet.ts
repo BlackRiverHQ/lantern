@@ -125,11 +125,26 @@ export async function simulate(
   }
 }
 
+/* A wallet's own estimate for this chain sits at the base fee with nothing above it, so it loses
+   whenever the base fee ticks up between the estimate and the block - the node answers "max fee per
+   gas less than block base fee" and nothing is ever broadcast. Ask the chain what it costs at the
+   block we are in and leave room above it, so the wallet has a number it can use. A tip is not
+   needed here: this chain's ordering does not price one. */
+async function fee(): Promise<Record<string, unknown>> {
+  try {
+    const b = await request("eth_getBlockByNumber", ["latest", false]);
+    const base = b && b.baseFeePerGas ? BigInt(b.baseFeePerGas) : 0n;
+    if (base > 0n) return { maxFeePerGas: "0x" + (base * 4n).toString(16), maxPriorityFeePerGas: "0x0" };
+    const p = BigInt(await request("eth_gasPrice", []));
+    return { gasPrice: "0x" + (p * 2n).toString(16) };
+  } catch { return {}; }
+}
+
 export async function send(
   label: string, to: string, calldata: string, value?: bigint | number | string,
   onHash?: (h: string) => void
 ): Promise<TxEntry> {
-  const hash = await request("eth_sendTransaction", [txFields(to, calldata, value)]);
+  const hash = await request("eth_sendTransaction", [{ ...txFields(to, calldata, value), ...(await fee()) }]);
   if (onHash) { try { onHash(hash); } catch { /* a render callback must not break a send */ } }
   const entry: TxEntry = { label, hash, status: "pending", to };
   log.unshift(entry);
