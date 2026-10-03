@@ -151,6 +151,24 @@ the page's own button producing its transactions and the chain accepting them. I
 `npm test`, because it needs the network, cast and playwright (`PLAYWRIGHT_DIR`), and it sends
 transactions: `--dry` connects and reports what the page offers without signing anything.
 
+Three pages, each in the state it needs:
+
+```
+npm run verify:wallet -- --page prove --case 45
+npm run verify:wallet -- --page feeds
+npm run verify:wallet -- --page run --case 45 --r1 15 --r2 16 --do "Get the verdict"
+```
+
+`--page run` seeds the visitor's case into `localStorage`, which the page's own "start a case" would
+otherwise have written, so the step table is built for a case the page did not create itself.
+
+Two things about a stake are worth knowing before reading its output. The page approves HOLD only when
+the allowance is short, so a wallet that already holds one sees a single transaction and not two:
+counting to two waits on a transaction the page has no reason to send. And the run page offers a step
+only once every step before it is done (the pass at the end of `plan.ts`), so a case assembled out of
+band - whose chain state makes steps 2 to 6 read as done, but whose wallet is short of WETH - shows
+the verdict as pending with no button at all. Run the fund step first, then the verdict.
+
 ### Producing something to stake against
 
 `/dashboard/prove` offers its button only while a bonus is held, and a bonus exists only between a

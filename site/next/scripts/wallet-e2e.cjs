@@ -132,7 +132,7 @@ async function connect(page) {
   console.log("  connected");
 }
 
-async function clickAndReport(page, re, label) {
+async function clickAndReport(page, re, label, wantTxs = 1) {
   const btn = page.getByRole("button", { name: re }).first();
   try {
     await btn.waitFor({ state: "visible", timeout: DRY ? 15000 : 60000 });
@@ -146,9 +146,22 @@ async function clickAndReport(page, re, label) {
   if (DRY) { console.log("  dry run: not clicking"); return; }
   if (disabled) throw new Error(label + " is disabled; the page would not send it");
   await btn.click();
+
+  // A stake is a flow, not a click: an approval, then the call that spends it. Two rules keep the
+  // page alive long enough for both - wait until the flow has produced the transactions it is known
+  // to have, and only then wait for a quiet period. Leaving on the first transaction, or on a short
+  // quiet period, closes the page mid-flow and the second transaction never goes out.
   const before = sent.length;
-  for (let i = 0; i < 120 && sent.length === before; i++) await page.waitForTimeout(1000);
+  let last = before;
+  let quiet = 0;
+  for (let i = 0; i < 180; i++) {
+    await page.waitForTimeout(1000);
+    if (sent.length > last) { last = sent.length; quiet = 0; }
+    else if (sent.length > before) quiet++;
+    if (sent.length - before >= wantTxs && quiet >= 15) break;
+  }
   if (sent.length === before) throw new Error(label + " produced no transaction");
+  console.log("  " + label + ": " + (sent.length - before) + " transaction(s)");
 }
 
 (async () => {
@@ -161,7 +174,8 @@ async function clickAndReport(page, re, label) {
   page.on("console", (m) => { if (m.type() === "error") console.log("  console.error: " + m.text().slice(0, 200)); });
   page.on("response", (r) => { if (r.status() >= 400) console.log("  HTTP " + r.status() + " " + r.url()); });
 
-  const url = SITE + (PAGE === "feeds" ? "/dashboard/feeds/" : "/dashboard/prove/");
+  const PATH = { prove: "/dashboard/prove/", feeds: "/dashboard/feeds/", run: "/dashboard/run/" };
+  const url = SITE + (PATH[PAGE] || PATH.prove);
   console.log("page " + url + (DRY ? "  (dry)" : ""));
   await page.goto(url, { waitUntil: "domcontentloaded" });
   console.log("  injected provider present at load: " + (await page.evaluate(() => typeof window.ethereum !== "undefined")));
@@ -173,7 +187,31 @@ async function clickAndReport(page, re, label) {
       await page.waitForFunction((id) => document.body.innerText.includes("#" + id), CASE_ID, { timeout: 90000 });
       console.log("  row #" + CASE_ID + " is on the page");
     }
-    await clickAndReport(page, /^Stake /, "Stake");
+    // One transaction, not two: the stake is an approval plus the call, but the page only approves
+    // when the allowance is short, and HOLD's allowance to Lantern is already set here. Waiting for a
+    // second transaction that the page has no reason to send just burns three minutes.
+    await clickAndReport(page, /^Stake /, "Stake", 1);
+  } else if (PAGE === "run") {
+    // The run page drives the visitor's own case from localStorage, so seed it the way the page's own
+    // "start a case" does. Without this the plan is for no case and the step is not offered at all.
+    const store = {
+      id: Number(CASE_ID),
+      r1: Number(opt("r1", "1")),
+      r2: Number(opt("r2", "2")),
+      gap: Number(opt("gap", "1800")),
+      tx: {},
+      start: { required: "0", errors: "0", borrower: account.addr },
+      pending: null,
+    };
+    const storeKey = "lantern.case.v2." + DEV.chainId + ".0xcdce3a1b3ebf7fe1e340ab670e25fe768195ac54";
+    await page.evaluate(
+      ([k, v]) => { try { localStorage.setItem(k, v); } catch (e) {} },
+      [storeKey, JSON.stringify(store)],
+    );
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await connect(page);
+    const want = opt("do", "Get the verdict");
+    await clickAndReport(page, new RegExp("^" + want + "$", "i"), want, 1);
   } else {
     await page.getByPlaceholder(/a short name for your feed/i).fill(FEED_NAME);
     await clickAndReport(page, /^Register the feed$/i, "Register the feed");
@@ -184,6 +222,9 @@ async function clickAndReport(page, re, label) {
   }
 
   console.log("hashes sent: " + (sent.length ? sent.join(" ") : "none"));
+  const shot = join(process.env.TMPDIR || "/tmp", "wallet-e2e-" + PAGE + ".png");
+  await page.screenshot({ path: shot });
+  console.log("screenshot " + shot);
   await browser.close();
   process.exit(0);
 })().catch((e) => {
