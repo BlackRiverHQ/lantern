@@ -140,11 +140,24 @@ async function fee(): Promise<Record<string, unknown>> {
   } catch { return {}; }
 }
 
+/* The chain's own estimate for a call that goes through a proxy lands within a few percent of what
+   the call actually needs, and a wallet's limit is that estimate plus a sliver - which is how the
+   wrap reverts for a visitor while the very same call succeeds a block later. Unused gas is not
+   charged (the fee is on gas used), so ask for more than the estimate and let the surplus come back.
+   An action that cannot be estimated is left to the wallet rather than blocked here. */
+async function gasFor(t: Record<string, unknown>): Promise<Record<string, unknown>> {
+  try {
+    const g = await request("eth_estimateGas", [t]);
+    return { gas: "0x" + (BigInt(g) * 2n).toString(16) };
+  } catch { return {}; }
+}
+
 export async function send(
   label: string, to: string, calldata: string, value?: bigint | number | string,
   onHash?: (h: string) => void
 ): Promise<TxEntry> {
-  const hash = await request("eth_sendTransaction", [{ ...txFields(to, calldata, value), ...(await fee()) }]);
+  const t = txFields(to, calldata, value);
+  const hash = await request("eth_sendTransaction", [{ ...t, ...(await gasFor(t)), ...(await fee()) }]);
   if (onHash) { try { onHash(hash); } catch { /* a render callback must not break a send */ } }
   const entry: TxEntry = { label, hash, status: "pending", to };
   log.unshift(entry);
