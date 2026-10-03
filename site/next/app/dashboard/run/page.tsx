@@ -36,8 +36,8 @@ export default function RunPage() {
           {g.kind === "connect" || g.kind === "chain" ? (
             <button className="link" onClick={p.connectOrSwitch}>{g.label}</button>
           ) : null}
-          {g.kind === "gas" || g.kind === "nowallet" ? (
-            <a className="link" href={g.link[0]} target="_blank" rel="noopener">{g.link[1]} ↗</a>
+          {g.kind === "gas" || g.kind === "nowallet" || g.kind === "connect" ? (
+            <a className="link" href={g.link![0]} target="_blank" rel="noopener">{g.link![1]} ↗</a>
           ) : null}
         </div>
       ) : null}

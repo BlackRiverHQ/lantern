@@ -113,7 +113,7 @@ export const bondTopUpNeeded = (s: Snapshot) => s.bond < s.required + s.required
 
 export type Gate =
   | { kind: "nowallet"; why: string; link: [string, string] }
-  | { kind: "connect"; why: string; label: string }
+  | { kind: "connect"; why: string; link: [string, string]; label: string }
   | { kind: "chain"; why: string; label: string }
   | { kind: "gas"; why: string; link: [string, string]; label: string }
   | { kind: "owner"; why: string };
@@ -124,7 +124,14 @@ export function gate(r: Runner): Gate | null {
   if (typeof window !== "undefined" && !(globalThis as any).ethereum) {
     return { kind: "nowallet", why: "You need a browser wallet such as MetaMask to run a case.", link: ["https://metamask.io/download/", "Get MetaMask"] };
   }
-  if (!r.account) return { kind: "connect", why: "Connect your wallet to start.", label: "Connect wallet" };
+  if (!r.account) {
+    return {
+      kind: "connect",
+      why: "Connect a wallet to start. Step 1 also needs a little test ETH for gas, which is free from a faucet.",
+      link: [CFG.faucet, "Get test ETH"],
+      label: "Connect wallet",
+    };
+  }
   if (r.chain !== null && r.chain !== CFG.chainId) {
     return { kind: "chain", why: "Your wallet is on another network. The case runs on Arbitrum Sepolia.", label: "Switch network" };
   }
