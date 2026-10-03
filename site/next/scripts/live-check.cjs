@@ -39,26 +39,45 @@ const check = (cond, msg) => {
   const rows = await provableCases(cases, Math.floor(Date.now() / 1000), 1000n, 2000n);
   check(rows.length === cases.length, rows.length + " rows for " + cases.length + " cases");
 
+  // A case nobody has adjudicated has no verdict to reproduce: the page saying "this one would hold"
+  // is a claim about a challenge that has not happened, not a disagreement with the contract.
+  const decidedIds = new Set(cases.filter((c) => c.outcome !== 0).map((c) => c.id));
+
   let agree = 0;
   let comparable = 0;
+  const compared = new Set();
   for (const r of rows) {
     const held = isHeld(r);
     const said = r.v ? (r.v.upheld ? "upheld" : "refused") : "n/a";
     const got = r.c.result;
-    const same = r.v ? (r.v.upheld ? got === "upheld" : got !== "upheld") : null;
+    const same =
+      r.v && decidedIds.has(r.c.id) ? (r.v.upheld ? got === "upheld" : got !== "upheld") : null;
     console.log(
       `  #${r.c.id} round=${r.round} held=${held} printed=${r.subj && r.subj.exists ? r.subj.value : "none"}` +
         ` second=${r.peer && r.peer.exists ? r.peer.value : "none"} says=${said}${r.v ? " (" + r.v.spread + "bps)" : ""} recorded=${got}`,
     );
     if (same !== null) {
       comparable++;
+      compared.add(r.c.id);
       if (same) agree++;
       check(same, `#${r.c.id}: the page's read matches the verdict the contract recorded`);
+    } else if (r.v) {
+      console.log(`       undecided: the page would have this ${r.v.upheld ? "upheld" : "refused"}`);
     }
     // a verdict strung from a missing print would be the page inventing a number
     if (r.v) check(r.subj.exists && r.peer.exists, `#${r.c.id}: both prints exist, so the comparison is real`);
   }
   console.log("  agreed on " + agree + " of " + comparable + " comparable cases");
+
+  // Without this, a deployment whose cases are all undecided reports "agreed on 0 of 0" and exits 0,
+  // which reads as a pass: the one thing this check exists to prove would go unproven and unnoticed.
+  const decided = cases.filter((c) => c.outcome !== 0);
+  const missed = decided.filter((c) => !compared.has(c.id)).map((c) => "#" + c.id);
+  check(
+    missed.length === 0,
+    `${decided.length} decided case(s) on this deployment, each one reproduced` +
+      (missed.length ? " — nothing to compare for " + missed.join(", ") : ""),
+  );
 
   console.log("\nfeeds");
   const feeds = await readFeeds([CFG.subject, CFG.peer]);

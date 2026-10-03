@@ -8,7 +8,8 @@
     "start": "next start -p 4211",
     "test": "tsc -p tsconfig.test.json && node -e \"require('fs').writeFileSync('.test-build/package.json','{\\\"type\\\":\\\"commonjs\\\"}')\" && node test/selectors.test.mjs && node test/encode.test.mjs && node test/format.test.mjs && node test/attention.test.mjs && node test/prove.test.mjs",
     "typecheck": "tsc --noEmit",
-    "live": "tsc -p tsconfig.probe.json && node -e \"require('fs').writeFileSync('.probe-build/package.json','{\\\"type\\\":\\\"commonjs\\\"}')\" && node scripts/live-check.cjs"
+    "live": "tsc -p tsconfig.probe.json && node -e \"require('fs').writeFileSync('.probe-build/package.json','{\\\"type\\\":\\\"commonjs\\\"}')\" && node scripts/live-check.cjs",
+    "verify:wallet": "node scripts/wallet-e2e.cjs"
   },
   "dependencies": {
     "next": "16.3.8",

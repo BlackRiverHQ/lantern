@@ -128,6 +128,7 @@ the chain.
 ```
 npm test
 npm run live
+npm run verify:wallet -- --page prove --dry
 ```
 
 Every selector and event topic the page uses is re-derived with `cast sig` / `cast keccak` and
@@ -138,7 +139,27 @@ the page can send, and the custom-error decoder is checked against real revert b
 `npm test` runs offline. `npm run live` compiles the chain layer and runs it against the real chain
 outside the browser, which is where a reader that builds malformed calldata or mis-formats an id
 fails with a stack trace instead of on the page. It also asserts the strongest thing the dashboard
-claims: that the comparison this page makes on a decided case is the verdict the contract reached.
+claims: that the comparison this page makes on a decided case is the verdict the contract reached -
+and that there is at least one decided case to make that assertion about, because a deployment with
+none would otherwise report "agreed on 0 of 0" and exit zero.
+
+`npm run verify:wallet` is the one check that ends in a signature. It drives the live deployment in a
+real browser with `window.ethereum` injected before the first render, bridging every request to a
+key read from `~/.lantern-deployer.json` at run time - the injected script holds nothing secret. A
+wallet extension cannot be driven headlessly, and DOM assertions only show the surface; this shows
+the page's own button producing its transactions and the chain accepting them. It is not part of
+`npm test`, because it needs the network, cast and playwright (`PLAYWRIGHT_DIR`), and it sends
+transactions: `--dry` connects and reports what the page offers without signing anything.
+
+### Producing something to stake against
+
+`/dashboard/prove` offers its button only while a bonus is held, and a bonus exists only between a
+liquidation and its verdict. On the live deployment the three calls in "Prove a price" above produce
+one. The order matters, and it is not the obvious one: the market's borrow limit and its liquidation
+check are the same function of the same price, so a position borrowed up to its limit can never be
+liquidated at that price - the price has to move after the borrow. Practically that means printing a
+real price at a new round, borrowing up to the limit at *that* price, and only then letting the feed
+print below it and liquidating against the lower round.
 
 ## Build
 

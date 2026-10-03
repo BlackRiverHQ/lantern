@@ -59,6 +59,31 @@ cooldown, and spends what it claimed.
 The equivalent stories are also asserted in the test suite, where they run without a network:
 `test/fixtures/Scenarios.t.sol`, `test/unit/CrossSource.t.sol`.
 
+## The same acts on the dashboard
+
+The scripts above are the contract's side, driven by a key. The same acts also exist as a surface,
+where a visitor signs each step with their own wallet and watches the state it produced:
+
+| page | act | what changes |
+|---|---|---|
+| `/dashboard/feeds/` | register a feed, post the bond the contract asks for, declare the second source | the registry gains a feed, and its bond reaches what it is underwriting - which is what lets it price |
+| `/dashboard/run/` | hold the settlement asset, supply, borrow, liquidate | the market's custody, then the case's escrow |
+| `/dashboard/prove/` | stake against a case you do not own | the escrow gains a challenger, and the chain holds the stake until the verdict |
+| `/dashboard/cases/` | read the record | nothing - this view is a read |
+| `/dashboard/` | the chain as one page | nothing |
+
+The stake on `/dashboard/prove/` is the act aimed at another party's money: the prover is not the
+borrower, not the liquidator and not the feed's operator. The contract asserts none of that - it asks
+for evidence a rule can be checked against and for a stake that covers its floor - so this page is the
+one to record if the point is that anyone can contest a price. It is offered only where the page's own
+comparison of the two prints says the challenge holds, because a refused challenge costs the challenger
+their whole stake.
+
+A recording of that page needs something held at the moment of recording, and the window closes by
+itself after five minutes. `docs/DASHBOARD.md` has the three calls that produce a case and the rounds
+the server will tell you it needs. Registering a feed is the one act that cannot be repeated against
+the same name: the contract refuses a feed that already exists.
+
 ## What to look at afterwards
 
 `feedErrors` (how many prints were caught), `requiredBond` (what the feed must now carry),
