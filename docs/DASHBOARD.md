@@ -169,6 +169,20 @@ only once every step before it is done (the pass at the end of `plan.ts`), so a 
 band - whose chain state makes steps 2 to 6 read as done, but whose wallet is short of WETH - shows
 the verdict as pending with no button at all. Run the fund step first, then the verdict.
 
+### What the harness has produced on the live deployment
+
+Every line below is a transaction one of the page's own buttons sent, and every receipt came back
+status 1. The block-level effects are readable on chain.
+
+- `/dashboard/prove`, case #45: the stake. `challengeOf(45)` reads prover `0x574d…7913`, stake 1000,
+  rule 4, against the evidence hash the page computed.
+- `/dashboard/run`, case #45: the fund step's wrap (`0xac86cfbf`), the verdict's `adjudicate`
+  (`0x8ec981a9`), and the settle step's `claim` (`0x588b0b0b`). The adjudication moved the contract's
+  own numbers - `heldTotal` fell from 3275 to 2969 by exactly that case's bonus, `feedErrors` went
+  from 2 to 3, the feed's bond from 199265 to 199204 - and `seizureOf(45)` now reads state 2.
+- `/dashboard/feeds`: `registerFeed` (`0x7d64d045`), `depositBond` (`0xc0df5602`) and `setPeerFeed`
+  (`0xfaf94659`). The page then lists the feed as bonded, with its second source declared.
+
 ### Producing something to stake against
 
 `/dashboard/prove` offers its button only while a bonus is held, and a bonus exists only between a
