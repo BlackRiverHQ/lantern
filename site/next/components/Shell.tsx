@@ -39,7 +39,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="app">
       <aside className={"side" + (menu ? " open" : "")}>
-        <Link className="brand" href="/" aria-label="Lantern home"><span className="word">Lantern</span></Link>
+        {/* The root is the landing page, not a route of this app: there is no payload for the router
+            to fetch, so a Link here asks for one and 404s. A plain anchor loads the page it names. */}
+        <a className="brand" href="/" aria-label="Lantern home"><span className="word">Lantern</span></a>
         <div className="side-group">Protocol</div>
         <nav className="side-nav" aria-label="Dashboard">
           {NAV.map((n) => (

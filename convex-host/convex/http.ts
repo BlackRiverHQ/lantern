@@ -6,9 +6,12 @@ import { components, internal } from "./_generated/api";
 const http = httpRouter();
 
 // The dashboard is a static export: every route is an index.html under its own directory, and static
-// hosting matches exact file paths only, so each clean URL is sent on to its file. Exact routes only —
-// a pathPrefix here would shadow the component's own routes and 404 the files under it. The query
-// string rides along, because the cases view reads the selected case from it.
+// hosting matches exact file paths only, so each clean URL is served the file itself. A redirect here
+// would leave index.html in the address bar, and Next reads the location to build the URLs it fetches
+// for the next navigation — every one of those would 404. Serving the bytes at the clean path keeps
+// them correct. Exact routes only — a pathPrefix here would shadow the component's own routes and
+// 404 the files under it. The query string rides along, because the cases view reads the selected
+// case from it.
 const FILE: Record<string, string> = {
   "/dashboard": "/dashboard/index.html",
   "/dashboard/": "/dashboard/index.html",
@@ -21,11 +24,22 @@ const FILE: Record<string, string> = {
   "/dashboard/feeds": "/dashboard/feeds/index.html",
   "/dashboard/feeds/": "/dashboard/feeds/index.html",
 };
-const toFile = httpAction(async (_ctx, request) => {
+const toFile = httpAction(async (ctx, request) => {
   const url = new URL(request.url);
   const to = FILE[url.pathname];
   if (!to) return new Response("Not found", { status: 404 });
-  return new Response(null, { status: 308, headers: { Location: to + url.search } });
+  const asset = await ctx.runQuery(components.staticHosting.lib.resolveAssetForHttp, { path: to });
+  if (!asset?.storageUrl) return new Response("Not found", { status: 404 });
+  const file = await fetch(asset.storageUrl);
+  if (!file.ok || !file.body) return new Response("Not found", { status: 404 });
+  return new Response(file.body, {
+    status: 200,
+    headers: {
+      "content-type": asset.contentType || "text/html; charset=utf-8",
+      "cache-control": "public, max-age=0, must-revalidate",
+      ...(asset.etag ? { etag: asset.etag } : {}),
+    },
+  });
 });
 for (const path of Object.keys(FILE)) {
   http.route({ path, method: "GET", handler: toFile });
