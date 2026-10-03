@@ -8,6 +8,7 @@
 ![live](https://img.shields.io/badge/live-Arbitrum%20Sepolia-blue)
 ![license](https://img.shields.io/badge/license-MIT-lightgrey)
 ![stack](https://img.shields.io/badge/Solidity%200.8.28-Foundry%20%C2%B7%20Next.js-informational)
+[![ci](https://github.com/subheeksh5599/lantern/actions/workflows/test.yml/badge.svg)](https://github.com/subheeksh5599/lantern/actions/workflows/test.yml)
 
 [![watch the demo](https://img.shields.io/badge/watch%20demo-1%3A21-black)](demo/media/lantern-demo-narrated.mp4)
 [![local copy](https://img.shields.io/badge/local%20copy-mp4-black)](demo/media/lantern-demo-narrated.mp4)

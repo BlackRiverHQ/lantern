@@ -12,7 +12,7 @@
 | `test/gas/` | cost ceilings, asserted rather than tabulated |
 | `test/fixtures/` | named scenarios, each a short story with a classification at the end |
 
-637 tests pass across 46 suites. The suite runs in about fifteen seconds locally, most of it the
+648 tests pass across 47 suites. The suite runs in about fifteen seconds locally, most of it the
 invariant campaign.
 
 ## What the newer suites pin
@@ -51,6 +51,16 @@ bytecode and burns more gas. The ceilings in `test/gas/` are calibrated for a no
 report failures under instrumentation that have nothing to do with a regression. `make coverage`
 therefore excludes the gas suite and the invariant campaign by contract name; the gas suite is checked
 by `make gas` on an uninstrumented build, and the invariants by `make invariants`.
+
+## The ceilings are toolchain-specific
+
+The same is true of the toolchain. Every ceiling in `test/gas/` is a `gasleft()` delta, and a delta
+moves with the gas schedule the toolchain implements. These numbers are measured against the build the
+contracts are compiled for, solc 0.8.28 with `evm_version = "cancun"`, on Forge 1.7.1. That is the
+version `.github/workflows/test.yml` pins, and the pin is load-bearing: Forge 1.8.4 reads
+`openChallenge` at 208,961 against the 200,000 ceiling here, while the contract deployed on Arbitrum
+Sepolia charges 177,963 gas for the same call (`0x70955d6dd665623b75`, block 315,299,518). Raising the
+pin means re-measuring the budgets and updating the figures the docs quote in the same commit.
 
 ## Why the invariants matter more than the unit tests
 

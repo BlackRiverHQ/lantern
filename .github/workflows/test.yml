@@ -1,3 +1,15 @@
+# One workflow, not two. This file and a near-identical `ci.yml` used to run the same Foundry suite on
+# every push, so each push produced two runs of the same job, and both were red.
+#
+# The red was a measurement, not a defect. The gas budgets in `test/gas/Gas.t.sol` are `gasleft()`
+# deltas, and a delta moves with the toolchain's gas schedule. Neither workflow pinned a version, so
+# both took whatever "stable" resolved to (Forge 1.8.4 at the time), and 1.8.4 reads `openChallenge` at
+# 208,961 against this repo's 200,000 budget. The contract deployed on Arbitrum Sepolia charges 177,963
+# gas for the same call, and the budgets are sized against the schedule the contracts are compiled for
+# (solc 0.8.28, evm cancun). So the toolchain is pinned to the version those numbers were measured on.
+#
+# Raising this pin is a deliberate act: re-measure the budgets in `test/gas/`, update the figures the
+# docs quote, and move the pin in the same commit. Do not raise the pin alone.
 name: test
 
 on:
@@ -5,7 +17,7 @@ on:
   pull_request:
 
 jobs:
-  forge:
+  contracts:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -14,7 +26,7 @@ jobs:
 
       - uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: stable
+          version: v1.7.1
 
       - name: Build
         run: forge build --sizes
@@ -24,3 +36,33 @@ jobs:
 
       - name: Invariants
         run: forge test --match-path "test/invariants/*"
+
+  dashboard:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site/next
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/next/package-lock.json
+
+      # The site carries no ethers and no viem: the encoder in lib/chain/abi.ts is ours, and
+      # test/encode.test.mjs diffs it against `cast calldata` for every action a page can send. Without
+      # cast on PATH that test fails, so this job needs the same pinned toolchain as the one above.
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.7.1
+
+      - name: Install
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test
