@@ -33,6 +33,12 @@ calendar. Two of those things are permissionless and get a button:
 Both checks are made against the contract's own guards: the row offers the button only where the
 call cannot revert, and where the move instead belongs to the feed operator the row says so.
 
+Every case is read, and every unsettled escrow with it — in bounded groups, but with no cap — because
+a row missing from this panel is money a reader could have moved and did not know about. The rows
+themselves are pinned by `test/attention.test.mjs`, which drives the panel with a closed window, a
+running window, an unresolved challenge, a decided seizure and an unreadable escrow and asserts
+exactly which of them carry a button.
+
 ## Cases
 
 The full event log across both contracts, oldest state folded away: how it ended, what was held, the
@@ -44,9 +50,10 @@ The one page that signs. Eight steps, each a real transaction: claim test HOLD, 
 price, borrow, print a false price, be liquidated, challenge the print, take the verdict, settle.
 
 Values are derived, never typed: the false price is the real price scaled by the gap the contract
-enforces, the liquidation amount comes from the market's own health check, and the stake comes from
-`minStake` plus the attacker's own `bountyBps` cap. Every transaction is preflighted with `eth_call`
-before it is offered for signature, so a revert arrives as a sentence instead of a receipt.
+enforces, the liquidation amount comes from the market's own health check, and the stake is the
+contract's own floor — `WaterfallMath.stakeFloor(bonus, minStake)`, the larger of `minStake` and 1%
+of the held bonus (`MIN_STAKE_BPS`). Every transaction is preflighted with `eth_call` before it is
+offered for signature, so a revert arrives as a sentence instead of a receipt.
 
 The feed's side is played by `/api/print`, a Convex HTTP action holding the feed operator's key. It
 derives every value it prints from the chain and refuses to print anything a case does not need.

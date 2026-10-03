@@ -67,8 +67,8 @@ verify-source:
 rehearse:
 	./script/rehearse-fork.sh
 
-# The dashboard. `site-test` diffs the page's encoder, selectors and formatters against cast; `site`
-# exports it to static files; `site-deploy` pushes the functions and uploads the export.
+# The dashboard. `site-test` diffs the page's encoder, selectors, formatters and panel rows against
+# cast; `site` exports it to static files; `site-deploy` builds, pushes the functions and uploads.
 site-test:
 	cd site/next && npm test
 

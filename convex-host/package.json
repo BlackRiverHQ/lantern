@@ -7,7 +7,7 @@
     "build": "npm run build:site && rm -rf dist && cp -r ../site/next/out dist",
     "dev": "npm --prefix ../site/next run dev",
     "test:site": "npm --prefix ../site/next test",
-    "deploy": "npx @convex-dev/static-hosting deploy --no-spa"
+    "deploy": "CONVEX_DEPLOYMENT=prod:friendly-fennec-31 npx @convex-dev/static-hosting deploy --no-spa"
   },
   "dependencies": {
     "@convex-dev/static-hosting": "^0.2.1",

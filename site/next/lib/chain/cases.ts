@@ -95,9 +95,11 @@ export async function loadCases(): Promise<CaseRecord[]> {
   cases.sort((x, y) => y.block - x.block);
 
   // The escrow is the authority on whether a held bonus can be moved and who it is owed to, so read
-  // it for every case that has not been settled yet rather than inferring it from which events exist.
-  const live = cases.filter((c) => !c.settled).slice(0, 30);
-  await Promise.all(live.map(async (c) => {
+  // it for every case that has not been settled rather than inferring it from which events exist.
+  // Both passes run in chunks: the overview promises a row for every held bonus and every unclaimed
+  // seizure, and a cap here would quietly drop the older ones off that list.
+  const live = cases.filter((c) => !c.settled);
+  await inChunks(live, async (c) => {
     try {
       const e = words(await call(CFG.lantern, SEL.escrowOf + BigInt(c.id).toString(16).padStart(64, "0")));
       if (e[8] === 1n) {
@@ -106,11 +108,18 @@ export async function loadCases(): Promise<CaseRecord[]> {
         c.bonus = e[4] || c.bonus;
       }
     } catch { /* a case we cannot read keeps the result its events imply */ }
-  }));
+  });
 
-  const blockTs = await blockTimestamps(cases.slice(0, 30).map((c) => c.block));
+  const blockTs = await blockTimestamps(cases.map((c) => c.block));
   cases.forEach((c) => { c.ts = blockTs[c.block] ?? null; });
   return cases;
+}
+
+/** Read in bounded groups so a long history does not open a hundred sockets at once. */
+async function inChunks<T>(items: T[], fn: (item: T) => Promise<void>, size = 16): Promise<void> {
+  for (let i = 0; i < items.length; i += size) {
+    await Promise.all(items.slice(i, i + size).map(fn));
+  }
 }
 
 async function blockTimestamps(blocks: number[]): Promise<Record<number, number>> {

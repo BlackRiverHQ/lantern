@@ -151,11 +151,17 @@ The dashboard is a separate build:
 
 ```
 cd site/next && npm install
-npm test                              # diffs the page's encoder and selectors against cast
-npm run build                         # static export into site/next/out
-cd ../../convex-host && npm run build # builds the site and copies it into dist/
-npm run deploy                        # pushes functions and uploads dist/ to the Convex deployment
+npm test                              # diffs the encoder, the selectors and the panel rows
+cd ../../convex-host && npm run deploy
 ```
+
+`npm run deploy` does the whole deploy: it builds the site, copies the export into `dist/`, pushes the
+functions, and uploads the files — in that order, one command. It targets this repository's production
+deployment (`prod:friendly-fennec-31`) rather than whatever `.env.local` points at, because
+`convex deploy` refuses to choose a production target without being told and cannot be asked in a
+non-interactive shell. Deploy only the site or only the functions with
+`npm run build && npx @convex-dev/static-hosting deploy --no-spa --skip-build --skip-convex` and
+`npx convex deploy` respectively.
 
 ## Documentation
 

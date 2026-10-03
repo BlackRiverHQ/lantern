@@ -6,7 +6,7 @@
     "dev": "next dev -p 4211",
     "build": "node scripts/prepare-public.mjs && next build",
     "start": "next start -p 4211",
-    "test": "tsc -p tsconfig.test.json && node -e \"require('fs').writeFileSync('.test-build/package.json','{\\\"type\\\":\\\"commonjs\\\"}')\" && node test/selectors.test.mjs && node test/encode.test.mjs && node test/format.test.mjs",
+    "test": "tsc -p tsconfig.test.json && node -e \"require('fs').writeFileSync('.test-build/package.json','{\\\"type\\\":\\\"commonjs\\\"}')\" && node test/selectors.test.mjs && node test/encode.test.mjs && node test/format.test.mjs && node test/attention.test.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
