@@ -1,0 +1,14 @@
+# Transient build products. The demo is committed as media/ plus the scripts that make it; anything
+# a rebuild regenerates stays out of the tree.
+frames/
+vframes/
+v2/
+v3/
+probe/
+fine/
+fp/
+sel_*/
+narration/
+pc_*.png
+poster_cand_*.png
+sheet_*.png
