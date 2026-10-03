@@ -10,7 +10,7 @@ The debt is not held back. Repayment and the closing of the position still happe
 liquidation, exactly as they did before. What becomes provisional is the profit.
 
 **Try it: [friendly-fennec-31.convex.site/dashboard](https://friendly-fennec-31.convex.site/dashboard).**
-Three views, each reading the chain rather than a mirror of it.
+Five views, each reading the chain rather than a mirror of it.
 
 - **Overview** holds the four facts that decide whether the feed may price anything at all: the bond
   it carries against the bond it must carry, the depth of its print history, the bonuses still held,
@@ -25,6 +25,16 @@ Three views, each reading the chain rather than a mirror of it.
   your collateral back. Every step is a real transaction you sign. Your wallet plays the borrower and
   the prover; the feed's side is played by a small server that holds the feed operator's key, derives
   every value from the chain, and only makes the prints a case needs.
+
+- **Prove a price** is the arguer's side, and the one page whose subject is other people's money. It
+  lists the bonuses a liquidation is still holding, and for each one reads the print the feed made for
+  that case's own round against the print its declared second source made for the same round. It
+  offers the stake only where the comparison the contract will run says the claim holds — a refused
+  challenge costs the challenger their whole stake — and beneath the held bonuses it lists the
+  verdicts already reached, with its own read beside the verdict the contract recorded.
+- **Feeds & bonds** is the operator's side: what a feed must carry, and how an operator registers
+  one, bonds it, and declares the second source it is reconciled against. The feed id is derived from
+  the reader's address and the name they type, so the page finds that feed again on the next visit.
 
 The dashboard is a Next.js app under `site/next/`, exported to static files and served by the same
 Convex deployment as the landing page. The landing page and its assets under `site/` are the source of
@@ -182,5 +192,5 @@ non-interactive shell. Deploy only the site or only the functions with
 | [docs/TESTING.md](docs/TESTING.md) | the shape of the suite and what it covers |
 | [docs/COVERAGE.md](docs/COVERAGE.md) | line and branch coverage, and what it leaves out |
 | [docs/DEMO.md](docs/DEMO.md) | the acts, and the commands that reproduce them |
-| [docs/DASHBOARD.md](docs/DASHBOARD.md) | the three views, what each reads, and how it is tested |
+| [docs/DASHBOARD.md](docs/DASHBOARD.md) | the five views, what each reads, and how it is tested |
 | [GAS.md](GAS.md) | measured cost |

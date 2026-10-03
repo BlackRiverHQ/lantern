@@ -65,6 +65,27 @@ own read beside the verdict the contract recorded. A row where the two disagree 
 the page can be checked rather than trusted: `npm run live` asserts the same agreement against the
 live chain, so a reader can see the page reproduce a verdict the contract actually reached.
 
+A held bonus exists for the length of the challenge window and then it is gone, so the page is empty
+of them most of the time and a recording has to make one first. `/dashboard/run` does that from a
+browser wallet; the same three steps are also callable directly on the deployment, which is how a
+held bonus can be produced without a wallet at all — the borrower only has to be a wallet with a
+liquidatable position:
+
+```
+SITE=https://friendly-fennec-31.convex.site
+BORROWER=0x...            # a position the market would liquidate at a false price
+post() { curl -s -X POST -H 'content-type: application/json' -d "$1" "$SITE/api/print"; echo; }
+
+post '{"kind":"honest","caseId":41,"r1":8,"r2":9,"borrower":"'$BORROWER'"}'
+post '{"kind":"lie","caseId":41,"r1":8,"r2":9,"gap":1800,"borrower":"'$BORROWER'"}'
+post '{"kind":"liquidate","caseId":41,"r1":8,"r2":9,"borrower":"'$BORROWER'"}'
+```
+
+The rounds are the two after the last print either feed made, and the server will tell you them
+rather than you having to work them out: post the first call with any `r1`/`r2` and it refuses with
+`{"error":"the feed has moved on; this case needs rounds N and N+1","r1":N,"r2":N+1}`. The case id is
+whatever is free — the server refuses a taken one.
+
 ## Feeds and bonds
 
 The operator's side. A feed is the thing that stands behind a print, so this page asks the contract
