@@ -319,6 +319,7 @@ non-interactive shell. Deploy only the site or only the functions with
 
 | Document | Contents |
 |---|---|
+| [docs/PROJECT.md](docs/PROJECT.md) | the project in one page: the problem, the mechanism, the five rules, what is live, and what is not |
 | [docs/TOUR.md](docs/TOUR.md) | a reading order for someone with ten minutes |
 | [docs/DESIGN.md](docs/DESIGN.md) | the mechanism, and why the bonus is the disputed object |
 | [docs/RULES.md](docs/RULES.md) | each rule as a predicate, with the tests that pin it |
