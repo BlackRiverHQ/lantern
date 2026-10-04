@@ -3,7 +3,8 @@
 // node tools/render.mjs --page src/index.html --out out/x.mp4 --fps 60 --sub 1 --from 0 --to 5 [--w 1920 --h 1080] [--q 16] [--jpeg]
 import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
-import { resolve, join, extname, relative } from 'node:path';
+import { resolve, join, extname, relative, dirname } from 'node:path';
+import { mkdirSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 
@@ -12,13 +13,14 @@ const opt = (k, d) => { const i = argv.indexOf('--' + k); return i >= 0 ? argv[i
 const has = (k) => argv.includes('--' + k);
 const page = resolve(opt('page', 'src/index.html'));
 const out = opt('out', 'out/test.mp4');
+mkdirSync(dirname(resolve(out)), { recursive: true });
 const FPS = +opt('fps', 60), SUB = +opt('sub', 1), FROM = +opt('from', 0), TO = +opt('to', 5);
 const W = +opt('w', 1920), H = +opt('h', 1080), CRF = opt('q', '16');
 const query = opt('query', '');
 const fmt = has('jpeg') ? 'jpeg' : 'png';
 
 const browser = await chromium.launch({
-  executablePath: process.env.CHROME,
+  executablePath: process.env.CHROME || undefined, // unset: the Chromium `npx playwright install chromium` fetched
   args: ['--use-gl=angle', process.env.SWGL ? '--use-angle=swiftshader' : '--use-angle=gl', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader', '--font-render-hinting=none',
          '--disable-gpu-vsync', '--force-color-profile=srgb', '--hide-scrollbars'],
 });

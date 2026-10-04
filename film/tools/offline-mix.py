@@ -25,9 +25,10 @@ import numpy as np
 from scipy.signal import butter, sosfilt
 from pathlib import Path
 P = Path(__file__).resolve().parents[1]; SR = 48000
+(P / 'renders').mkdir(exist_ok=True)
 args = sys.argv[1:]; pic, out = args[0], args[1]
 opt = lambda k, d: args[args.index(k) + 1] if k in args else d
-score = opt('--score', 'score-duo-a2-beat.mp3'); target_lufs = float(opt('--music-lufs', '-29.9')); HF_CAP = float(opt('--hf-cap', '4'))  # the client's rule: 2-8 kHz lift <= ~4 dB
+score = opt('--score', '130.mp3'); target_lufs = float(opt('--music-lufs', '-14')); HF_CAP = float(opt('--hf-cap', '4'))  # the client's rule: 2-8 kHz lift <= ~4 dB
 no_sfx = '--no-sfx' in args
 def load(p): return np.frombuffer(subprocess.run(['ffmpeg', '-v', 'error', '-i', str(p), '-ac', '2', '-ar', str(SR), '-f', 'f32le', '-'], capture_output=True).stdout, np.float32).reshape(-1, 2).copy()
 def lufs(x):

@@ -1,13 +1,14 @@
 {
   "name": "film",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Lantern launch film: one GSAP timeline, Three.js for the 3D, rendered frame by frame.",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "setup": "npx playwright install chromium",
+    "render": "node tools/render.mjs --page src/index.html --out out/lantern-picture.mp4 --fps 60 --sub 4 --to 30 --jpeg",
+    "render:fast": "node tools/render.mjs --page src/index.html --out out/lantern-picture.mp4 --fps 30 --sub 1 --to 30 --jpeg",
+    "mix": "python3 tools/offline-mix.py out/lantern-picture.mp4 out/lantern-16x9.mp4",
+    "preview": "python3 -m http.server 8090"
   },
-  "keywords": [],
-  "author": "",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
