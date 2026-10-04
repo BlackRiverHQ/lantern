@@ -17,7 +17,7 @@ OUT=${OUT:-$HERE/media/lantern-demo-narrated.mp4}
 
 # End of each section on the assembled timeline, in seconds: the explainer's own scene lengths (25s
 # total), then the walkthrough's section ends as measured by newmap.py shifted by 25, then the end card.
-SEGMENT_ENDS=(5.0 10.5 15.5 20.0 25.0 65.0 76.0 145.0 215.0 285.0 355.0 425.0 462.0 471.0 479.0 492.5)
+SEGMENT_ENDS=(5.0 10.5 15.5 20.0 25.0 62.0 72.0 135.0 200.0 275.0 340.0 420.0 432.0 445.0 456.0 464.0 478.5)
 
 mkdir -p "$WORK"
 rm -f "$WORK"/line*.mp3 "$WORK"/line*.wav "$WORK/measured.tsv"

@@ -2,23 +2,24 @@
 #   <second on the assembled timeline>|<words>
 #
 # The assembled file is three pieces: the HyperFrames explainer (0-25s), the walkthrough of the
-# deployed site (25-480s), and the HyperFrames end card (480-492s). This is the long cut: every step of
+# deployed site (25-466s), and the HyperFrames end card (466-478s). This is the long cut: every step of
 # the case, every wallet confirmation and every explorer page is on screen, and the narration talks
 # through the flow rather than over it. Starts are placed against the screen map measured from the
 # shipped file itself, at one frame every three seconds:
 #
 #     0.0 -  25.0  explainer: the idea, the mechanic, the tolerances, the proof
-#    25.0 -  65.0  the landing page, scrolled whole
-#    65.0 -  76.0  the overview: the bond, the held bonuses, what needs a decision
-#    76.0 - 145.0  the case opens, and the wallet is funded
-#   145.0 - 215.0  the lie size, and the false print signed for
-#   215.0 - 285.0  the loan: approval, then the position
-#   285.0 - 355.0  the real price and the false one, both read back
-#   355.0 - 425.0  the liquidation, the hold, the second print
-#   425.0 - 462.0  upheld, settled, and the explorer
-#   462.0 - 471.0  the case list
-#   471.0 - 479.0  prove a price, and closing
-#   479.0 - 492.0  end card: what is live, and where to look
+#    25.0 -  62.0  the landing page, scrolled whole
+#    62.0 -  72.0  the overview: the bond, the held bonuses, what needs a decision
+#    72.0 - 135.0  the case opens, and the wallet is funded
+#   135.0 - 200.0  the lie size, and the false print signed for
+#   200.0 - 275.0  the loan, and the real price printed
+#   275.0 - 340.0  the liquidation, and the hold
+#   340.0 - 420.0  the second print, upheld, and the debt settled
+#   420.0 - 432.0  the explorer
+#   432.0 - 445.0  prove a price
+#   445.0 - 456.0  the case list
+#   456.0 - 466.0  the landing page again, closing
+#   466.0 - 478.0  end card: what is live, and where to look
 #
 # Numbers are spelled as they are spoken, there is no marketing vocabulary, and every claim is one the
 # viewer can check on screen in the same shot. Only rows that begin with a digit are read. The rate is
@@ -30,43 +31,43 @@
 10.9|Two sources have to agree within five per cent.
 15.7|The bonus is held for five minutes. The debt is not.
 20.6|Anyone can challenge. The contract decides.
-25.5|This is the landing page: what is held back, and why.
-33.5|The liquidator's profit is held for five minutes. The debt is not.
-42.0|The landing page sets out what the contract checks, and what it holds.
-52.0|Five rules, each one a predicate over state the contract already has.
-60.0|Then the contracts, and the tests behind them.
-65.5|The dashboard, reading the chain: the bond a feed carries, and what needs a decision.
-78.0|A visitor can run the whole case. The page says what the wallet needs first: test gas.
-88.0|Funding the wallet is the visitor's own transaction.
-100.0|The feed's operator runs on the server, so a visitor never needs that key.
-108.0|Every step here is a transaction the visitor signs.
-114.0|The case opens with the feed's honest print, and the peer's print beside it.
-121.5|Step one done. The page keeps the wallet's shortfall on screen until it is fixed.
-131.0|The visitor chooses how far the feed will lie. Eight per cent is enough to be provable.
-148.5|The false print is a transaction, so the wallet asks first.
-159.5|The request names the contract it calls, and the fee, before anything is signed.
-178.5|Once printed, the page reads the print back from the chain.
-190.5|Eight per cent off a second source is over the five per cent tolerance, so it is provable.
-208.5|Next, the loan. The collateral is escrowed until the case ends.
-221.5|That is two transactions: an approval, then the loan itself.
-236.5|The position is live, and the collateral sits with the protocol.
-243.5|The collateral and the debt are read from the position, not typed in.
-250.5|Each transaction has its own receipt, and a step completes only when it lands.
-266.5|The wallet reports it confirmed.
-272.0|The feed has now printed the real price and the false one.
-286.0|The contract holds both, with the round each one belongs to.
-302.0|Printing is free. Pricing is not: a band needs four prints behind it.
-314.0|The market liquidates on the false print, and the bonus is held instead of paid.
-330.0|The hold runs five minutes, and the challenge window with it.
-348.0|The feed prints again, and the run page tracks what the bond is carrying.
-366.0|The run page keeps every step's transaction, and its result.
-382.0|Upheld: the print contradicted the record, so the borrower is made whole.
+27.0|This is the landing page: what is held back, and why.
+36.0|The liquidator's profit is held for five minutes. The debt is not.
+44.0|The landing page sets out what the contract checks, and what it holds.
+51.0|Five rules, each one a predicate over state the contract already has.
+57.5|Then the contracts, and the tests behind them.
+64.0|The dashboard, reading the chain: the bond a feed carries, and what needs a decision.
+74.0|A visitor can run the whole case. The page says what the wallet needs first: test gas.
+82.0|Funding the wallet is the visitor's own transaction.
+95.0|The feed's operator runs on the server, so a visitor never needs that key.
+103.0|Every step here is a transaction the visitor signs.
+110.0|The case opens with the feed's honest print, and the peer's print beside it.
+120.0|Step one done. The page keeps the wallet's shortfall on screen until it is fixed.
+127.0|The visitor chooses how far the feed will lie. Eight per cent is enough to be provable.
+139.0|The false print is a transaction, so the wallet asks first.
+152.0|The request names the contract it calls, and the fee, before anything is signed.
+182.0|Once printed, the page reads the print back from the chain.
+192.0|Eight per cent off a second source is over the five per cent tolerance, so it is provable.
+205.0|Next, the loan. The collateral is escrowed until the case ends.
+220.0|That is two transactions: an approval, then the loan itself.
+240.0|The position is live, and the collateral sits with the protocol.
+248.0|The collateral and the debt are read from the position, not typed in.
+258.0|Each transaction has its own receipt, and a step completes only when it lands.
+268.0|The wallet reports it confirmed.
+300.0|The feed has now printed the real price and the false one.
+312.0|The contract holds both, with the round each one belongs to.
+322.0|Printing is free. Pricing is not: a band needs four prints behind it.
+340.0|The market liquidates on the false print, and the bonus is held instead of paid.
+352.0|The hold runs five minutes, and the challenge window with it.
+370.0|The feed prints again, and the run page tracks what the bond is carrying.
+392.0|The run page keeps every step's transaction, and its result.
 398.0|Settling is one more transaction, signed the same way.
-412.0|The case is closed. The collateral is back with the borrower.
-428.0|Every transaction links to the explorer, where it can be read.
-434.0|The transaction page: the call, the logs, and the block it landed in.
-445.0|The prove page lists the bonuses held and every verdict reached.
-462.0|The case list shows all seven cases, each with the bond it paid.
-474.0|Prices you can check, and a record you can read.
-480.0|Six contracts on Arbitrum Sepolia, with no owner.
-487.0|Every number on it is read from the chain.
+404.0|Upheld: the print contradicted the record, so the borrower is made whole.
+411.0|The case is closed. The collateral is back with the borrower.
+415.5|Every transaction links to the explorer, where it can be read.
+424.0|The transaction page: the call, the logs, and the block it landed in.
+434.0|The prove page lists the bonuses held and every verdict reached.
+445.0|The case list shows all seven cases, each with the bond it paid.
+458.0|Prices you can check, and a record you can read.
+466.0|Six contracts on Arbitrum Sepolia, with no owner.
+472.0|Every number on it is read from the chain.
