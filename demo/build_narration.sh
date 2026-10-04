@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Build the voice track and mux it onto the cut.
 #
-# The voice is a male English narration at a small speed-up, placed line by line at the second each
-# line's subject is on screen. Line starts come from narration.tsv; durations are measured after
+# The voice is a male English narration at the voice's own pace, placed line by line at the second
+# each line's subject is on screen. Line starts come from narration.tsv; durations are measured after
 # synthesis rather than assumed, and the script refuses to ship a track where a line overruns the
 # segment it belongs to or collides with the next one.
 set -euo pipefail
@@ -11,13 +11,14 @@ HERE=$(cd "$(dirname "$0")" && pwd)
 VIDEO=${VIDEO:-$HERE/media/lantern-demo-full.mp4}
 SCRIPT=${SCRIPT:-$HERE/narration.tsv}
 VOICE=${VOICE:-en-US-AndrewMultilingualNeural}
-RATE=${RATE:-+4%}
+RATE=${RATE:-+0%}
 WORK=${WORK:-$HERE/narration}
 OUT=${OUT:-$HERE/media/lantern-demo-narrated.mp4}
 
 # End of each page segment on the assembled timeline, in seconds: the explainer's own scene lengths
-# (25s total), then verify_cut.sh's measured map of the recording shifted by 25, then the end card.
-SEGMENT_ENDS=(5.0 10.5 15.5 20.0 25.0 29.5 37.5 43.5 57.5 65.0 69.0 75.0 81.0)
+# (25s total), then the recording's segment boundaries measured from the cut by scene detection
+# (3.0 5.8 9.77 16.77 25.77 31.77 39.27 45.23) shifted by 25, then the end card's 12s.
+SEGMENT_ENDS=(5.0 10.5 15.5 20.0 25.0 28.0 30.8 34.8 41.8 50.8 56.8 64.3 70.3 82.3)
 
 mkdir -p "$WORK"
 rm -f "$WORK"/line*.mp3 "$WORK"/line*.wav "$WORK/measured.tsv"
@@ -82,7 +83,7 @@ for k in $(seq 1 "$N"); do
   mix+="[L$k]"
 done
 filter+=";${mix}amix=inputs=$((N + 1)):normalize=0:duration=first[mixed]"
-filter+=";[mixed]highpass=f=70,acompressor=threshold=-20dB:ratio=3:attack=10:release=250,loudnorm=I=-16:TP=-1.5:LRA=11,alimiter=limit=0.85[out]"
+filter+=";[mixed]highpass=f=70,acompressor=threshold=-20dB:ratio=3:attack=10:release=250,loudnorm=I=-16:TP=-1.5:LRA=11,alimiter=limit=0.85,volume=-1.5dB[out]"
 
 ffmpeg -v error -y "${inputs[@]}" -filter_complex "$filter" -map "[out]" \
   -t "$vdur" -c:a aac -b:a 160k "$WORK/voice.m4a"

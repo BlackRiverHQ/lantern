@@ -1,55 +1,63 @@
 #!/usr/bin/env bash
 # Cut the raw recording into the demo timeline.
 #
-# The source is a VFR screen capture (r_frame_rate=90000/1) with no audio stream, so the picture is
+# The source is a VFR screen capture (r_frame_rate=90000/1) with no audio stream, so each clip is
 # re-encoded at a constant 30fps and the audio is built separately in build_narration.sh.
 #
+# Each segment is extracted with an input seek (-ss before -i) and the pieces are joined by the
+# concat demuxer with -c copy, which is exact here because every clip is written with the same codec,
+# frame rate and geometry. Decoding the whole 16-minute capture once per segment, which is what a
+# single trim filtergraph does, would cost about an hour of decoder time for nothing.
+#
 # What is kept is the product and its evidence. What is removed, and why:
-#   6-8s      idle between the landing page and the dashboard
-#   20-29s    explorer tab, a bridge status screen, and a wallet confirmation: not the product
-#   34-52s    the run page's "Your wallet has no test ETH" state, which is a blocker, not a feature
-#   54-145s   MetaMask's own window, stuck on "Loading is taking longer than usual. Restart MetaMask
-#             if the problem persists." Ninety seconds of another program's error dialog
-#   170-196s  the run page's "demo feed is low on test ETH for gas, so it is not starting new cases"
-#             notice, which is a degraded deployment state and not what the demo is about
-#   199-241s  explorer waiting screens and the same notice on the prove page before it clears
-#   250-261s  the same notice across the feeds view
+#   0-36s     the landing page being scrolled end to end: the explainer already covers the idea, and
+#             a scrolling page is not a readable shot. The hero is kept from the end of the
+#             recording, where the page sits still
+#   51-58s    the run page's "Your wallet has no test ETH on Arbitrum Sepolia for gas" note, a
+#             blocker state while the faucet claim settles
+#   103-432s  MetaMask's own windows: "Approving spending cap", "Imported Account 6", token
+#             approvals. Another program's dialog, not the product
+#   432-443s  the same dialog closing
+#   628-673s  the feed-print notice under a MetaMask dialog, and the dialog itself
+#   811-872s  a second transaction request dialog, and the settle confirmation
+#   891-932s  Blockscout waiting on its own bundle ("Launch your own fully functioning blockchain
+#             explorer in minutes"), a third-party page mid-load
+#   950-963s  the cases list reloading and the browser returning to the landing page
 set -euo pipefail
 
-SRC=${SRC:-/home/arch/Videos/recording_2026-10-03_17.27.38.mp4}
+SRC=${SRC:-/home/arch/Videos/recording_2026-10-04_12.30.48.mp4}
 OUT=${OUT:-$(dirname "$0")/media/lantern-demo.mp4}
+PARTS=${PARTS:-${OUT%/*}/.cutparts}
 
 # start:end, in source seconds. Kept in one place so the offsets in build_narration.sh can be
 # re-derived from these numbers rather than guessed.
 SEGMENTS=(
-  "1.2:5.5"      # the landing page: what is held back and why. Starts past the browser's own
-                 # "Waiting for friendly-fennec-31.convex.site..." overlay painted over the page
-  "8.0:14.5"     # the overview: bond against requirement, history depth, held bonuses
-  "15.0:20.0"    # the case list and one case's ledger, step by step, with blocks
-  "30.0:32.5"    # the same list, six cases on this deployment. Ends at 32.5 because 33.5 is already
-                 # the next page's first paint, and that one carries the wallet note
-  "154.0:168.0"  # run a case: the step table, the gap, and a confirmed transaction. Starts at 154:
-                 # the run page's first seconds flicker the wallet's "no test ETH" note in and out
-                 # as the wallet is polled, and 153.75-170 is the longest stretch with it absent
-  "242.0:249.75" # prove a price: this page's read beside the contract's recorded verdict. Runs to
-                 # 249.75 because the deployment notice appears on the next page at 250.25
-  "262.0:266.0"  # the landing page again, closing, out to the end of the recording
+  "965.0:968.0"   # the landing page, still: holds the bonus, prove the price
+  "44.0:46.8"     # the overview: bond against requirement, what needs a decision
+  "47.5:51.5"     # the case list: every case, its verdict, the bond it paid
+  "75.0:82.0"     # run a case: the case, the price the feed printed, the lie size
+  "796.0:805.0"   # run a case: the steps, and the feed's own print in the ledger
+  "872.0:878.0"   # run a case: every step done, verdict in
+  "933.5:941.0"   # prove a price: this page's read beside the contract's recorded verdict
+  "944.0:950.0"   # feeds and bonds: who posts the bond, and what it pays
 )
 
-parts=()
+rm -rf "$PARTS"; mkdir -p "$PARTS"
+list=$PARTS/list.txt
+: > "$list"
+
+i=0
 for seg in "${SEGMENTS[@]}"; do
   s=${seg%%:*}; e=${seg##*:}
-  parts+=(-i "$SRC")
-  filter_parts+=("[${#filter_parts[@]}:v]trim=start=${s}:end=${e},setpts=PTS-STARTPTS[v${#filter_parts[@]}]")
+  dur=$(awk -v a="$s" -v b="$e" 'BEGIN{printf "%.3f", b-a}')
+  f=$PARTS/part$i.mp4
+  ffmpeg -v error -y -ss "$s" -i "$SRC" -t "$dur" \
+    -r 30 -crf 20 -preset veryfast -pix_fmt yuv420p -an "$f"
+  printf "file '%s'\n" "$f" >> "$list"
+  i=$((i + 1))
 done
 
-filter="$(printf '%s;' "${filter_parts[@]}")"
-filter+="$(for i in $(seq 0 $((${#SEGMENTS[@]} - 1))); do printf '[v%d]' "$i"; done)"
-filter+="concat=n=${#SEGMENTS[@]}:v=1:a=0[out]"
-
-ffmpeg -v error -y "${parts[@]}" \
-  -filter_complex "$filter" -map "[out]" \
-  -r 30 -crf 20 -preset veryfast -pix_fmt yuv420p -an "$OUT"
+ffmpeg -v error -y -f concat -safe 0 -i "$list" -c copy "$OUT"
 
 ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$OUT" | \
   awk '{printf "cut %s: %.2fs\n", "'"$OUT"'", $1}'
