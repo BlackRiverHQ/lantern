@@ -6,40 +6,90 @@
 #
 # Each segment is extracted with an input seek (-ss before -i) and the pieces are joined by the
 # concat demuxer with -c copy, which is exact here because every clip is written with the same codec,
-# frame rate and geometry. Decoding the whole 16-minute capture once per segment, which is what a
-# single trim filtergraph does, would cost about an hour of decoder time for nothing.
+# frame rate and geometry.
 #
-# What is kept is the product and its evidence. What is removed, and why:
-#   0-36s     the landing page being scrolled end to end: the explainer already covers the idea, and
-#             a scrolling page is not a readable shot. The hero is kept from the end of the
-#             recording, where the page sits still
-#   51-58s    the run page's "Your wallet has no test ETH on Arbitrum Sepolia for gas" note, a
-#             blocker state while the faucet claim settles
-#   103-432s  MetaMask's own windows: "Approving spending cap", "Imported Account 6", token
-#             approvals. Another program's dialog, not the product
-#   432-443s  the same dialog closing
-#   628-673s  the feed-print notice under a MetaMask dialog, and the dialog itself
-#   811-872s  a second transaction request dialog, and the settle confirmation
-#   891-932s  Blockscout waiting on its own bundle ("Launch your own fully functioning blockchain
-#             explorer in minutes"), a third-party page mid-load
-#   950-963s  the cases list reloading and the browser returning to the landing page
+# The keep list is measured, not chosen by hand: propose.py differences the recording at one frame a
+# second, keeps the seconds around every change (a click, a page load, a dialog opening) with two
+# seconds of run-up and five of run-out, merges what overlaps, and caps any stretch that then sits
+# still at five seconds. The landing page is kept whole, because the whole page is the point of it.
+#
+# So what survives is every step of the flow and every wallet confirmation, and what is dropped is
+# waiting: the feed's own five-minute hold, MetaMask sitting on a blank panel while the chain catches
+# up, and the explorer fetching its own bundle. Nothing that changes the state of the case is cut.
 set -euo pipefail
 
+HERE=$(cd "$(dirname "$0")" && pwd)
 SRC=${SRC:-/home/arch/Videos/recording_2026-10-04_12.30.48.mp4}
-OUT=${OUT:-$(dirname "$0")/media/lantern-demo.mp4}
-PARTS=${PARTS:-${OUT%/*}/.cutparts}
+OUT=${OUT:-$HERE/media/lantern-demo.mp4}
+PARTS=${PARTS:-$HERE/media/.cutparts}
 
-# start:end, in source seconds. Kept in one place so the offsets in build_narration.sh can be
-# re-derived from these numbers rather than guessed.
+# start:end, in source seconds: 65 segments, 462.5s of the 968s recording.
 SEGMENTS=(
-  "965.0:968.0"   # the landing page, still: holds the bonus, prove the price
-  "44.0:46.8"     # the overview: bond against requirement, what needs a decision
-  "47.5:51.5"     # the case list: every case, its verdict, the bond it paid
-  "75.0:82.0"     # run a case: the case, the price the feed printed, the lie size
-  "796.0:805.0"   # run a case: the steps, and the feed's own print in the ledger
-  "872.0:878.0"   # run a case: every step done, verdict in
-  "933.5:941.0"   # prove a price: this page's read beside the contract's recorded verdict
-  "944.0:950.0"   # feeds and bonds: who posts the bond, and what it pays
+  "0.0:40.0"
+  "40.0:51.0"
+  "51.0:56.0"
+  "93.0:107.0"
+  "159.0:166.0"
+  "218.0:226.0"
+  "259.0:266.0"
+  "269.5:275.0"
+  "279.0:289.0"
+  "289.0:297.0"
+  "297.0:298.0"
+  "302.0:313.0"
+  "341.0:347.0"
+  "347.0:348.0"
+  "357.0:369.0"
+  "369.0:378.0"
+  "402.0:405.0"
+  "405.0:406.0"
+  "407.0:416.0"
+  "416.0:427.0"
+  "437.0:444.0"
+  "447.0:458.0"
+  "458.0:459.0"
+  "482.0:493.0"
+  "496.0:502.0"
+  "502.0:503.0"
+  "507.0:514.0"
+  "520.0:530.0"
+  "530.0:531.0"
+  "556.0:572.0"
+  "572.0:573.0"
+  "575.0:582.0"
+  "585.0:591.0"
+  "591.0:592.0"
+  "620.0:631.0"
+  "656.0:662.0"
+  "662.0:663.0"
+  "671.0:683.0"
+  "683.0:689.0"
+  "689.0:694.0"
+  "725.0:731.0"
+  "731.0:732.0"
+  "735.0:744.0"
+  "744.0:745.0"
+  "750.0:756.0"
+  "756.0:763.0"
+  "763.0:769.0"
+  "786.0:792.0"
+  "792.0:799.0"
+  "799.0:800.0"
+  "811.0:817.0"
+  "817.0:826.0"
+  "826.0:827.0"
+  "832.0:838.0"
+  "838.0:848.0"
+  "851.0:858.0"
+  "862.0:871.0"
+  "886.0:895.0"
+  "919.0:937.0"
+  "937.0:942.0"
+  "942.0:948.0"
+  "948.0:956.0"
+  "956.0:961.0"
+  "961.0:967.0"
+  "967.0:968.0"
 )
 
 rm -rf "$PARTS"; mkdir -p "$PARTS"

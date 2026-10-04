@@ -10,7 +10,7 @@
 ![stack](https://img.shields.io/badge/Solidity%200.8.28-Foundry%20%C2%B7%20Next.js-informational)
 [![ci](https://github.com/subheeksh5599/lantern/actions/workflows/test.yml/badge.svg)](https://github.com/subheeksh5599/lantern/actions/workflows/test.yml)
 
-[![watch the demo](https://img.shields.io/badge/watch%20demo-1%3A22-black)](demo/media/lantern-demo-narrated.mp4)
+[![watch the demo](https://img.shields.io/badge/watch%20demo-8%3A18-black)](demo/media/lantern-demo-narrated.mp4)
 [![local copy](https://img.shields.io/badge/local%20copy-mp4-black)](demo/media/lantern-demo-narrated.mp4)
 [![try it](https://img.shields.io/badge/click--through-dashboard-black)](https://friendly-fennec-31.convex.site/dashboard)
 [![honesty table](https://img.shields.io/badge/what%27s%20real-honesty%20table-black)](#whats-real-and-what-is-not)
@@ -78,27 +78,31 @@ the money that answers it is the bonus, which is held.
 | Held bonuses | 0.00145 at rest | `heldTotal` 1,450 in the asset's own units (case #41, whose window closed unchallenged), and nothing is waiting on a decision |
 | Dashboard | live | five views at [friendly-fennec-31.convex.site/dashboard](https://friendly-fennec-31.convex.site/dashboard), each reading the chain rather than a mirror of it |
 | Suite | 648 passing | `forge test`: 47 suites, 648 tests, 0 failed, 0 skipped |
-| Demo | 82 seconds | `demo/media/lantern-demo-narrated.mp4`: a rendered explainer, then the deployed site recorded between block 315,594,195 and 315,597,565, then an end card |
+| Demo | 8m18s | `demo/media/lantern-demo-narrated.mp4`: a rendered explainer, then a case run end to end on the deployed site: every step, every wallet confirmation, the explorer pages, then an end card |
 
 ## ▶ Demo
 
 [![Lantern: the bonus is held, then somebody proves the price contradicted the record](demo/media/lantern-poster.webp)](demo/media/lantern-demo-narrated.mp4)
 
-`1:22` · [watch it](demo/media/lantern-demo-narrated.mp4) · [local copy](demo/media/lantern-demo-narrated.mp4)
+`8:18` · [watch it](demo/media/lantern-demo-narrated.mp4) · [local copy](demo/media/lantern-demo-narrated.mp4)
 
 _Three parts. An explainer, animated from HTML by HyperFrames, that sets out the problem and the two
-tolerances the contract uses. Then the deployed site itself: the landing page, the live overview, the
-case list with every verdict and the bond each one paid, the run page carrying its own case from the
-printed price to every step done, and the prove page where this deployment's own read sits beside the
-verdict the contract recorded. Then an end card with what is actually live. Everything in the middle
-is the real site reading real chain state, from block 315,594,195 to 315,597,565._
+tolerances the contract uses. Then the deployed site, walked through end to end: the landing page
+scrolled whole, the overview, a case opened from funding the wallet through the lie size, the loan and
+its approval, the liquidation, the challenge window, the verdict, the settlement, the explorer pages
+each transaction links to, the prove page, and the case list. Nothing that changes the state of the
+case is cut, and the wallet's own panels and the explorer are in the edit; what is dropped is waiting,
+never a step. Then an end card with what is actually live. Everything in the middle is the real site
+reading real chain state, from block 315,594,195 to 315,597,565._
 
-To rebuild it: `demo/build_cut.sh` cuts the recording, `demo/build_full.sh` joins the two cards around
-it, `demo/build_narration.sh` lays the voice track and refuses to build a line that outlasts the shot it
-is describing, and `demo/verify_cut.sh` reads the shipped file back at two frames a second and fails on
-any state the demo is not supposed to show. The cards are HyperFrames compositions in `demo/cards/`.
-`demo/media/lantern-intro.mp4` is the same voice over the explainer and the first two screens, 35
-seconds, for a launch post.
+To rebuild it: `demo/propose.py` differences the recording at one frame a second and writes the keep
+list: the seconds around every change, with a cap on anything that then sits still; `demo/newmap.py`
+reads the kept seconds back to place the narration; `demo/build_cut.sh` cuts them, `demo/build_full.sh`
+joins the two cards around the cut, `demo/build_narration.sh` lays the voice track and refuses to build a
+line that outlasts the section it is talking about, and `demo/verify_cut.sh` reads the shipped file back
+and fails on any state the demo is not supposed to show. The cards are HyperFrames compositions in
+`demo/cards/`. `demo/media/lantern-intro.mp4` is the same voice over the explainer and the first two
+screens, 35 seconds, for a launch post.
 
 ## The 20-second pitch
 
@@ -256,7 +260,7 @@ input is a read of contracts that are already deployed.
 | The rules are decided by the contract, not by the page | real | the verdict is recomputed inside `adjudicate`; a challenger supplies the rule and the evidence, never an answer |
 | Every button on the dashboard sends a real transaction | real | `site/next/scripts/wallet-e2e.cjs` drives each page with an injected wallet; the receipts are listed in `docs/DASHBOARD.md` |
 | The demo shows the deployed site, not a mock | real | recorded from the live domain between block 315,594,195 and 315,597,565, narrated, and committed in `demo/media/` |
-| The demo is an edit, not a raw capture | stated | the raw recording is 16m09s; the cuts drop idle time, MetaMask's own windows, a blocker note while the faucet claim settled, and a third-party explorer mid-load. It never drops a step of the flow |
+| The demo is an edit, not a raw capture | stated | the raw recording is 16m09s and the edit is 8m18s; what is dropped is waiting: the five-minute hold, MetaMask sitting on a blank panel while the chain catches up, and the explorer fetching its own bundle. Every step, every confirmation and every explorer page is in the edit |
 | A visitor can run a whole case | real, with one dependency | every step is a transaction the visitor signs, so their own wallet needs testnet ether; step 1 links the faucet rather than hiding it |
 | The deployment can start a case for a visitor | real, and it says so when it cannot | the server holds the feed operator's key and needs a minimum balance; when it is short, the run page says the deployment is out of gas instead of failing a button |
 | Someone actually watches | real, run by us | `watcher/` decided cases #42 and #44 on the live chain; whether third parties would run one for a 20% bounty is an open question (see `docs/LIMITS.md`) |
