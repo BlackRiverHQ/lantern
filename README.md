@@ -95,6 +95,8 @@ case is cut, and the wallet's own panels and the explorer are in the edit; what 
 never a step. Then an end card with what is actually live. Everything in the middle is the real site
 reading real chain state, from block 315,594,195 to 315,597,565._
 
+_The published copy is on YouTube; `demo/media/lantern-demo-narrated.mp4` is the same file, committed._
+
 To rebuild it: `demo/propose.py` differences the recording at one frame a second and writes the keep
 list: the seconds around every change, with a cap on anything that then sits still; `demo/newmap.py`
 reads the kept seconds back to place the narration; `demo/build_cut.sh` cuts them, `demo/build_full.sh`
@@ -263,7 +265,7 @@ input is a read of contracts that are already deployed.
 |---|---|---|
 | The rules are decided by the contract, not by the page | real | the verdict is recomputed inside `adjudicate`; a challenger supplies the rule and the evidence, never an answer |
 | Every button on the dashboard sends a real transaction | real | `site/next/scripts/wallet-e2e.cjs` drives each page with an injected wallet; the receipts are listed in `docs/DASHBOARD.md` |
-| The demo shows the deployed site, not a mock | real | recorded from the live domain between block 315,594,195 and 315,597,565, narrated, and committed in `demo/media/` |
+| The demo shows the deployed site, not a mock | real | recorded from the live domain between block 315,594,195 and 315,597,565, narrated, published on YouTube, and committed in `demo/media/` |
 | The demo is an edit, not a raw capture | stated | the raw recording is 16m09s and the edit is 7m58s; what is dropped is waiting: the five-minute hold, MetaMask sitting on a blank panel while the chain catches up, and the explorer fetching its own bundle. Every step, every confirmation and every explorer page is in the edit |
 | A visitor can run a whole case | real, with one dependency | every step is a transaction the visitor signs, so their own wallet needs testnet ether; step 1 links the faucet rather than hiding it |
 | The deployment can start a case for a visitor | real, and it says so when it cannot | the server holds the feed operator's key and needs a minimum balance; when it is short, the run page says the deployment is out of gas instead of failing a button |
