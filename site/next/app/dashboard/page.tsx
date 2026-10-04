@@ -71,7 +71,7 @@ export default function Overview() {
       <div className="tiles roles">
         <Link className="tile" href="/dashboard/prove/">
           <div className="k">Anyone can prove</div>
-          <div className="v" style={{ fontSize: 19 }}>Prove a price was false</div>
+          <div className="v" style={{ fontSize: 19 }}>Prove a price contradicted the record</div>
           <div className="n">
             {s ? openCases.length + " held bonus" + (openCases.length === 1 ? "" : "es") + " inside a window. " : ""}
             Read the print and the second source for that round and stake on the difference.

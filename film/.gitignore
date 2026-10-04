@@ -1,0 +1,9 @@
+node_modules/
+.venv/
+out/
+renders/
+review/
+research/
+assets/sfx/cand/
+assets/music/*
+!assets/music/130.mp3

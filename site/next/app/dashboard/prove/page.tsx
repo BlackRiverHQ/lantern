@@ -57,7 +57,7 @@ export default function ProvePage() {
   return (
     <>
       <div className="head">
-        <h1>Prove a price was false</h1>
+        <h1>Prove a price contradicted the record</h1>
         <div className="sub">
           {ready ? held.length + " held, " + decided.length + " decided on this deployment" : "reading the chain…"}
         </div>

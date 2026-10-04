@@ -67,3 +67,52 @@ would otherwise walk through.
   held bonus. If the borrower's actual loss exceeded the bonus, the rest is not recovered here.
 - **Escalation is capped.** A feed with ten or more caught prints is asked for three times its floor,
   not more. Beyond that the mechanism stops escalating and simply keeps charging the bond per incident.
+
+## What a verdict means, and what it does not
+
+- **"Upheld" means contradicted, not false.** Each rule establishes that the value is inconsistent
+  with something the feed already committed to (its own round, its own timing, its own payload, its
+  own history) or with a second source the operator named in advance. None of them establishes the
+  true price. That is why the page says "contradicted the record" and not "was false".
+- **`CROSS_SOURCE` does not make the peer right.** A disagreement beyond 5% for the same round shows that
+  the two sources cannot both be right, and the subject feed is the one that consumed the
+  liquidation. If the peer is the one that is wrong (late, thin, a different market, or manipulated),
+  the verdict is still upheld against the subject. The operator chose that peer and cannot change it,
+  so the operator is the one exposed to that risk. Two methodologies that legitimately differ by more
+  than 5% should not be declared peers.
+- **`SELF_HISTORY` shows an abnormal move, not a false price.** A real market can leave the band. The band is
+  widened by each move it sees, capped by the per-report drift limit, and a fast real move upheld
+  under this rule costs the liquidator the bonus and nothing else, because the debt was already settled.
+- **The rules are public, so a feed can stay inside them.** A value that agrees with the feed's own
+  history and with its peer passes every rule. Lantern raises the cost of a lie from "publish it" to
+  "publish it consistently, and get a second, independently operated source to agree". It does not
+  make a consistent lie detectable.
+
+## Recovery, not prevention
+
+- The liquidation, the repayment and the close all happen at the moment of liquidation. Lantern only
+  decides who keeps the profit afterwards. A borrower whose position was closed on a contradicted price
+  gets the collateral and the bonus back, but the position itself stays closed, and losses beyond
+  those amounts (a missed move, a cascade elsewhere) are not recovered here.
+
+## Who watches, and why they would
+
+- "Anyone can challenge" is a permission, not a guarantee that someone will. A challenge is worth
+  making when 20% of the held bonus is larger than the gas plus the risk on a 1% stake. On small
+  bonuses that may not pay, and such cases can go unchallenged.
+- The checks a challenger runs are reads of state that is already on chain, so a watcher is a few RPC calls
+  per liquidation and does not need its own price data. The person with the most reason to run one is the
+  borrower who was liquidated.
+- The hold window is a deploy-time choice between 30 seconds and one hour (`TimeLib.validateWindow`).
+  Five minutes is the value this deployment uses, not a derived optimum. Longer windows give watchers
+  more time and delay the liquidator's profit by the same amount.
+
+## What is and is not shown
+
+- The deployment is on Arbitrum Sepolia with a test asset. The 648 tests and the recorded
+  transactions show that the mechanism behaves as written. They say nothing about whether anyone wants it.
+- A feed operator has to choose to post a bond. The intended pressure comes from the market side: a
+  lending market that only accepts Lantern-bonded feeds makes the bond the operator's cost of being
+  listed there. Whether markets would require it is an open question, not something shown here.
+- Escalating the bond 20% per caught print is a policy that makes repeat offences expensive. It is not a
+  model of expected loss.

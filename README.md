@@ -2,7 +2,7 @@
 
 # LANTERN
 
-### A liquidator's bonus is held until someone proves the price behind it was false.
+### A liquidator's bonus is held until someone proves the price behind it contradicted the record.
 
 ![tests](https://img.shields.io/badge/tests-648%20passing-brightgreen)
 ![live](https://img.shields.io/badge/live-Arbitrum%20Sepolia-blue)
@@ -39,7 +39,7 @@ Five views, each reading the chain rather than a mirror of it.
 - **Cases** is every liquidation on chain, newest first, with how it ended and the transactions that
   decided it.
 - **Run a case** takes a visitor from no position to a proven lie: take out a loan, watch the feed
-  print a false price and the market liquidate you on it, then prove the price was false and take
+  print a false price and the market liquidate you on it, then prove the price contradicted the record and take
   your collateral back. Every step is a real transaction you sign. Your wallet plays the borrower and
   the prover; the feed's side is played by a small server that holds the feed operator's key, derives
   every value from the chain, and only makes the prints a case needs.
@@ -71,17 +71,18 @@ the money that answers it is the bonus, which is held.
 | Surface | Status | The evidence |
 |---|---|---|
 | Six contracts | deployed | Lantern, the market, the registry, the history store and the report book, all on Arbitrum Sepolia with an exact Sourcify match on creation and runtime bytecode |
-| Feed | registered and bonded | `bondOf` reads 199,204 against a `requiredBond` of 160,000: the 100,000 minimum, raised twenty per cent for each of the three prints it was caught on |
-| Caught prints | 3 | `feedErrors` 3, read at block 315,340,260 |
-| Challenges | 5 opened | `challengesOpened` 5, with the verdicts already reached listed on the prove page beside this deployment's own read |
-| Held bonuses | 0.002969 at rest | `heldTotal` 2,969 in the asset's own units, and nothing is waiting on a decision |
+| Feed | registered and bonded | `bondOf` reads 298,901 against a `requiredBond` of 200,000: the 100,000 minimum, raised twenty per cent for each of the five prints it was caught on |
+| Caught prints | 5 | `feedErrors` 5, read at block 315,567,293. Two of them were decided by the watcher |
+| Challenges | 5 opened, 5 upheld | `challengesOpened` 5; every one has a verdict, and the watcher's own recomputation agrees with all five (`watcher/`, `--agree`) |
+| Watcher | live | [`watcher/`](watcher/README.md) challenges what the contract will uphold and leaves the rest alone; proved end to end on a fork of this deployment, and it settled cases #42 and #44 on the live chain |
+| Held bonuses | 0.00145 at rest | `heldTotal` 1,450 in the asset's own units (case #41, whose window closed unchallenged), and nothing is waiting on a decision |
 | Dashboard | live | five views at [friendly-fennec-31.convex.site/dashboard](https://friendly-fennec-31.convex.site/dashboard), each reading the chain rather than a mirror of it |
 | Suite | 648 passing | `forge test`: 47 suites, 648 tests, 0 failed, 0 skipped |
 | Demo | 81 seconds | `demo/media/lantern-demo-narrated.mp4`: a rendered explainer, then the deployed site recorded at block 315,320,157, then an end card |
 
 ## ▶ Demo
 
-[![Lantern: the bonus is held, then somebody proves the price was false](demo/media/lantern-poster.webp)](demo/media/lantern-demo-narrated.mp4)
+[![Lantern: the bonus is held, then somebody proves the price contradicted the record](demo/media/lantern-poster.webp)](demo/media/lantern-demo-narrated.mp4)
 
 `1:21` · [watch it](demo/media/lantern-demo-narrated.mp4) · [local copy](demo/media/lantern-demo-narrated.mp4)
 
@@ -121,6 +122,7 @@ it prices anything again.
 - [The floors follow the asset](#the-floors-follow-the-asset)
 - [No owner](#no-owner)
 - [Live on Arbitrum Sepolia](#live-on-arbitrum-sepolia)
+- [Who actually challenges](#who-actually-challenges)
 - [What's real and what is not](#whats-real-and-what-is-not)
 - [Run it](#run-it)
 - [Documentation](#documentation)
@@ -225,6 +227,26 @@ All six contracts verify on Sourcify with an exact match on creation and runtime
 (`make verify-source` for the bytecode check), and the source is readable on the public explorer with
 no key at `arbitrum-sepolia.blockscout.com/address/<address>`.
 
+## Who actually challenges
+
+"Anyone can challenge" is only a permission, so the repository ships the program that does it.
+[`watcher/`](watcher/README.md) reads every held bonus and, for each one, the same state
+`adjudicate` will read. It runs the five rules on that state and, while the window is open, stakes
+the minimum against the cases the contract will uphold. It needs no price data of its own: every
+input is a read of contracts that are already deployed.
+
+- **On the live chain:** two `CROSS_SOURCE` challenges, #42 and #44, had been opened and then
+  abandoned past the grace period. Anyone could have voided them, which hands the stake to the
+  liquidator without checking the claim. The watcher adjudicated them instead, and both were upheld:
+  [`0x55e96586…`](https://arbitrum-sepolia.blockscout.com/tx/0x55e96586f9616c8524d80f21a407d5d728cf278db44a30b7631e21199a640c2d),
+  [`0x4444c67f…`](https://arbitrum-sepolia.blockscout.com/tx/0x4444c67ff998a5be2a0a6d943ab5f022fa920336035cee1eeff736fd4058cb5e).
+- **Prediction against the contract:** `node bin/watch.mjs --agree` recomputes every verdict on chain
+  and compares. It reads 5/5.
+- **End to end, on a fork of this deployment:** two fresh liquidations go through the real market.
+  - An 18% gap is challenged by a key that never touched the deployment, and the bonus goes to the borrower.
+  - A 4% gap, enough to liquidate a 99% loan but inside the 5% tolerance, is left alone.
+  - Both outcomes are checked from chain state (`npm run fork`).
+
 ## What's real and what is not
 
 | Claim | State | The evidence, or what closes it |
@@ -235,6 +257,7 @@ no key at `arbitrum-sepolia.blockscout.com/address/<address>`.
 | The demo is an edit, not a raw capture | stated | the raw recording is 4m26s; the cuts drop idle time, a browser load overlay and a stuck wallet dialog. It never drops a step of the flow |
 | A visitor can run a whole case | real, with one dependency | every step is a transaction the visitor signs, so their own wallet needs testnet ether; step 1 links the faucet rather than hiding it |
 | The deployment can start a case for a visitor | real, and it says so when it cannot | the server holds the feed operator's key and needs a minimum balance; when it is short, the run page says the deployment is out of gas instead of failing a button |
+| Someone actually watches | real, run by us | `watcher/` decided cases #42 and #44 on the live chain; whether third parties would run one for a 20% bounty is an open question (see `docs/LIMITS.md`) |
 | Mainnet | not deployed | this is Arbitrum Sepolia, the footer says testnet only, and the settlement asset is a faucet token |
 
 ## Run it
@@ -248,6 +271,15 @@ forge script script/Deploy.s.sol --rpc-url arbitrum_sepolia --broadcast -vv
 forge script script/DemoRun.s.sol --rpc-url arbitrum_sepolia --broadcast -vv
 forge script script/ReportFromChainlink.s.sol --rpc-url arbitrum_sepolia --broadcast -vv
 forge script script/ChallengeWithChainlink.s.sol --rpc-url arbitrum_sepolia --broadcast -vv
+```
+
+The watcher, from `watcher/`:
+
+```
+npm install && npm test                         # the rule mirror against the Solidity: 44 checks
+node bin/watch.mjs --agree                      # recompute every verdict on chain and compare
+npm run fork                                    # two fresh liquidations on a local fork, checked from state
+WATCHER_ACCOUNT_FILE=~/.watcher.json node bin/watch.mjs   # watch the live deployment
 ```
 
 The four scripts run in order and each later one needs the addresses the first printed, so

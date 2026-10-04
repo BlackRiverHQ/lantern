@@ -17,7 +17,7 @@ const SKIP = new Set([
   "js/dashboard.js",
 ]);
 
-const KEEP_DIRS = ["css", "fonts", "img"];
+const KEEP_DIRS = ["css", "fonts", "img", "video"];
 
 async function exists(p) {
   try { await stat(p); return true; } catch { return false; }

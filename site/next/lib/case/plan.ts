@@ -258,7 +258,7 @@ export function steps(r: Runner, d: Prices): StepView[] {
 
   /* 6. challenge */
   {
-    const base = { key: "challenge" as StepKey, title: "Prove the price was false", who: "you", preview: PREVIEW.challenge };
+    const base = { key: "challenge" as StepKey, title: "Prove the price contradicted the record", who: "you", preview: PREVIEW.challenge };
     if (s.ch && s.ch.open) {
       out.push({ ...base, st: "done", vals: [["rule", "two sources disagree"], ["stake", hold(s.ch.stake)]] });
     } else if (s.esc && s.esc.outcome !== 0) {
@@ -274,7 +274,7 @@ export function steps(r: Runner, d: Prices): StepView[] {
           note: "Nobody challenged in time, so the liquidator keeps the profit.",
           run: async () => { await r.tx("challenge", "Release case #" + r.k.id, config().lantern, encode("release", ["uint256"], [r.k.id])); } });
       } else {
-        out.push({ ...base, st: "ready", vals, label: "Prove the price was false", run: async () => {
+        out.push({ ...base, st: "ready", vals, label: "Prove the price contradicted the record", run: async () => {
           await r.approve("challenge", config().asset, config().lantern, stake, "stake");
           await r.tx("challenge", "Challenge case #" + r.k.id, config().lantern,
             encode("openChallenge", ["uint256", "uint8", "bytes", "uint256"], [r.k.id, CROSS_SOURCE, config().peer, stake]));
@@ -336,6 +336,6 @@ export const PREVIEW: Record<StepKey, string> = {
 
 export const STEP_TITLE: Record<StepKey, string> = {
   fund: "Fund your wallet", honest: "Feed prints the real price", borrow: "Take out a loan",
-  lie: "Feed prints a false price", liquidate: "Market liquidates you", challenge: "Prove the price was false",
+  lie: "Feed prints a false price", liquidate: "Market liquidates you", challenge: "Prove the price contradicted the record",
   verdict: "Verdict", claim: "Settle",
 };

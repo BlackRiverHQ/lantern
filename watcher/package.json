@@ -1,0 +1,13 @@
+{
+  "name": "lantern-watcher",
+  "private": true,
+  "type": "module",
+  "description": "Watches Lantern liquidations and challenges the ones whose price the contract will find contradicted.",
+  "scripts": {
+    "test": "node test/rules.test.mjs",
+    "watch": "node bin/watch.mjs",
+    "fork": "bash test/fork-e2e.sh",
+    "agree": "node bin/watch.mjs --dry-run --once --all"
+  },
+  "dependencies": { "viem": "2.57.2" }
+}
