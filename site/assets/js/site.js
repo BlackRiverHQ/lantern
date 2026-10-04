@@ -343,3 +343,41 @@
   window.addEventListener('load', function () { measureHero(); marquees.forEach(function (m) { m.measure(); }); kick(); });
   measureHero(); kick();
 })();
+
+/* Live hero numbers: read straight from Lantern on Arbitrum Sepolia. The values in the markup are the
+   last read; these replace them when the chain answers, and stay put when it does not. */
+(function () {
+  var RPCS = ["https://sepolia-rollup.arbitrum.io/rpc", "https://arbitrum-sepolia-rpc.publicnode.com"];
+  var L = "0xcdce3a1b3ebf7fe1e340ab670e25fe768195ac54";
+  var FEED = "f7ed0c5000d57be8bb1723e1298ee49e6a076692f4ef68d27dd00db178f57210";
+  var FROM = "0x12c75ac4"; // 315054788, before the first liquidation
+  var T = {
+    upheld: "0x55b829cef7cad8bef1a62cf7e471ae3491efb3576757129e5be9e03ec1284077",
+    refused: "0x18e16cc42c00099c04eeb2326ae0f0e407a334a3a3703e1fcf304fc37e1291b6",
+    voided: "0x44fd6fd4050e131e47fdf9e3b4a731eb20fb723105dc1d48852fc5864dccba26",
+    released: "0x3334a79f183e2e8b5df01c85de8e210f33d28b3342852eb454ea5d5d975a3ff3"
+  };
+  function rpc(method, params, i) {
+    i = i || 0;
+    return fetch(RPCS[i], { method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: method, params: params }) })
+      .then(function (r) { return r.json(); })
+      .then(function (j) { if (j.error) throw new Error(j.error.message); return j.result; })
+      .catch(function (e) { if (i + 1 < RPCS.length) return rpc(method, params, i + 1); throw e; });
+  }
+  function call(data) { return rpc("eth_call", [{ to: L, data: data }, "latest"]).then(function (h) { return BigInt(h); }); }
+  function logs(topic) { return rpc("eth_getLogs", [{ address: L, fromBlock: FROM, toBlock: "latest", topics: [topic] }]).then(function (a) { return a.length; }); }
+  function set(k, v) { document.querySelectorAll('[data-live="' + k + '"]').forEach(function (el) { el.textContent = v; }); }
+  function width(k, pct) { document.querySelectorAll('[data-live="' + k + '"]').forEach(function (el) { el.style.width = pct + "%"; }); }
+  Promise.all([
+    call("0xc4334ab4" + FEED), call("0xcd8f9967" + FEED), call("0x831518b7"), call("0xb3097a08"),
+    logs(T.upheld), logs(T.refused), logs(T.voided), logs(T.released)
+  ]).then(function (v) {
+    set("errors", v[0].toString());
+    set("bondx", (Number(v[1] * 10n / v[2]) / 10).toFixed(1));
+    set("held", (Math.round(Number(v[3]) / 100) / 1e4).toFixed(4));
+    var n = { upheld: v[4], refused: v[5], voided: v[6], released: v[7] };
+    var total = v[4] + v[5] + v[6] + v[7] || 1;
+    Object.keys(n).forEach(function (k) { set("n-" + k, String(n[k])); width("w-" + k, Math.round(100 * n[k] / total)); });
+  }).catch(function () { /* keep the last read already in the page */ });
+})();
