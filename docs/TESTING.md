@@ -7,12 +7,12 @@
 | `test/base/` | the shared harness: a real token, a real market, a predicted deploy order |
 | `test/unit/` | one file per module, plus the read surface, events, decimals, fee tokens, cross-source, escalation, liveness and interface conformance |
 | `test/fuzz/` | band math, bond floors, waterfall splits, registry sequences, verdict totality, whole-mechanism properties |
-| `test/integration/` | the lifecycle, the deployment wiring, and a hostile-token reentrancy suite |
+| `test/integration/` | the lifecycle, the deployment wiring, a hostile-token reentrancy suite, and the adversarial suite: races, deadline boundaries, parties that disappear |
 | `test/invariants/` | a guarded handler driving random action sequences, with fifteen invariants over it |
 | `test/gas/` | cost ceilings, asserted rather than tabulated |
 | `test/fixtures/` | named scenarios, each a short story with a classification at the end |
 
-648 tests pass across 47 suites. The suite runs in about fifteen seconds locally, most of it the
+664 tests pass across 48 suites. The suite runs in about fifteen seconds locally, most of it the
 invariant campaign.
 
 ## What the newer suites pin

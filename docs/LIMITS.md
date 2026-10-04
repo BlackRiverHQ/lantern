@@ -65,6 +65,11 @@ would otherwise walk through.
   contract, and the notional it declares is the number the hold and the bond are computed from.
 - **A challenge is a claim, not a proof of loss.** When it succeeds, the borrower is restored from the
   held bonus. If the borrower's actual loss exceeded the bonus, the rest is not recovered here.
+- **One challenge per liquidation, and a liquidator can spend it.** A liquidator can file a rule that
+  does not hold against its own liquidation, get its stake back as the forfeit, and lock out the rule
+  that does. It costs gas and nothing else. The fix is one challenge per (liquidation, rule); it is not
+  deployed because the contract has no upgrade path. Pinned by
+  `test_KNOWN_GAP_a_liquidator_can_spend_the_one_challenge_slot_on_itself`.
 - **Escalation is capped.** A feed with ten or more caught prints is asked for three times its floor,
   not more. Beyond that the mechanism stops escalating and simply keeps charging the bond per incident.
 
@@ -109,7 +114,7 @@ would otherwise walk through.
 
 ## What is and is not shown
 
-- The deployment is on Arbitrum Sepolia with a test asset. The 648 tests and the recorded
+- The deployment is on Arbitrum Sepolia with a test asset. The 664 tests and the recorded
   transactions show that the mechanism behaves as written. They say nothing about whether anyone wants it.
 - A feed operator has to choose to post a bond. The intended pressure comes from the market side: a
   lending market that only accepts Lantern-bonded feeds makes the bond the operator's cost of being

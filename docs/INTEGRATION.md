@@ -20,7 +20,7 @@ one.
 lantern.recordReport(FEED_ID, value, round, timestamp, payloadHash, signerAddress);
 
 // the liquidation path: repay and close as you always did, then
-lantern.recordLiquidation(liquidationId, FEED_ID, round, liquidatorBonus, borrower);
+lantern.recordLiquidation(liquidationId, FEED_ID, round, liquidatorBonus, notional, liquidator, borrower);
 ```
 
 `recordLiquidation` is callable only by the market address fixed at deploy. It pulls **only the bonus**
@@ -30,7 +30,7 @@ close are untouched by Lantern and remain yours.
 ## After: read the escrow, act on the outcome
 
 ```solidity
-(uint8 outcome, uint256 bonus, address liquidator, address borrower) = lantern.escrowOf(id);
+uint8 outcome = lantern.bonusOutcome(id);   // or lantern.escrowOf(id) for the whole record
 ```
 
 | `outcome` | Meaning | What the market should assume |
