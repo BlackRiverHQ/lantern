@@ -10,7 +10,7 @@
 ![stack](https://img.shields.io/badge/Solidity%200.8.28-Foundry%20%C2%B7%20Next.js-informational)
 [![ci](https://github.com/subheeksh5599/lantern/actions/workflows/test.yml/badge.svg)](https://github.com/subheeksh5599/lantern/actions/workflows/test.yml)
 
-[![watch the demo](https://img.shields.io/badge/watch%20demo-7%3A58-black)](demo/media/lantern-demo-narrated.mp4)
+[![watch the demo](https://img.shields.io/badge/watch%20demo-7%3A58-red)](https://youtu.be/cZGxXNKqNvk)
 [![local copy](https://img.shields.io/badge/local%20copy-mp4-black)](demo/media/lantern-demo-narrated.mp4)
 [![try it](https://img.shields.io/badge/click--through-dashboard-black)](https://friendly-fennec-31.convex.site/dashboard)
 [![honesty table](https://img.shields.io/badge/what%27s%20real-honesty%20table-black)](#whats-real-and-what-is-not)
@@ -78,13 +78,13 @@ the money that answers it is the bonus, which is held.
 | Held bonuses | 0.00145 at rest | `heldTotal` 1,450 in the asset's own units (case #41, whose window closed unchallenged), and nothing is waiting on a decision |
 | Dashboard | live | five views at [friendly-fennec-31.convex.site/dashboard](https://friendly-fennec-31.convex.site/dashboard), each reading the chain rather than a mirror of it |
 | Suite | 648 passing | `forge test`: 47 suites, 648 tests, 0 failed, 0 skipped |
-| Demo | 7m58s | `demo/media/lantern-demo-narrated.mp4`: a rendered explainer, then a case run end to end on the deployed site: every step, every wallet confirmation, the explorer pages, then an end card |
+| Demo | 7m58s | [watch it on YouTube](https://youtu.be/cZGxXNKqNvk), or `demo/media/lantern-demo-narrated.mp4`: a rendered explainer, then a case run end to end on the deployed site: every step, every wallet confirmation, the explorer pages, then an end card |
 
 ## ▶ Demo
 
-[![Lantern: the bonus is held, then somebody proves the price contradicted the record](demo/media/lantern-poster.webp)](demo/media/lantern-demo-narrated.mp4)
+[![Lantern: the bonus is held, then somebody proves the price contradicted the record](demo/media/lantern-poster.webp)](https://youtu.be/cZGxXNKqNvk)
 
-`7:58` · [watch it](demo/media/lantern-demo-narrated.mp4) · [local copy](demo/media/lantern-demo-narrated.mp4)
+`7:58` · [watch it on YouTube](https://youtu.be/cZGxXNKqNvk) · [local copy](demo/media/lantern-demo-narrated.mp4)
 
 _Three parts. An explainer, animated from HTML by HyperFrames, that sets out the problem and the two
 tolerances the contract uses. Then the deployed site, walked through end to end: the landing page
