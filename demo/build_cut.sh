@@ -23,7 +23,7 @@ SRC=${SRC:-/home/arch/Videos/recording_2026-10-04_12.30.48.mp4}
 OUT=${OUT:-$HERE/media/lantern-demo.mp4}
 PARTS=${PARTS:-$HERE/media/.cutparts}
 
-# start:end, in source seconds: 65 segments, 462.5s of the 968s recording.
+# start:end, in source seconds: 64 segments, 457.0s of the 968s recording.
 SEGMENTS=(
   "0.0:40.0"
   "40.0:51.0"
@@ -32,7 +32,6 @@ SEGMENTS=(
   "159.0:166.0"
   "218.0:226.0"
   "259.0:266.0"
-  "269.5:275.0"
   "279.0:289.0"
   "289.0:297.0"
   "297.0:298.0"

@@ -10,7 +10,7 @@
 ![stack](https://img.shields.io/badge/Solidity%200.8.28-Foundry%20%C2%B7%20Next.js-informational)
 [![ci](https://github.com/subheeksh5599/lantern/actions/workflows/test.yml/badge.svg)](https://github.com/subheeksh5599/lantern/actions/workflows/test.yml)
 
-[![watch the demo](https://img.shields.io/badge/watch%20demo-8%3A18-black)](demo/media/lantern-demo-narrated.mp4)
+[![watch the demo](https://img.shields.io/badge/watch%20demo-8%3A12-black)](demo/media/lantern-demo-narrated.mp4)
 [![local copy](https://img.shields.io/badge/local%20copy-mp4-black)](demo/media/lantern-demo-narrated.mp4)
 [![try it](https://img.shields.io/badge/click--through-dashboard-black)](https://friendly-fennec-31.convex.site/dashboard)
 [![honesty table](https://img.shields.io/badge/what%27s%20real-honesty%20table-black)](#whats-real-and-what-is-not)
@@ -78,13 +78,13 @@ the money that answers it is the bonus, which is held.
 | Held bonuses | 0.00145 at rest | `heldTotal` 1,450 in the asset's own units (case #41, whose window closed unchallenged), and nothing is waiting on a decision |
 | Dashboard | live | five views at [friendly-fennec-31.convex.site/dashboard](https://friendly-fennec-31.convex.site/dashboard), each reading the chain rather than a mirror of it |
 | Suite | 648 passing | `forge test`: 47 suites, 648 tests, 0 failed, 0 skipped |
-| Demo | 8m18s | `demo/media/lantern-demo-narrated.mp4`: a rendered explainer, then a case run end to end on the deployed site: every step, every wallet confirmation, the explorer pages, then an end card |
+| Demo | 8m12s | `demo/media/lantern-demo-narrated.mp4`: a rendered explainer, then a case run end to end on the deployed site: every step, every wallet confirmation, the explorer pages, then an end card |
 
 ## ▶ Demo
 
 [![Lantern: the bonus is held, then somebody proves the price contradicted the record](demo/media/lantern-poster.webp)](demo/media/lantern-demo-narrated.mp4)
 
-`8:18` · [watch it](demo/media/lantern-demo-narrated.mp4) · [local copy](demo/media/lantern-demo-narrated.mp4)
+`8:12` · [watch it](demo/media/lantern-demo-narrated.mp4) · [local copy](demo/media/lantern-demo-narrated.mp4)
 
 _Three parts. An explainer, animated from HTML by HyperFrames, that sets out the problem and the two
 tolerances the contract uses. Then the deployed site, walked through end to end: the landing page
@@ -260,7 +260,7 @@ input is a read of contracts that are already deployed.
 | The rules are decided by the contract, not by the page | real | the verdict is recomputed inside `adjudicate`; a challenger supplies the rule and the evidence, never an answer |
 | Every button on the dashboard sends a real transaction | real | `site/next/scripts/wallet-e2e.cjs` drives each page with an injected wallet; the receipts are listed in `docs/DASHBOARD.md` |
 | The demo shows the deployed site, not a mock | real | recorded from the live domain between block 315,594,195 and 315,597,565, narrated, and committed in `demo/media/` |
-| The demo is an edit, not a raw capture | stated | the raw recording is 16m09s and the edit is 8m18s; what is dropped is waiting: the five-minute hold, MetaMask sitting on a blank panel while the chain catches up, and the explorer fetching its own bundle. Every step, every confirmation and every explorer page is in the edit |
+| The demo is an edit, not a raw capture | stated | the raw recording is 16m09s and the edit is 8m12s; what is dropped is waiting: the five-minute hold, MetaMask sitting on a blank panel while the chain catches up, and the explorer fetching its own bundle. Every step, every confirmation and every explorer page is in the edit |
 | A visitor can run a whole case | real, with one dependency | every step is a transaction the visitor signs, so their own wallet needs testnet ether; step 1 links the faucet rather than hiding it |
 | The deployment can start a case for a visitor | real, and it says so when it cannot | the server holds the feed operator's key and needs a minimum balance; when it is short, the run page says the deployment is out of gas instead of failing a button |
 | Someone actually watches | real, run by us | `watcher/` decided cases #42 and #44 on the live chain; whether third parties would run one for a 20% bounty is an open question (see `docs/LIMITS.md`) |
