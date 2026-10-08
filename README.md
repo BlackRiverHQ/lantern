@@ -225,10 +225,12 @@ decided by arithmetic over records the operator already committed to. That is th
 ### It already happened, twice this year
 
 - **10 March 2026, Ethereum.** A misconfigured exchange-rate cap priced wstETH about 2.85% under market on
-  a major lending market. 34 accounts were liquidated on it; borrowers lost **513.19 ETH**. The fix was
-  manual: a governance proposal, refunds negotiated back from a block builder and a searcher, and the rest
-  paid from the treasury, a net **316.94 ETH**.
-  ([incident reimbursement proposal](https://governance.aave.com/t/direct-to-aip-wsteth-capo-oracle-incident-user-reimbursement/24275))
+  a major lending market. 34 healthy accounts were liquidated on it, about 10,938 wstETH; borrowers lost
+  **513.19 ETH**, of which **129.72 ETH** was liquidation bonus, the exact amount Lantern holds. The fix was
+  manual: a governance proposal to refund all 513.19 ETH, part of it recovered from a block builder, the rest
+  from the treasury (**358.56 ETH** net when proposed).
+  ([post-mortem](https://governance.aave.com/t/post-mortem-exchange-rate-misallignment-on-wsteth-core-and-prime-instances/24269),
+  [reimbursement proposal](https://governance.aave.com/t/direct-to-aip-wsteth-capo-oracle-incident-user-reimbursement/24275))
 - **15 February 2026, Base.** A feed priced cbETH at **$1.12** instead of about $2,200. **1,096 cbETH** was
   seized and **$1.78M** of bad debt remained. The team saw it within minutes; the fix needed a vote behind
   a five-day timelock.
@@ -237,6 +239,35 @@ decided by arithmetic over records the operator already committed to. That is th
 Both remedies are the same shape: decide afterwards whether the price held up, then move the
 liquidation's profit back to the borrower. Lantern is that remedy with a five-minute clock instead of a
 vote. Replays of both incidents against Lantern are not run yet; see the honesty table.
+
+### What people said
+
+The refund proposal itself states the need: *"The affected users bear no responsibility for these
+liquidations, which were the direct result of a protocol-level configuration error."* A delegate replied:
+*"I fully support reimbursing the affected users."* Refunding wrongly liquidated borrowers is already
+policy; today it is done by hand, weeks later.
+
+From users:
+
+- *"One price feed glitch and suddenly you're liquidated before you can even react."*
+  ([r/CryptoCurrency, on the March 2026 liquidations](https://www.reddit.com/r/CryptoCurrency/comments/1rqknai/))
+- The cbETH misprice thread, *"$1.78 million hack due to a misconfigured price oracle that undervalued
+  cbETH at $1.12 instead of $2,200."*
+  ([r/CryptoCurrency](https://www.reddit.com/r/CryptoCurrency/comments/1rcq003/))
+- *"Sad story: How I (and others) lost everything"*, an older oracle-price incident that left about $900k
+  of bad debt. ([r/CryptoCurrency](https://www.reddit.com/r/CryptoCurrency/comments/yt4r9f/))
+
+From security researchers, on why it keeps recurring:
+
+- *"It was not the first time this happened. It will not be the last."* Liquid-staking price feeds are
+  described as one of the most consistently exploited patterns in lending, with $100M+ lost.
+  ([LST/LRT oracle pricing](https://odinscan.ai/blog/lst-lrt-oracle-vulnerability))
+- A large Solana lender smooths prices against brief wicks for borrowing but not for liquidation.
+  ([TWAP analysis](https://dev.to/kbrandwijk/kamino-lends-3-billion-twap-promise-that-doesnt-apply-when-it-matters-1ib2);
+  [the lender's own risk report on 10 October 2025](https://gov.kamino.finance/t/kamino-lend-risk-event-analysis-10th-of-october-2025/847))
+
+What this shows: wrongful liquidations recur, and protocols already choose to pay them back. What it does
+not show: that any protocol has asked for Lantern. That row stays ❌ in the honesty table.
 
 ## The five rules, exactly
 
@@ -417,7 +448,7 @@ claim. The watcher adjudicates instead, because `adjudicate` has no deadline.
 | Static analysis | ✅ RUN: Slither, 27 results, none exploitable, each triaged in [docs/SECURITY.md](docs/SECURITY.md#static-analysis) |
 | One challenge per liquidation cannot be spent by the liquidator | ⚠️ KNOWN GAP: a liquidator can file a losing rule against itself to use up the slot. Pinned by a test; fix designed, not deployed (no upgrade path) |
 | The settlement asset | ⚠️ TESTNET: a faucet token with capped claims, because a stablecoin cannot be minted on demand on a testnet. On mainnet it is a constructor argument |
-| The cost of the problem | ✅ SOURCED: two 2026 incidents, 513.19 ETH and $1.78M, both linked above from the protocols' own posts |
+| The cost of the problem | ✅ SOURCED: two 2026 incidents, 513.19 ETH and $1.78M, linked above from the protocols' own posts, plus user and researcher posts under *What people said* |
 | Lantern would have caught those two incidents | ⏳ NOT RUN: fork replays pending. The 2.85% case sits under the 5% `CROSS_SOURCE` bound, so it would rest on `SELF_HISTORY` |
 | Demand | ❌ NOT SHOWN: a testnet deployment shows the mechanism works, not that markets or feed operators want it |
 | Mainnet | ❌ NOT DEPLOYED |
