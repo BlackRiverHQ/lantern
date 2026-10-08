@@ -19,3 +19,4 @@ out/
 
 # Broadcast logs are machine-local and are never committed
 /broadcast/
+deployments/*.log

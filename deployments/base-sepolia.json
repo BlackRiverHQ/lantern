@@ -1,0 +1,152 @@
+{
+  "chainId": 84532,
+  "network": "base-sepolia",
+  "explorer": "https://base-sepolia.blockscout.com",
+  "note": "Written by script/deploy-evm.sh from the broadcast record and read back from the chain.",
+  "lantern": "0xb48391211b56da23c6b0b70754a5d1ace187773c",
+  "market": "0x2fca0c5fea24f87398742cd572b085a9f9d4a7c6",
+  "asset": "0x2f283a8e36fb72621033aca298c56dded732a16c",
+  "collateral": "0x4200000000000000000000000000000000000006",
+  "registry": "0x5edd994cfc50dbdb453df743d66e336907260612",
+  "history": "0xbc1972e8e53bac2370040201d1e4e61392b37448",
+  "reportBook": "0x9ee75e25473958ae82f55b35d20a03a65b2fe87a",
+  "chainlinkSource": "0x846fee1c11252a8595460bf6c9a4deb0f90ece66",
+  "chainlinkEthUsd": "0x4aDC67696bA383F43DD60A9e78F2C97Fbbfc7cb1",
+  "subjectFeed": "0xdfd38045437d7c1b82eec2b636883e9212bdca7a2f6d9624faefa0ac9d040a0d",
+  "peerFeed": "0x0bf35ab8318649a0b126cdc6fb6c89b2ebbb1659b37fbd0b3aca12e6eefa71a2",
+  "liquidationId": 9,
+  "readBack": {
+    "bonusOutcome (2 = redirected to the borrower)": "2",
+    "bonusSettled": "true",
+    "subjectFeedErrors": "1",
+    "heldTotal": "0"
+  },
+  "transactions": {
+    "deploy": [
+      {
+        "fn": "create FaucetToken",
+        "hash": "0x7d44d0a41df24bec3ce52f4c1e7bbe930a139549dbe707e382e292cb7d9cc537"
+      },
+      {
+        "fn": "create Lantern",
+        "hash": "0x6f0709d67ae3a383e720f6abefc8ebee5059a55767491f8b41f88815239c32ab"
+      },
+      {
+        "fn": "create LendingMarket",
+        "hash": "0x9aee4546762237771b49b2847eee4283aedd2a2c46851d008d5f2f2f396bf378"
+      }
+    ],
+    "lifecycle": [
+      {
+        "fn": "claim()",
+        "hash": "0xc786ee9b39c55be3fad1e336fe61d6dce1887b0da96a1bfb8bdd460696accfbd"
+      },
+      {
+        "fn": "approve(address,uint256)",
+        "hash": "0x4337b38ce01f1acf0390a5e9bb0fa933836529fc5eff02fd6efc7b2c087d969b"
+      },
+      {
+        "fn": "approve(address,uint256)",
+        "hash": "0xe56d3f8e12466ea3dbc9d93af6fb13befdeffc9432636c3c9cfd12382993880f"
+      },
+      {
+        "fn": "registerFeed(bytes32,bytes32,uint8)",
+        "hash": "0xc4ab7fdcb0f99bebbf4b5413eaa22f37808184e3c6ee24f3646f34e5018b4ed5"
+      },
+      {
+        "fn": "depositBond(bytes32,uint256)",
+        "hash": "0x28e7d6d0d3096742a4b23b220ea3c9c5c174d40ffc1b0478b4bbe35dde96d888"
+      },
+      {
+        "fn": "recordReport(bytes32,uint256,uint64,uint64,bytes32,address)",
+        "hash": "0xb53cb2086ab3639376ac6caf581d9b3d54212029eefba3e91989251a8d496cef"
+      },
+      {
+        "fn": "recordReport(bytes32,uint256,uint64,uint64,bytes32,address)",
+        "hash": "0x2cc42d3006a008ee9ecf4597490a9f1a8684fb2833b482ab5c324ad30053484c"
+      },
+      {
+        "fn": "recordReport(bytes32,uint256,uint64,uint64,bytes32,address)",
+        "hash": "0x5df8ac593aeffd5d875553fa8d81246460da012cbd2745f0d07ab56142e3c65f"
+      },
+      {
+        "fn": "recordReport(bytes32,uint256,uint64,uint64,bytes32,address)",
+        "hash": "0xddde60d0fe6ab11fe8b2116f9ddccb7d66f962f430fa147528284daaa32370fa"
+      },
+      {
+        "fn": "supply(uint256)",
+        "hash": "0x39cddcff79bf878baf07657fbcef545a4cba05638a257bbeeb4001b710091053"
+      },
+      {
+        "fn": "deposit()",
+        "hash": "0xe919841f37bb59b5cfe33f7d0b30a5afb8d89190767bcc795c168038cf8857c3"
+      },
+      {
+        "fn": "approve(address,uint256)",
+        "hash": "0x645fe4cacac1ce352c89779060c15dbc21f80769b54a905fc62edc1158a8689d"
+      },
+      {
+        "fn": "depositCollateral(uint256)",
+        "hash": "0x5caeb608711da69ec00c684718cf8b9e7274b3ebeb36a66e35694d44f192ada4"
+      },
+      {
+        "fn": "borrow(uint256)",
+        "hash": "0x201ff1dda189bc549e63442f55c8a578b79f493e2bcf5f149368ddf337c4cc8c"
+      },
+      {
+        "fn": "recordReport(bytes32,uint256,uint64,uint64,bytes32,address)",
+        "hash": "0x8df48de0174e4894d352d9449fc0273a6d5f9652f0e34df6ccffbec9bf765861"
+      },
+      {
+        "fn": "liquidate(address,uint256,uint64,uint256)",
+        "hash": "0x297621a3f68244f2b9b04284175663c1c5de1a0d97f9cc95d58fce1c02c872b4"
+      }
+    ],
+    "chainlinkReport": [
+      {
+        "fn": "create ChainlinkSource",
+        "hash": "0xb58244d3c91995a7bc082fbc5f0dfe2a43b598a6f48ce60023c688610a66d1e4"
+      },
+      {
+        "fn": "approve(address,uint256)",
+        "hash": "0x04952b9d0eaf254b465ac91aa372e9f5d02ba0fb72e32f1f1417eb739651d8c6"
+      },
+      {
+        "fn": "registerFeed(bytes32,bytes32,uint8)",
+        "hash": "0x754f5ff50bb910ad7050f13c2ea4d64e850eefc99b448e0b1160d1686958c231"
+      },
+      {
+        "fn": "depositBond(bytes32,uint256)",
+        "hash": "0x86488f50ae6178ccee09108c665052d5346dcfb3b02b5fd087ef153240e8597a"
+      },
+      {
+        "fn": "recordReport(bytes32,uint256,uint64,uint64,bytes32,address)",
+        "hash": "0x917fac83da4bda3601c42374e9c9c99fac2dab118c7d3ae02662ba4d53c8f006"
+      },
+      {
+        "fn": "setPeerFeed(bytes32,bytes32)",
+        "hash": "0x3d2f05608a62f4f5cb74dc220d601001d757cb5be5a2553353a4153a0c2940ed"
+      }
+    ],
+    "challenge": [
+      {
+        "fn": "approve(address,uint256)",
+        "hash": "0x435960cbb5a1fa3cb330f14f82e4f2b61156c3c5c9020aef2a5cb690b1af4b18"
+      },
+      {
+        "fn": "openChallenge(uint256,uint8,bytes,uint256)",
+        "hash": "0x11ad51727e6630835cf9a661f4207f5460c49f08153aaabf8064b26fbf9f0d75"
+      },
+      {
+        "fn": "adjudicate(uint256)",
+        "hash": "0xafa6a51b6f0f464381045745df4af7e14c2e001f950fcad1805db8a0a75e7774"
+      }
+    ],
+    "settle": [
+      {
+        "fn": "claim(uint256)",
+        "hash": "0x5f8b72dbdb60855daa7d636fafa519495a05cad3cb73c537e2d098572e875f5c"
+      }
+    ]
+  }
+}

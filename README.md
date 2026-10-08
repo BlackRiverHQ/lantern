@@ -38,7 +38,9 @@ money that answers it is the bonus, which is held.
 
 | Surface | Status | The evidence |
 |---|---|---|
-| Six contracts | deployed, source-verified | Lantern, the market, the asset, the registry, the history store and the report book on Arbitrum Sepolia; exact Sourcify match on creation and runtime bytecode; `script/verify-source.sh all` passes all six |
+| Six contracts (Arbitrum Sepolia) | deployed, source-verified | Lantern, the market, the asset, the registry, the history store and the report book on Arbitrum Sepolia; exact Sourcify match on creation and runtime bytecode; `script/verify-source.sh all` passes all six |
+| Base Sepolia | deployed, source-verified, one full case | the same source, seven contracts, Sourcify exact match on all seven; a liquidation, a challenge against Base's own Chainlink ETH/USD, upheld, bonus to the borrower. [Below](#also-live-on-base-sepolia-and-ethereum-sepolia) |
+| Ethereum Sepolia | deployed, source-verified, one full case | the same, against Ethereum Sepolia's Chainlink ETH/USD. [Below](#also-live-on-base-sepolia-and-ethereum-sepolia) |
 | Liquidations | 7 | cases #9, #37, #41, #42, #44, #45, #51, each through the real market |
 | Challenges | 6 opened, 6 upheld, 0 refused | every one decided by the contract; `watcher/`'s own recomputation agrees with all six |
 | Caught prints | 6 | `feedErrors` 6 |
@@ -75,6 +77,7 @@ flowchart LR
 - [See it in one command](#see-it-in-one-command)
 - [Verify every claim in one command](#verify-every-claim-in-one-command)
 - [Live on Arbitrum Sepolia: the receipts](#live-on-arbitrum-sepolia-the-receipts)
+- [Also live on Base Sepolia and Ethereum Sepolia](#also-live-on-base-sepolia-and-ethereum-sepolia)
 - [What Lantern is NOT](#what-lantern-is-not)
 - [The problem](#the-problem)
 - [The five rules, exactly](#the-five-rules-exactly)
@@ -189,6 +192,48 @@ and then abandoned; the watcher decided them on their merits instead of letting 
 
 Machine-readable in [deployments.json](deployments.json), the ABI in [abi/](abi/), every read in
 [docs/DEPLOYMENTS.md](docs/DEPLOYMENTS.md).
+
+## Also live on Base Sepolia and Ethereum Sepolia
+
+The same source, deployed unchanged to two more chains, and one whole case run on each: a feed is listed
+and bonded, warmed up with four agreeing prints, then prints 2,200 for ether while that chain's own
+Chainlink ETH/USD aggregator reads about 2,460, more than 10% apart. The market liquidates on the print,
+Lantern holds the bonus, the Chainlink answer is published as the named second source, a challenge names
+`CROSS_SOURCE`, and the contract upholds it. The bonus goes to the borrower and the seized collateral goes
+back.
+
+| Step | Base Sepolia | Ethereum Sepolia |
+|---|---|---|
+| Liquidation (bonus held) | [`0x297621a3…`](https://base-sepolia.blockscout.com/tx/0x297621a3f68244f2b9b04284175663c1c5de1a0d97f9cc95d58fce1c02c872b4) | [`0xd974d039…`](https://eth-sepolia.blockscout.com/tx/0xd974d039fdbe0da2e33b07548082ba44576df1d5fa53a45829f044afe80de2f5) |
+| Chainlink answer published as the second source | [`0x917fac83…`](https://base-sepolia.blockscout.com/tx/0x917fac83da4bda3601c42374e9c9c99fac2dab118c7d3ae02662ba4d53c8f006) | [`0xf3696939…`](https://eth-sepolia.blockscout.com/tx/0xf3696939712df933deffd571790c562afbc05b207b62a41f4e096f1858b63fa7) |
+| Challenge opened | [`0x11ad5172…`](https://base-sepolia.blockscout.com/tx/0x11ad51727e6630835cf9a661f4207f5460c49f08153aaabf8064b26fbf9f0d75) | [`0x166579bb…`](https://eth-sepolia.blockscout.com/tx/0x166579bb0c7d3882cb7a0001ad056fa0091306f77beb4340cf89b0fb6eca1fd1) |
+| Verdict: upheld | [`0xafa6a51b…`](https://base-sepolia.blockscout.com/tx/0xafa6a51b6f0f464381045745df4af7e14c2e001f950fcad1805db8a0a75e7774) | [`0x1068513a…`](https://eth-sepolia.blockscout.com/tx/0x1068513a61894a225a0cc5dd5830c0a17878609fd6317f6d6ecaba0b07c769b0) |
+| Collateral returned | [`0x5f8b72db…`](https://base-sepolia.blockscout.com/tx/0x5f8b72dbdb60855daa7d636fafa519495a05cad3cb73c537e2d098572e875f5c) | [`0x70326146…`](https://eth-sepolia.blockscout.com/tx/0x703261465838427ef4443e742083793c8c024e131907f46bf0012f4505703fd2) |
+
+Read back from each chain after the run: `bonusOutcome(9)` is 2 (redirected to the borrower),
+`feedErrors` on the printing feed is 1, `heldTotal` is 0. All 29 transactions on each chain succeeded.
+
+| Contract | Base Sepolia (84532) | Ethereum Sepolia (11155111) |
+|---|---|---|
+| Lantern | [`0xb48391211b56da23c6b0b70754a5d1ace187773c`](https://base-sepolia.blockscout.com/address/0xb48391211b56da23c6b0b70754a5d1ace187773c) | [`0x6482a9f2355f6fdd8f136b74125cf66fec19720f`](https://eth-sepolia.blockscout.com/address/0x6482a9f2355f6fdd8f136b74125cf66fec19720f) |
+| Market | [`0x2fca0c5fea24f87398742cd572b085a9f9d4a7c6`](https://base-sepolia.blockscout.com/address/0x2fca0c5fea24f87398742cd572b085a9f9d4a7c6) | [`0xcbd41606f40f9a57a38be4e8395a5fa2997d819c`](https://eth-sepolia.blockscout.com/address/0xcbd41606f40f9a57a38be4e8395a5fa2997d819c) |
+| Collateral (the chain's wrapped ether) | [`0x4200000000000000000000000000000000000006`](https://base-sepolia.blockscout.com/address/0x4200000000000000000000000000000000000006) | [`0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14`](https://eth-sepolia.blockscout.com/address/0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14) |
+| Asset (settlement, faucet token) | [`0x2f283a8e36fb72621033aca298c56dded732a16c`](https://base-sepolia.blockscout.com/address/0x2f283a8e36fb72621033aca298c56dded732a16c) | [`0x3091ad348004984747b6b8c702271bd11c1c9834`](https://eth-sepolia.blockscout.com/address/0x3091ad348004984747b6b8c702271bd11c1c9834) |
+| Feed registry | [`0x5edd994cfc50dbdb453df743d66e336907260612`](https://base-sepolia.blockscout.com/address/0x5edd994cfc50dbdb453df743d66e336907260612) | [`0x2205538f0301fc265671dce82ad96865ac3d3d9b`](https://eth-sepolia.blockscout.com/address/0x2205538f0301fc265671dce82ad96865ac3d3d9b) |
+| History store | [`0xbc1972e8e53bac2370040201d1e4e61392b37448`](https://base-sepolia.blockscout.com/address/0xbc1972e8e53bac2370040201d1e4e61392b37448) | [`0x3c0abca55abf6e18acf620e5d22a50befc31a4b5`](https://eth-sepolia.blockscout.com/address/0x3c0abca55abf6e18acf620e5d22a50befc31a4b5) |
+| Report book | [`0x9ee75e25473958ae82f55b35d20a03a65b2fe87a`](https://base-sepolia.blockscout.com/address/0x9ee75e25473958ae82f55b35d20a03a65b2fe87a) | [`0x5fc9a95d721cfdf538b75438296e0a11ec3a863a`](https://eth-sepolia.blockscout.com/address/0x5fc9a95d721cfdf538b75438296e0a11ec3a863a) |
+| Second source (`ChainlinkSource`) | [`0x846fee1c11252a8595460bf6c9a4deb0f90ece66`](https://base-sepolia.blockscout.com/address/0x846fee1c11252a8595460bf6c9a4deb0f90ece66) | [`0xbde31871d234592035b8a16f57b6da2f8d90acbb`](https://eth-sepolia.blockscout.com/address/0xbde31871d234592035b8a16f57b6da2f8d90acbb) |
+| Chainlink ETH/USD aggregator it reads | [`0x4aDC67696bA383F43DD60A9e78F2C97Fbbfc7cb1`](https://base-sepolia.blockscout.com/address/0x4aDC67696bA383F43DD60A9e78F2C97Fbbfc7cb1) | [`0x694AA1769357215DE4FAC081bf1f309aDC325306`](https://eth-sepolia.blockscout.com/address/0x694AA1769357215DE4FAC081bf1f309aDC325306) |
+
+Every contract above is an exact Sourcify match (`./script/verify-sourcify.sh base-sepolia`). The whole
+run is one command, `./script/deploy-evm.sh base-sepolia` or `eth-sepolia`, which writes
+[deployments/base-sepolia.json](deployments/base-sepolia.json) and
+[deployments/eth-sepolia.json](deployments/eth-sepolia.json) with every hash.
+
+One thing this taught: on Ethereum Sepolia today, creating a contract costs about seven times what
+Foundry's local EVM estimates (Lantern's deployment used 37.1M gas there, 5.2M on Base), so the first
+attempt ran out of gas. The script takes `GAS_MULT` for that. The dashboard and the watcher read Arbitrum
+Sepolia only.
 
 ## What Lantern is NOT
 
@@ -440,6 +485,7 @@ claim. The watcher adjudicates instead, because `adjudicate` has no deadline.
 |---|---|
 | Verdicts are recomputed by the contract | ✅ REAL: `adjudicate` reads every input from state; the challenger supplies only a rule |
 | Seven liquidations, six upheld challenges on Arbitrum Sepolia | ✅ REAL: hashes above, re-read by `script/verify-receipts.sh` |
+| Same contracts on Base Sepolia and Ethereum Sepolia | ✅ REAL: deployed, Sourcify exact match, one upheld case each against that chain's Chainlink ETH/USD; hashes above |
 | The market is a real lending market | ✅ REAL: collateral in custody, priced from the feed, closes only unhealthy positions, holds seized collateral until the verdict |
 | Source verification | ✅ REAL: Sourcify exact match on all six, and `script/verify-source.sh` against the bytecode |
 | Someone actually watches | ✅ REAL, run by us: `watcher/` decided #42 and #44 live. Whether third parties would run one for a 20% bounty is not shown |
