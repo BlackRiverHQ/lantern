@@ -10,7 +10,7 @@
 ![Watcher checks](https://img.shields.io/badge/watcher%20checks-44%20passing-2ecc71)
 ![Stack](https://img.shields.io/badge/Solidity%200.8.28%20%C2%B7%20Foundry%20%C2%B7%20Next.js%20%C2%B7%20Convex-14151a)
 ![Network](https://img.shields.io/badge/Arbitrum%20Sepolia-421614-28A0F0)
-[![ci](https://github.com/subheeksh5599/lantern/actions/workflows/test.yml/badge.svg)](https://github.com/subheeksh5599/lantern/actions/workflows/test.yml)
+[![ci](https://github.com/BlackRiverHQ/lantern/actions/workflows/test.yml/badge.svg)](https://github.com/BlackRiverHQ/lantern/actions/workflows/test.yml)
 
 [![Live site](https://img.shields.io/badge/%E2%96%B6%20Live%20site-friendly--fennec--31.convex.site-14151a?labelColor=0f1420)](https://friendly-fennec-31.convex.site) [![Dashboard](https://img.shields.io/badge/Dashboard-%2Fdashboard-14151a?labelColor=0f1420)](https://friendly-fennec-31.convex.site/dashboard) [![Lantern on Arbitrum Sepolia](https://img.shields.io/badge/Lantern-0xcdce%E2%80%A6ac54-28A0F0?labelColor=0f1420)](https://arbitrum-sepolia.blockscout.com/address/0xcdce3a1b3ebf7fe1e340ab670e25fe768195ac54) [![Watch the demo](https://img.shields.io/badge/%E2%96%B6%20Demo-7%3A58-FF0000?labelColor=1f1f23)](https://youtu.be/cZGxXNKqNvk)
 
@@ -222,6 +222,22 @@ A wrong price is caught today, if at all, by one of three things, and each stops
 None of them leaves the profit of a liquidation open to dispute for a few minutes, with the dispute
 decided by arithmetic over records the operator already committed to. That is the missing piece.
 
+### It already happened, twice this year
+
+- **10 March 2026, Ethereum.** A misconfigured exchange-rate cap priced wstETH about 2.85% under market on
+  a major lending market. 34 accounts were liquidated on it; borrowers lost **513.19 ETH**. The fix was
+  manual: a governance proposal, refunds negotiated back from a block builder and a searcher, and the rest
+  paid from the treasury, a net **316.94 ETH**.
+  ([incident reimbursement proposal](https://governance.aave.com/t/direct-to-aip-wsteth-capo-oracle-incident-user-reimbursement/24275))
+- **15 February 2026, Base.** A feed priced cbETH at **$1.12** instead of about $2,200. **1,096 cbETH** was
+  seized and **$1.78M** of bad debt remained. The team saw it within minutes; the fix needed a vote behind
+  a five-day timelock.
+  ([incident summary](https://forum.moonwell.fi/t/mip-x43-cbeth-oracle-incident-summary/2068))
+
+Both remedies are the same shape: decide afterwards whether the price held up, then move the
+liquidation's profit back to the borrower. Lantern is that remedy with a five-minute clock instead of a
+vote. Replays of both incidents against Lantern are not run yet; see the honesty table.
+
 ## The five rules, exactly
 
 A challenger supplies a rule and nothing else. `adjudicate` reads every input from state.
@@ -401,6 +417,8 @@ claim. The watcher adjudicates instead, because `adjudicate` has no deadline.
 | Static analysis | ✅ RUN: Slither, 27 results, none exploitable, each triaged in [docs/SECURITY.md](docs/SECURITY.md#static-analysis) |
 | One challenge per liquidation cannot be spent by the liquidator | ⚠️ KNOWN GAP: a liquidator can file a losing rule against itself to use up the slot. Pinned by a test; fix designed, not deployed (no upgrade path) |
 | The settlement asset | ⚠️ TESTNET: a faucet token with capped claims, because a stablecoin cannot be minted on demand on a testnet. On mainnet it is a constructor argument |
+| The cost of the problem | ✅ SOURCED: two 2026 incidents, 513.19 ETH and $1.78M, both linked above from the protocols' own posts |
+| Lantern would have caught those two incidents | ⏳ NOT RUN: fork replays pending. The 2.85% case sits under the 5% `CROSS_SOURCE` bound, so it would rest on `SELF_HISTORY` |
 | Demand | ❌ NOT SHOWN: a testnet deployment shows the mechanism works, not that markets or feed operators want it |
 | Mainnet | ❌ NOT DEPLOYED |
 
